@@ -12,7 +12,7 @@
       "LABELS": ["1. a flat colour", "2. the coordinate as colour", "3. one channel", "4. the coordinate, moved"],
       "DEFAULT": 1
     },
-    { "NAME": "flat",  "TYPE": "color", "LABEL": "Flat colour", "DEFAULT": [0.27, 0.88, 0.83, 1.0] },
+    { "NAME": "flatColour", "TYPE": "color", "LABEL": "Flat colour", "DEFAULT": [0.27, 0.88, 0.83, 1.0] },
     { "NAME": "rate",  "TYPE": "float", "LABEL": "Rate",        "DEFAULT": 0.20, "MIN": 0.0, "MAX": 2.0 },
     { "NAME": "gamma", "TYPE": "float", "LABEL": "Gamma",       "DEFAULT": 1.00, "MIN": 0.3, "MAX": 3.0 }
   ]
@@ -28,7 +28,7 @@ void main() {
     if (stage == 0) {
         // Stage 1. The smallest shader that does anything: ignore the
         // coordinate entirely and answer the same colour everywhere.
-        colour = flat.rgb;
+        colour = flatColour.rgb;
 
     } else if (stage == 1) {
         // Stage 2. Use the coordinate as the answer. Red rises to the right

@@ -57,6 +57,28 @@ from typing import Any
 HEADER_RE = re.compile(r"/\*\s*(\{.*?\})\s*\*/", re.S)
 
 VALUE_TYPES = {"bool", "long", "float", "point2D", "color", "event"}
+
+# Words GLSL ES 3.00 will not let an input be named. An ISF header is JSON, so
+# nothing stops a shader declaring an input called `flat` or `sample`; the name
+# then becomes a uniform declaration and the shader fails to compile with a
+# syntax error pointing at the line after it, which reads as a missing
+# semicolon. Worse, the NVIDIA driver accepts several of these, so a shader can
+# render correctly on the machine the figures are made on and fail in every
+# browser. Caught here, at parse time, with the offending name said out loud.
+GLSL_RESERVED = frozenset("""
+attribute varying flat smooth noperspective centroid sample patch subroutine
+common partition active asm class union enum typedef template this packed
+resource goto inline noinline public static extern external interface
+long short double half fixed unsigned superp input output hvec2 hvec3 hvec4
+fvec2 fvec3 fvec4 sampler3DRect filter image1D image2D image3D imageCube
+iimage1D iimage2D iimage3D iimageCube uimage1D uimage2D uimage3D uimageCube
+image1DArray image2DArray namespace using row_major
+const uniform buffer shared coherent volatile restrict readonly writeonly
+atomic_uint layout precise break continue do for while switch case default
+if else in out inout float int void bool true false invariant discard return
+mat2 mat3 mat4 vec2 vec3 vec4 ivec2 ivec3 ivec4 bvec2 bvec3 bvec4 uint uvec2
+uvec3 uvec4 lowp mediump highp precision struct sampler2D sampler3D samplerCube
+""".split())
 IMAGE_TYPES = {"image", "audio", "audioFFT"}
 
 
@@ -195,9 +217,23 @@ def parse(source: str, path: Path | None = None) -> ISFShader:
     for entry in declared:
         if not isinstance(entry, dict) or "NAME" not in entry:
             raise ISFError(f"input without a NAME in {path or '<string>'}")
+        name = str(entry["NAME"])
+        if name in GLSL_RESERVED:
+            raise ISFError(
+                f"input {name!r} in {path or '<string>'} is a GLSL reserved word, "
+                f"so the uniform it becomes will not compile. Rename it."
+            )
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+            raise ISFError(
+                f"input {name!r} in {path or '<string>'} is not a valid GLSL identifier"
+            )
+        if name.startswith("gl_") or name.startswith("isf_"):
+            raise ISFError(
+                f"input {name!r} in {path or '<string>'} uses a reserved prefix"
+            )
         shader.inputs.append(
             ISFInput(
-                name=str(entry["NAME"]),
+                name=name,
                 type=str(entry.get("TYPE", "float")),
                 label=str(entry.get("LABEL", "")),
                 default=entry.get("DEFAULT"),

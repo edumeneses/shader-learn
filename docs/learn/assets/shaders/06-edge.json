@@ -1,0 +1,104 @@
+{
+ "categories": [
+  "Course"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art",
+ "description": "One circle's edge drawn four ways, magnified, so the difference between a hard step, a fixed-width blend, and a pixel-width blend is visible rather than described.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform int method;\nuniform vec2 focus;\nuniform bool snap;\nuniform float zoom;\nuniform float width;\nuniform float radius;\nuniform float spin;\nuniform vec4 ink;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\n\nconst float TAU = 6.28318530718;\n\n// The field, in the centred, height-divided space of Unit 03. A slow rotation\n// so the edge is never axis-aligned: an aliased edge on a perfect horizontal\n// looks fine, and it is the diagonal that gives the game away.\nfloat field(vec2 p) {\n    // A standing tilt plus the drift: an aliased edge on a perfect horizontal or\n    // vertical looks fine, so the shape is never allowed to be axis-aligned.\n    float a = 0.32 + TIME * spin * TAU * 0.1;\n    mat2 rot = mat2(cos(a), -sin(a), sin(a), cos(a));\n    vec2 q = rot * p;\n    // A rounded square rather than a circle, so there are both curves and\n    // near-straight runs in one shape.\n    vec2 d = abs(q) - vec2(radius, radius * 0.72);\n    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - 0.06;\n}\n\nfloat coverage(float d, float pixel) {\n    if (method == 0) {\n        // No blend at all: every pixel is fully in or fully out, so the edge\n        // can only lie on pixel boundaries and it staircases.\n        return step(d, 0.0);\n    } else if (method == 1) {\n        // A linear ramp of a chosen width. Better than nothing and visibly\n        // linear: the ramp has corners where it meets 0 and 1.\n        return clamp(0.5 - d / max(width, 1e-5), 0.0, 1.0);\n    } else if (method == 2) {\n        // smoothstep over the same width. The cubic has zero slope at both\n        // ends, so the transition has no corners, but the width is in field\n        // units and therefore changes with zoom and resolution.\n        return smoothstep(width, -width, d);\n    } else {\n        // The width the edge actually wants: how much the field changes across\n        // one pixel. Unit 11 is this line. It is one pixel wide at any zoom.\n        float aa = fwidth(d) * 0.75;\n        return smoothstep(aa, -aa, d);\n    }\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    // The magnifier: a disc that shows the same field sampled from a small\n    // region, at the same screen resolution, which is what makes an aliasing\n    // artefact large enough to see on a page.\n    vec2 centre = (focus - 0.5) * RENDERSIZE / RENDERSIZE.y;\n    float lensR = 0.28;\n    float inLens = step(length(p - centre), lensR);\n\n    // Snap the magnified region onto the nearest edge. At fourteen times, the\n    // lens sees about two hundredths of a unit, so a magnifier that showed\n    // wherever the reader dropped it would show flat colour almost always and\n    // the figure would look broken rather than instructive. A distance field\n    // makes the correction one step: its value is the distance to the edge and\n    // its gradient is the direction, so stepping by one against the other lands\n    // on the edge from anywhere. Unit 24 marches a ray with the same fact.\n    vec2 origin = centre;\n    if (snap) {\n        float e = 0.002;\n        float d0 = field(centre);\n        vec2 grad = vec2(\n            field(centre + vec2(e, 0.0)) - field(centre - vec2(e, 0.0)),\n            field(centre + vec2(0.0, e)) - field(centre - vec2(0.0, e)));\n        float len = max(length(grad), 1e-6);\n        origin = centre - (grad / len) * d0;\n    }\n\n    vec2 probe = mix(p, origin + (p - centre) / zoom, inLens);\n\n    float d = field(probe);\n    // fwidth must be taken on the coordinate actually being shown, or the\n    // magnified region would be antialiased for the wrong scale. Because\n    // `probe` is a real varying-derived value, fwidth inside coverage()\n    // measures the magnified rate of change, which is the honest thing to show.\n    float cov = coverage(d, 1.0);\n\n    vec3 background = vec3(0.05, 0.06, 0.09);\n    vec3 colour = mix(background, ink.rgb, cov);\n\n    // The lens rim, and a dimming of everything outside it, so the eye goes to\n    // the magnified edge rather than to the whole shape.\n    float rim = abs(length(p - centre) - lensR);\n    colour *= mix(0.55, 1.0, inLens);\n    colour = mix(colour, vec3(0.85, 0.88, 0.95), smoothstep(3.0 / RENDERSIZE.y, 0.0, rim));\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "id": "06-edge",
+ "imported": {},
+ "inputs": [
+  {
+   "default": 0,
+   "label": "Edge",
+   "labels": [
+    "step: hard",
+    "linear ramp",
+    "smoothstep: fixed width",
+    "smoothstep: one pixel"
+   ],
+   "name": "method",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "default": [
+    0.66,
+    0.62
+   ],
+   "label": "Magnifier",
+   "max": [
+    1.0,
+    1.0
+   ],
+   "min": [
+    0.0,
+    0.0
+   ],
+   "name": "focus",
+   "type": "point2D"
+  },
+  {
+   "default": true,
+   "label": "Snap to edge",
+   "name": "snap",
+   "type": "bool"
+  },
+  {
+   "default": 14.0,
+   "label": "Zoom",
+   "max": 48.0,
+   "min": 1.0,
+   "name": "zoom",
+   "type": "float"
+  },
+  {
+   "default": 0.012,
+   "label": "Width",
+   "max": 0.2,
+   "min": 0.0,
+   "name": "width",
+   "type": "float"
+  },
+  {
+   "default": 0.3,
+   "label": "Radius",
+   "max": 0.45,
+   "min": 0.05,
+   "name": "radius",
+   "type": "float"
+  },
+  {
+   "default": 0.1,
+   "label": "Spin",
+   "max": 1.0,
+   "min": 0.0,
+   "name": "spin",
+   "type": "float"
+  },
+  {
+   "default": [
+    0.27,
+    0.88,
+    0.83,
+    1.0
+   ],
+   "label": "Ink",
+   "name": "ink",
+   "type": "color"
+  }
+ ],
+ "mode": "fragment",
+ "name": "06-edge",
+ "passes": [
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"One circle's edge drawn four ways, magnified, so the difference between a hard step, a fixed-width blend, and a pixel-width blend is visible rather than described.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\"],\n  \"INPUTS\": [\n    {\n      \"NAME\": \"method\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Edge\",\n      \"VALUES\": [0, 1, 2, 3],\n      \"LABELS\": [\"step: hard\", \"linear ramp\", \"smoothstep: fixed width\", \"smoothstep: one pixel\"],\n      \"DEFAULT\": 0\n    },\n    { \"NAME\": \"focus\",  \"TYPE\": \"point2D\", \"LABEL\": \"Magnifier\", \"DEFAULT\": [0.66, 0.62], \"MIN\": [0.0, 0.0], \"MAX\": [1.0, 1.0] },\n    { \"NAME\": \"snap\",   \"TYPE\": \"bool\",    \"LABEL\": \"Snap to edge\", \"DEFAULT\": true },\n    { \"NAME\": \"zoom\",   \"TYPE\": \"float\",   \"LABEL\": \"Zoom\",      \"DEFAULT\": 14.0, \"MIN\": 1.0, \"MAX\": 48.0 },\n    { \"NAME\": \"width\",  \"TYPE\": \"float\",   \"LABEL\": \"Width\",     \"DEFAULT\": 0.012, \"MIN\": 0.0, \"MAX\": 0.20 },\n    { \"NAME\": \"radius\", \"TYPE\": \"float\",   \"LABEL\": \"Radius\",    \"DEFAULT\": 0.30, \"MIN\": 0.05, \"MAX\": 0.45 },\n    { \"NAME\": \"spin\",   \"TYPE\": \"float\",   \"LABEL\": \"Spin\",      \"DEFAULT\": 0.10, \"MIN\": 0.0, \"MAX\": 1.0 },\n    { \"NAME\": \"ink\",    \"TYPE\": \"color\",   \"LABEL\": \"Ink\",       \"DEFAULT\": [0.27, 0.88, 0.83, 1.0] }\n  ]\n}*/\n\nconst float TAU = 6.28318530718;\n\n// The field, in the centred, height-divided space of Unit 03. A slow rotation\n// so the edge is never axis-aligned: an aliased edge on a perfect horizontal\n// looks fine, and it is the diagonal that gives the game away.\nfloat field(vec2 p) {\n    // A standing tilt plus the drift: an aliased edge on a perfect horizontal or\n    // vertical looks fine, so the shape is never allowed to be axis-aligned.\n    float a = 0.32 + TIME * spin * TAU * 0.1;\n    mat2 rot = mat2(cos(a), -sin(a), sin(a), cos(a));\n    vec2 q = rot * p;\n    // A rounded square rather than a circle, so there are both curves and\n    // near-straight runs in one shape.\n    vec2 d = abs(q) - vec2(radius, radius * 0.72);\n    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - 0.06;\n}\n\nfloat coverage(float d, float pixel) {\n    if (method == 0) {\n        // No blend at all: every pixel is fully in or fully out, so the edge\n        // can only lie on pixel boundaries and it staircases.\n        return step(d, 0.0);\n    } else if (method == 1) {\n        // A linear ramp of a chosen width. Better than nothing and visibly\n        // linear: the ramp has corners where it meets 0 and 1.\n        return clamp(0.5 - d / max(width, 1e-5), 0.0, 1.0);\n    } else if (method == 2) {\n        // smoothstep over the same width. The cubic has zero slope at both\n        // ends, so the transition has no corners, but the width is in field\n        // units and therefore changes with zoom and resolution.\n        return smoothstep(width, -width, d);\n    } else {\n        // The width the edge actually wants: how much the field changes across\n        // one pixel. Unit 11 is this line. It is one pixel wide at any zoom.\n        float aa = fwidth(d) * 0.75;\n        return smoothstep(aa, -aa, d);\n    }\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    // The magnifier: a disc that shows the same field sampled from a small\n    // region, at the same screen resolution, which is what makes an aliasing\n    // artefact large enough to see on a page.\n    vec2 centre = (focus - 0.5) * RENDERSIZE / RENDERSIZE.y;\n    float lensR = 0.28;\n    float inLens = step(length(p - centre), lensR);\n\n    // Snap the magnified region onto the nearest edge. At fourteen times, the\n    // lens sees about two hundredths of a unit, so a magnifier that showed\n    // wherever the reader dropped it would show flat colour almost always and\n    // the figure would look broken rather than instructive. A distance field\n    // makes the correction one step: its value is the distance to the edge and\n    // its gradient is the direction, so stepping by one against the other lands\n    // on the edge from anywhere. Unit 24 marches a ray with the same fact.\n    vec2 origin = centre;\n    if (snap) {\n        float e = 0.002;\n        float d0 = field(centre);\n        vec2 grad = vec2(\n            field(centre + vec2(e, 0.0)) - field(centre - vec2(e, 0.0)),\n            field(centre + vec2(0.0, e)) - field(centre - vec2(0.0, e)));\n        float len = max(length(grad), 1e-6);\n        origin = centre - (grad / len) * d0;\n    }\n\n    vec2 probe = mix(p, origin + (p - centre) / zoom, inLens);\n\n    float d = field(probe);\n    // fwidth must be taken on the coordinate actually being shown, or the\n    // magnified region would be antialiased for the wrong scale. Because\n    // `probe` is a real varying-derived value, fwidth inside coverage()\n    // measures the magnified rate of change, which is the honest thing to show.\n    float cov = coverage(d, 1.0);\n\n    vec3 background = vec3(0.05, 0.06, 0.09);\n    vec3 colour = mix(background, ink.rgb, cov);\n\n    // The lens rim, and a dimming of everything outside it, so the eye goes to\n    // the magnified edge rather than to the whole shape.\n    float rim = abs(length(p - centre) - lensR);\n    colour *= mix(0.55, 1.0, inLens);\n    colour = mix(colour, vec3(0.85, 0.88, 0.95), smoothstep(3.0 / RENDERSIZE.y, 0.0, rim));\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "sourcePath": "library/shaders/06/edge.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform int method;\nuniform vec2 focus;\nuniform bool snap;\nuniform float zoom;\nuniform float width;\nuniform float radius;\nuniform float spin;\nuniform vec4 ink;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}

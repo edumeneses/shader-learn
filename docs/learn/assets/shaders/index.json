@@ -35,5 +35,43 @@
   "mode": "fragment",
   "passes": 1,
   "source": "library/shaders/03/aspect.fs"
+ },
+ {
+  "categories": [
+   "Course",
+   "Color"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "The same two colours blended in the space the numbers are stored in and in the space light actually adds in, above and below a split, so the muddy middle is visible rather than argued about.",
+  "id": "04-mixing",
+  "inputs": 6,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/04/mixing.fs"
+ },
+ {
+  "categories": [
+   "Course",
+   "Color"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The palette form is Inigo Quilez's.",
+  "description": "The cosine palette, with its four constants on controls, shown as a strip and applied to a field, so the relationship between the numbers and the gradient is visible.",
+  "id": "05-palette",
+  "inputs": 9,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/05/palette.fs"
+ },
+ {
+  "categories": [
+   "Course"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "One circle's edge drawn four ways, magnified, so the difference between a hard step, a fixed-width blend, and a pixel-width blend is visible rather than described.",
+  "id": "06-edge",
+  "inputs": 8,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/06/edge.fs"
  }
 ]
