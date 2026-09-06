@@ -140,6 +140,36 @@
   }
 
   // ---------------------------------------------------------------------
+  // Live contexts, and the cap on them.
+  //
+  // A browser allows a small number of simultaneous WebGL contexts, commonly
+  // sixteen, and silently drops the oldest when the limit is passed. The
+  // library page shows every shader in the course on one page, so the limit is
+  // reachable by scrolling. Players therefore create their context on first
+  // sight rather than on load, and the least recently seen one is released when
+  // the cap is exceeded. A released player keeps its manifest and its parameter
+  // values, so coming back to it costs a recompile and nothing else.
+  // ---------------------------------------------------------------------
+
+  const MAX_CONTEXTS = 8;
+  const live = [];
+
+  function claimContext(player) {
+    const i = live.indexOf(player);
+    if (i >= 0) live.splice(i, 1);
+    live.push(player);
+    while (live.length > MAX_CONTEXTS) {
+      const victim = live.shift();
+      if (victim !== player) victim._release();
+    }
+  }
+
+  function dropContext(player) {
+    const i = live.indexOf(player);
+    if (i >= 0) live.splice(i, 1);
+  }
+
+  // ---------------------------------------------------------------------
   // The element
   // ---------------------------------------------------------------------
 
@@ -161,8 +191,9 @@
     }
 
     disconnectedCallback() {
-      this._stop();
+      this._release();
       if (this._observer) this._observer.disconnect();
+      if (this._resizeBound) window.removeEventListener("resize", this._resizeBound);
     }
 
     // -- markup ---------------------------------------------------------
@@ -221,6 +252,7 @@
       this._sourceEl = source;
 
       overlay.querySelector(".sp-bigplay").addEventListener("click", () => {
+        if (!this._gl && !this._wake()) return;
         this._start();
       });
     }
@@ -256,38 +288,66 @@
         return;
       }
 
-      try {
-        this._initGL();
-      } catch (err) {
-        this._status(err.message, true);
-        return;
-      }
-
-      this._buildControls();
-      this._buildBar();
       this._buildSourceView();
-      this._resize();
-      window.addEventListener("resize", () => this._resize());
-
-      // One frame immediately, so a paused player is a picture rather than a
-      // black rectangle. A reader who has asked for reduced motion sees this
-      // and nothing else until they press play.
-      this._drawOnce();
 
       const wantsAuto = this.hasAttribute("autoplay") && !REDUCED_MOTION.matches;
       this._observer = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
+            if (!this._gl && !this._wake()) return;
             if (wantsAuto && !this._everStarted) this._start();
           } else if (this._running) {
             this._pause();          // never burn a GPU on an off-screen canvas
-            this._autoPaused = true;
-          } else if (this._autoPaused) {
-            this._autoPaused = false;
           }
         }
-      }, { threshold: 0.15 });
+      }, { threshold: 0.15, rootMargin: "200px" });
       this._observer.observe(this);
+    }
+
+    /** Create the context and everything that depends on it. */
+    _wake() {
+      if (this._gl) return true;
+      claimContext(this);
+      try {
+        this._initGL();
+      } catch (err) {
+        dropContext(this);
+        this._status(err.message, true);
+        return false;
+      }
+      this._buildControls();
+      this._buildBar();
+      this._resize();
+      if (!this._resizeBound) {
+        this._resizeBound = () => this._resize();
+        window.addEventListener("resize", this._resizeBound);
+      }
+      // One frame immediately, so a resting player is a picture rather than a
+      // black rectangle. A reader who has asked for reduced motion sees this
+      // and nothing else until they press play.
+      this._drawOnce();
+      return true;
+    }
+
+    /**
+     * Give the context back. The manifest and the parameter values survive, so
+     * this is a recompile rather than a reload when the player is seen again.
+     */
+    _release() {
+      if (!this._gl) return;
+      this._pause();
+      const lose = this._gl.getExtension("WEBGL_lose_context");
+      if (lose) lose.loseContext();
+      this._gl = null;
+      this._program = null;
+      this._targets = Object.create(null);
+      this._audioTextures = Object.create(null);
+      this._imageTextures = Object.create(null);
+      this._controls = Object.create(null);
+      this._bar.innerHTML = "";
+      this._panel.innerHTML = "";
+      this._overlay.hidden = false;
+      dropContext(this);
     }
 
     _initGL() {
@@ -907,7 +967,7 @@
     }
 
     _drawOnce() {
-      if (!this._gl) return;
+      if (!this._gl || !this._program) return;
       try {
         this._draw(1 / 60);
         this._updateClock();
@@ -989,7 +1049,8 @@
     // -- transport ------------------------------------------------------
 
     _start() {
-      if (this._running || !this._gl) return;
+      if (this._running) return;
+      if (!this._gl && !this._wake()) return;
       this._everStarted = true;
       this._running = true;
       this._overlay.hidden = true;

@@ -31,12 +31,27 @@ import isf  # noqa: E402
 SOURCES = ROOT / "library" / "shaders"
 OUTPUT = ROOT / "docs" / "learn" / "assets" / "shaders"
 REGISTRY = OUTPUT / "index.json"
+# The same registry again, where Jekyll can reach it as `site.data.shaders`.
+# The library page is generated from it, so adding a shader adds a card with no
+# page edit at all.
+SITE_DATA = ROOT / "_data" / "shaders.json"
 
 
 def shader_id(path: Path) -> str:
     """A stable id from the path under library/shaders: `03/warp` -> `03-warp`."""
     rel = path.relative_to(SOURCES).with_suffix("")
     return "-".join(rel.parts)
+
+
+def unit_of(path: Path) -> str:
+    """The unit a shader belongs to, from its directory: `p1/poster.fs` -> `P1`.
+
+    Directories are lowercase on disk and unit numbers are uppercase in
+    _data/units.yml, so a milestone's directory has to be upper-cased here or
+    the library page cannot link a shader back to the unit that teaches it.
+    """
+    parts = path.relative_to(SOURCES).parts
+    return parts[0].upper() if len(parts) > 1 else ""
 
 
 def build_one(path: Path) -> dict:
@@ -88,6 +103,7 @@ def main(argv: list[str] | None = None) -> int:
 
         registry.append({
             "id": manifest["id"],
+            "unit": unit_of(path),
             "description": manifest["description"],
             "credit": manifest["credit"],
             "categories": manifest["categories"],
@@ -98,14 +114,15 @@ def main(argv: list[str] | None = None) -> int:
         })
 
     registry_text = json.dumps(registry, indent=1, sort_keys=True) + "\n"
-    if args.check:
-        if not REGISTRY.exists():
-            stale.append(f"{REGISTRY.relative_to(ROOT)} is missing")
-        elif REGISTRY.read_text(encoding="utf8") != registry_text:
-            stale.append(f"{REGISTRY.relative_to(ROOT)} is out of date")
-    else:
-        REGISTRY.parent.mkdir(parents=True, exist_ok=True)
-        REGISTRY.write_text(registry_text, encoding="utf8")
+    for target in (REGISTRY, SITE_DATA):
+        if args.check:
+            if not target.exists():
+                stale.append(f"{target.relative_to(ROOT)} is missing")
+            elif target.read_text(encoding="utf8") != registry_text:
+                stale.append(f"{target.relative_to(ROOT)} is out of date")
+        else:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(registry_text, encoding="utf8")
 
     if errors:
         print("FAILED to compile:")

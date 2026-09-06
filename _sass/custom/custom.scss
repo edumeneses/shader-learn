@@ -471,3 +471,57 @@ figure {
   color: $sl-violet;
   margin-bottom: 0.2rem;
 }
+
+// ---------------------------------------------------------------------------
+// The shader library page
+// ---------------------------------------------------------------------------
+
+.shader-card {
+  margin: 2.5rem 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid $border-color;
+
+  h3 {
+    margin-bottom: 0.2rem;
+
+    code {
+      font-size: 1em;
+      background: none;
+      padding: 0;
+      color: $sl-heading;
+    }
+  }
+
+  .shader-player {
+    margin-top: 0.9rem;
+  }
+}
+
+.shader-card-meta {
+  font-size: 0.75rem;
+  color: $sl-text-dim;
+  margin-bottom: 0.4rem;
+}
+
+.shader-card-desc {
+  margin-bottom: 0.3rem;
+  max-width: 46rem;
+}
+
+.shader-card-credit,
+.shader-card-path {
+  font-size: 0.75rem;
+  color: $sl-text-dim;
+  margin-bottom: 0.3rem;
+
+  code {
+    font-size: 0.95em;
+  }
+}
+
+.toy-link {
+  margin: 0.3rem 0;
+  padding-left: 1rem;
+  border-left: 2px solid $sl-ink-600;
+  font-size: 0.88rem;
+}
