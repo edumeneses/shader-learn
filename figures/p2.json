@@ -1,0 +1,16 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/p2/living-surface.fs",
+      "out": "docs/learn/assets/p2/p2-01",
+      "size": [1280, 720],
+      "duration": 8,
+      "fps": 30,
+      "formats": ["mp4", "png"],
+      "poster_time": 3.0,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Duration must equal the shader's `period` default of 8 seconds, or the clip contains part of a second lap and the join jumps. That is the milestone's own step 4."
+    }
+  ]
+}

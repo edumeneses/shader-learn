@@ -1,0 +1,105 @@
+{
+ "categories": [
+  "Course",
+  "Noise"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art. Gradient noise after Ken Perlin and Inigo Quilez.",
+ "description": "Value noise and gradient noise side by side, with the interpolation curve on a control and a view that shows the grid both of them are built on.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform int kind;\nuniform int curve;\nuniform float density;\nuniform float drift;\nuniform float contrast;\nuniform bool showGrid;\nuniform vec4 warm;\nuniform vec4 cool;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\n\nconst float TAU = 6.28318530718;\n\nfloat hash21(vec2 p) {\n    vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));\n    q += dot(q, q.yzx + 33.33);\n    return fract((q.x + q.y) * q.z);\n}\n\n// A random unit-ish vector per lattice point, for gradient noise.\nvec2 hash22(vec2 p) {\n    float a = hash21(p) * TAU;\n    float b = hash21(p + 19.19);\n    return vec2(cos(a), sin(a)) * (0.7 + 0.3 * b);\n}\n\n// The interpolation curve, which is the whole difference between noise that\n// looks like noise and noise that looks like a grid of diamonds.\n//\n//   linear     has a kink at every lattice line; the grid is visible.\n//   smoothstep has zero first derivative at the lattice, so the kink goes.\n//   quintic    has zero second derivative too, which matters as soon as the\n//              noise is differentiated, which fbm and normal mapping both do.\nvec2 fade(vec2 t) {\n    if (curve == 0) return t;\n    if (curve == 1) return t * t * (3.0 - 2.0 * t);\n    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);\n}\n\n// Value noise: a random value at each lattice point, interpolated. Cheap, and\n// it has a characteristic blobbiness because the extremes sit on the lattice.\nfloat valueNoise(vec2 p) {\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    vec2 u = fade(f);\n    float a = hash21(i + vec2(0.0, 0.0));\n    float b = hash21(i + vec2(1.0, 0.0));\n    float c = hash21(i + vec2(0.0, 1.0));\n    float d = hash21(i + vec2(1.0, 1.0));\n    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);\n}\n\n// Gradient noise: a random *direction* at each lattice point, and the value is\n// the dot product of that direction with the offset from the lattice point. It\n// is therefore zero at every lattice point, which is why it has no blobs and\n// why its extremes fall between the lattice points rather than on them.\nfloat gradientNoise(vec2 p) {\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    vec2 u = fade(f);\n    float a = dot(hash22(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0));\n    float b = dot(hash22(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0));\n    float c = dot(hash22(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0));\n    float d = dot(hash22(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0));\n    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * 0.7 + 0.5;\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y * density\n           + vec2(TIME * drift, 0.0);\n\n    float n;\n    if (kind == 0) {\n        n = valueNoise(p);\n    } else if (kind == 1) {\n        n = gradientNoise(p);\n    } else {\n        n = uv.x < 0.5 ? valueNoise(p) : gradientNoise(p);\n    }\n\n    // Contrast, by smoothstep rather than by multiplication, so it pushes the\n    // middle apart without clipping the ends. Unit 06 called this the other use\n    // of smoothstep and this is it.\n    n = mix(n, smoothstep(0.30, 0.70, n), contrast);\n\n    vec3 colour = mix(cool.rgb, warm.rgb, clamp(n, 0.0, 1.0));\n\n    if (showGrid) {\n        // The lattice both kinds of noise are built on. Every feature in the\n        // picture is anchored to it, which is the single most useful thing to\n        // know about this family of functions and the least obvious.\n        vec2 g = abs(fract(p) - 0.5) / fwidth(p);\n        float lines = 1.0 - min(min(g.x, g.y), 1.0);\n        colour = mix(colour, vec3(0.0), lines * 0.35);\n    }\n\n    if (kind == 2) {\n        // The split, and a label side chosen so a reader knows which is which.\n        float seam = smoothstep(1.5 / RENDERSIZE.x, 0.0, abs(uv.x - 0.5));\n        colour = mix(colour, vec3(1.0), seam * 0.8);\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "id": "13-noise",
+ "imported": {},
+ "inputs": [
+  {
+   "default": 2,
+   "label": "Noise",
+   "labels": [
+    "value noise",
+    "gradient noise",
+    "both, split"
+   ],
+   "name": "kind",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  {
+   "default": 2,
+   "label": "Interpolation",
+   "labels": [
+    "linear",
+    "smoothstep  3t2-2t3",
+    "quintic  6t5-15t4+10t3"
+   ],
+   "name": "curve",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  {
+   "default": 5.0,
+   "label": "Density",
+   "max": 40.0,
+   "min": 1.0,
+   "name": "density",
+   "type": "float"
+  },
+  {
+   "default": 0.0,
+   "label": "Drift",
+   "max": 1.0,
+   "min": -1.0,
+   "name": "drift",
+   "type": "float"
+  },
+  {
+   "default": 0.0,
+   "label": "Contrast",
+   "max": 1.0,
+   "min": 0.0,
+   "name": "contrast",
+   "type": "float"
+  },
+  {
+   "default": true,
+   "label": "Show the lattice",
+   "name": "showGrid",
+   "type": "bool"
+  },
+  {
+   "default": [
+    0.98,
+    0.86,
+    0.62,
+    1.0
+   ],
+   "label": "High",
+   "name": "warm",
+   "type": "color"
+  },
+  {
+   "default": [
+    0.1,
+    0.16,
+    0.32,
+    1.0
+   ],
+   "label": "Low",
+   "name": "cool",
+   "type": "color"
+  }
+ ],
+ "mode": "fragment",
+ "name": "13-noise",
+ "passes": [
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"Value noise and gradient noise side by side, with the interpolation curve on a control and a view that shows the grid both of them are built on.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art. Gradient noise after Ken Perlin and Inigo Quilez.\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\", \"Noise\"],\n  \"INPUTS\": [\n    {\n      \"NAME\": \"kind\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Noise\",\n      \"VALUES\": [0, 1, 2],\n      \"LABELS\": [\"value noise\", \"gradient noise\", \"both, split\"],\n      \"DEFAULT\": 2\n    },\n    {\n      \"NAME\": \"curve\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Interpolation\",\n      \"VALUES\": [0, 1, 2],\n      \"LABELS\": [\"linear\", \"smoothstep  3t2-2t3\", \"quintic  6t5-15t4+10t3\"],\n      \"DEFAULT\": 2\n    },\n    { \"NAME\": \"density\", \"TYPE\": \"float\", \"LABEL\": \"Density\",  \"DEFAULT\": 5.0, \"MIN\": 1.0, \"MAX\": 40.0 },\n    { \"NAME\": \"drift\",   \"TYPE\": \"float\", \"LABEL\": \"Drift\",    \"DEFAULT\": 0.0, \"MIN\": -1.0, \"MAX\": 1.0 },\n    { \"NAME\": \"contrast\",\"TYPE\": \"float\", \"LABEL\": \"Contrast\", \"DEFAULT\": 0.0, \"MIN\": 0.0, \"MAX\": 1.0 },\n    { \"NAME\": \"showGrid\",\"TYPE\": \"bool\",  \"LABEL\": \"Show the lattice\", \"DEFAULT\": true },\n    { \"NAME\": \"warm\",    \"TYPE\": \"color\", \"LABEL\": \"High\",     \"DEFAULT\": [0.98, 0.86, 0.62, 1.0] },\n    { \"NAME\": \"cool\",    \"TYPE\": \"color\", \"LABEL\": \"Low\",      \"DEFAULT\": [0.10, 0.16, 0.32, 1.0] }\n  ]\n}*/\n\nconst float TAU = 6.28318530718;\n\nfloat hash21(vec2 p) {\n    vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));\n    q += dot(q, q.yzx + 33.33);\n    return fract((q.x + q.y) * q.z);\n}\n\n// A random unit-ish vector per lattice point, for gradient noise.\nvec2 hash22(vec2 p) {\n    float a = hash21(p) * TAU;\n    float b = hash21(p + 19.19);\n    return vec2(cos(a), sin(a)) * (0.7 + 0.3 * b);\n}\n\n// The interpolation curve, which is the whole difference between noise that\n// looks like noise and noise that looks like a grid of diamonds.\n//\n//   linear     has a kink at every lattice line; the grid is visible.\n//   smoothstep has zero first derivative at the lattice, so the kink goes.\n//   quintic    has zero second derivative too, which matters as soon as the\n//              noise is differentiated, which fbm and normal mapping both do.\nvec2 fade(vec2 t) {\n    if (curve == 0) return t;\n    if (curve == 1) return t * t * (3.0 - 2.0 * t);\n    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);\n}\n\n// Value noise: a random value at each lattice point, interpolated. Cheap, and\n// it has a characteristic blobbiness because the extremes sit on the lattice.\nfloat valueNoise(vec2 p) {\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    vec2 u = fade(f);\n    float a = hash21(i + vec2(0.0, 0.0));\n    float b = hash21(i + vec2(1.0, 0.0));\n    float c = hash21(i + vec2(0.0, 1.0));\n    float d = hash21(i + vec2(1.0, 1.0));\n    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);\n}\n\n// Gradient noise: a random *direction* at each lattice point, and the value is\n// the dot product of that direction with the offset from the lattice point. It\n// is therefore zero at every lattice point, which is why it has no blobs and\n// why its extremes fall between the lattice points rather than on them.\nfloat gradientNoise(vec2 p) {\n    vec2 i = floor(p);\n    vec2 f = fract(p);\n    vec2 u = fade(f);\n    float a = dot(hash22(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0));\n    float b = dot(hash22(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0));\n    float c = dot(hash22(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0));\n    float d = dot(hash22(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0));\n    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y) * 0.7 + 0.5;\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y * density\n           + vec2(TIME * drift, 0.0);\n\n    float n;\n    if (kind == 0) {\n        n = valueNoise(p);\n    } else if (kind == 1) {\n        n = gradientNoise(p);\n    } else {\n        n = uv.x < 0.5 ? valueNoise(p) : gradientNoise(p);\n    }\n\n    // Contrast, by smoothstep rather than by multiplication, so it pushes the\n    // middle apart without clipping the ends. Unit 06 called this the other use\n    // of smoothstep and this is it.\n    n = mix(n, smoothstep(0.30, 0.70, n), contrast);\n\n    vec3 colour = mix(cool.rgb, warm.rgb, clamp(n, 0.0, 1.0));\n\n    if (showGrid) {\n        // The lattice both kinds of noise are built on. Every feature in the\n        // picture is anchored to it, which is the single most useful thing to\n        // know about this family of functions and the least obvious.\n        vec2 g = abs(fract(p) - 0.5) / fwidth(p);\n        float lines = 1.0 - min(min(g.x, g.y), 1.0);\n        colour = mix(colour, vec3(0.0), lines * 0.35);\n    }\n\n    if (kind == 2) {\n        // The split, and a label side chosen so a reader knows which is which.\n        float seam = smoothstep(1.5 / RENDERSIZE.x, 0.0, abs(uv.x - 0.5));\n        colour = mix(colour, vec3(1.0), seam * 0.8);\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "sourcePath": "library/shaders/13/noise.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform int kind;\nuniform int curve;\nuniform float density;\nuniform float drift;\nuniform float contrast;\nuniform bool showGrid;\nuniform vec4 warm;\nuniform vec4 cool;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}

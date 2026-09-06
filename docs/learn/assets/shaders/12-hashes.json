@@ -1,0 +1,85 @@
+{
+ "categories": [
+  "Course",
+  "Noise"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art. The sine hash is folklore; the integer hash is after Chris Wellons and Mark Jarzynski.",
+ "description": "Four ways to get a repeatable random number out of a coordinate, with the failure modes of the cheap ones made visible rather than described.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform int method;\nuniform int view;\nuniform float cell;\nuniform float zoom;\nuniform float offset;\nuniform bool animate;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\n\n// --- 1. the sine hash, one dimension ---------------------------------------\n//\n// Multiply, take a sine, multiply by something large, keep the fractional part.\n// It is one line and it is everywhere in published shaders. It is also the only\n// function in this course whose result is not guaranteed: sin's precision is\n// implementation defined, so this returns different numbers on different\n// drivers, and on some mobile hardware it degenerates into visible bands.\nfloat hash11(float p) {\n    return fract(sin(p * 12.9898) * 43758.5453123);\n}\n\n// --- 2. the sine hash, two dimensions --------------------------------------\n//\n// The same trick with a dot product. The classic constants are (12.9898,\n// 78.233) and 43758.5453, and they are not magic: they are large, irrational\n// enough, and were picked by someone in 2008. The dot product means the input\n// is projected onto one direction first, which is exactly why this hash has a\n// grain: points along a line perpendicular to that direction hash similarly.\nfloat hash21(vec2 p) {\n    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453123);\n}\n\n// --- 3. fract-multiply, no transcendental ----------------------------------\n//\n// Dave Hoskins's approach: stay in the fractional part and stir. No sine, so no\n// precision surprise, and it is cheaper. Good enough for almost everything in\n// this course.\nfloat hash21b(vec2 p) {\n    vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));\n    q += dot(q, q.yzx + 33.33);\n    return fract((q.x + q.y) * q.z);\n}\n\n// --- 4. integer bit mixing --------------------------------------------------\n//\n// What a hash function is actually supposed to be. Convert to integers, mix the\n// bits with shifts and multiplies until every input bit affects every output\n// bit, then convert back. It is exact, identical on every conforming device,\n// and has no grain, no bands, and no correlation between neighbours. It costs a\n// handful of integer operations, which on any GPU made this decade is nothing.\nuint hashUint(uint x) {\n    x ^= x >> 16;\n    x *= 0x7feb352du;\n    x ^= x >> 15;\n    x *= 0x846ca68bu;\n    x ^= x >> 16;\n    return x;\n}\n\nfloat hash21i(vec2 p) {\n    uvec2 q = uvec2(ivec2(floor(p)) + 0x7fff);\n    uint h = hashUint(q.x ^ hashUint(q.y * 0x9e3779b9u));\n    return float(h) * (1.0 / 4294967296.0);\n}\n\nfloat hashOf(vec2 p) {\n    if (method == 0) return hash11(p.x + p.y * 57.0);\n    if (method == 1) return hash21(p);\n    if (method == 2) return hash21b(p);\n    return hash21i(p);\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    float seed = offset + (animate ? floor(TIME * 2.0) * 137.0 : 0.0);\n\n    vec3 colour;\n\n    if (view == 0) {\n        // One number per pixel. At zoom 1 this is white noise; wind Zoom up and\n        // the cheap hashes start to show structure that should not be there.\n        vec2 q = p * zoom * 256.0 + seed;\n        colour = vec3(hashOf(q));\n\n    } else if (view == 1) {\n        // One number per cell, which is how a hash is actually used: to give\n        // each cell of a repetition its own value. Unit 13 builds noise out of\n        // exactly this by interpolating between neighbouring cells.\n        vec2 q = floor(p * cell + seed);\n        colour = vec3(hashOf(q));\n\n    } else {\n        // A correlation plot: plot each cell's value against its neighbour's.\n        // A good hash scatters evenly over the square; a bad one draws lines,\n        // because its output depends on its input in a way simple enough to\n        // see. This is the only view that separates methods 2 and 3, and it\n        // separates them immediately.\n        //\n        // Every pixel loops over the whole sample set rather than owning one\n        // sample, because a fragment shader cannot scatter: it can only ask\n        // \"does anything land on me\". The loop bound is a compile-time constant\n        // for the same portability reason as Unit 11's supersampler.\n        const int SAMPLES = 192;\n        float hit = 0.0;\n        float radius = 2.5 / RENDERSIZE.y;\n        for (int i = 0; i < SAMPLES; i++) {\n            float fi = float(i);\n            vec2 pt = vec2(hashOf(vec2(fi + seed, seed)),\n                           hashOf(vec2(fi + 1.0 + seed, seed)));\n            hit = max(hit, 1.0 - smoothstep(0.0, radius, length(uv - pt)));\n        }\n        colour = vec3(0.04, 0.05, 0.07) + vec3(0.30, 0.85, 0.80) * hit;\n        // A frame, so the square reads as a plot rather than as a field.\n        vec2 edge = min(uv, 1.0 - uv);\n        colour += vec3(0.14) * smoothstep(2.0 / RENDERSIZE.y, 0.0, min(edge.x, edge.y));\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "id": "12-hashes",
+ "imported": {},
+ "inputs": [
+  {
+   "default": 1,
+   "label": "Hash",
+   "labels": [
+    "fract(sin) 1D",
+    "fract(sin) 2D",
+    "fract-multiply 2D",
+    "integer bit mix"
+   ],
+   "name": "method",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "default": 1,
+   "label": "View",
+   "labels": [
+    "per pixel",
+    "per cell",
+    "value against neighbour"
+   ],
+   "name": "view",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  {
+   "default": 24.0,
+   "label": "Cell size",
+   "max": 200.0,
+   "min": 2.0,
+   "name": "cell",
+   "type": "float"
+  },
+  {
+   "default": 1.0,
+   "label": "Zoom",
+   "max": 400.0,
+   "min": 0.05,
+   "name": "zoom",
+   "type": "float"
+  },
+  {
+   "default": 0.0,
+   "label": "Offset",
+   "max": 5000.0,
+   "min": 0.0,
+   "name": "offset",
+   "type": "float"
+  },
+  {
+   "default": false,
+   "label": "Reseed over time",
+   "name": "animate",
+   "type": "bool"
+  }
+ ],
+ "mode": "fragment",
+ "name": "12-hashes",
+ "passes": [
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"Four ways to get a repeatable random number out of a coordinate, with the failure modes of the cheap ones made visible rather than described.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art. The sine hash is folklore; the integer hash is after Chris Wellons and Mark Jarzynski.\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\", \"Noise\"],\n  \"INPUTS\": [\n    {\n      \"NAME\": \"method\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Hash\",\n      \"VALUES\": [0, 1, 2, 3],\n      \"LABELS\": [\"fract(sin) 1D\", \"fract(sin) 2D\", \"fract-multiply 2D\", \"integer bit mix\"],\n      \"DEFAULT\": 1\n    },\n    {\n      \"NAME\": \"view\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"View\",\n      \"VALUES\": [0, 1, 2],\n      \"LABELS\": [\"per pixel\", \"per cell\", \"value against neighbour\"],\n      \"DEFAULT\": 1\n    },\n    { \"NAME\": \"cell\",   \"TYPE\": \"float\", \"LABEL\": \"Cell size\",  \"DEFAULT\": 24.0, \"MIN\": 2.0, \"MAX\": 200.0 },\n    { \"NAME\": \"zoom\",   \"TYPE\": \"float\", \"LABEL\": \"Zoom\",       \"DEFAULT\": 1.0,  \"MIN\": 0.05, \"MAX\": 400.0 },\n    { \"NAME\": \"offset\", \"TYPE\": \"float\", \"LABEL\": \"Offset\",     \"DEFAULT\": 0.0,  \"MIN\": 0.0, \"MAX\": 5000.0 },\n    { \"NAME\": \"animate\",\"TYPE\": \"bool\",  \"LABEL\": \"Reseed over time\", \"DEFAULT\": false }\n  ]\n}*/\n\n// --- 1. the sine hash, one dimension ---------------------------------------\n//\n// Multiply, take a sine, multiply by something large, keep the fractional part.\n// It is one line and it is everywhere in published shaders. It is also the only\n// function in this course whose result is not guaranteed: sin's precision is\n// implementation defined, so this returns different numbers on different\n// drivers, and on some mobile hardware it degenerates into visible bands.\nfloat hash11(float p) {\n    return fract(sin(p * 12.9898) * 43758.5453123);\n}\n\n// --- 2. the sine hash, two dimensions --------------------------------------\n//\n// The same trick with a dot product. The classic constants are (12.9898,\n// 78.233) and 43758.5453, and they are not magic: they are large, irrational\n// enough, and were picked by someone in 2008. The dot product means the input\n// is projected onto one direction first, which is exactly why this hash has a\n// grain: points along a line perpendicular to that direction hash similarly.\nfloat hash21(vec2 p) {\n    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453123);\n}\n\n// --- 3. fract-multiply, no transcendental ----------------------------------\n//\n// Dave Hoskins's approach: stay in the fractional part and stir. No sine, so no\n// precision surprise, and it is cheaper. Good enough for almost everything in\n// this course.\nfloat hash21b(vec2 p) {\n    vec3 q = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));\n    q += dot(q, q.yzx + 33.33);\n    return fract((q.x + q.y) * q.z);\n}\n\n// --- 4. integer bit mixing --------------------------------------------------\n//\n// What a hash function is actually supposed to be. Convert to integers, mix the\n// bits with shifts and multiplies until every input bit affects every output\n// bit, then convert back. It is exact, identical on every conforming device,\n// and has no grain, no bands, and no correlation between neighbours. It costs a\n// handful of integer operations, which on any GPU made this decade is nothing.\nuint hashUint(uint x) {\n    x ^= x >> 16;\n    x *= 0x7feb352du;\n    x ^= x >> 15;\n    x *= 0x846ca68bu;\n    x ^= x >> 16;\n    return x;\n}\n\nfloat hash21i(vec2 p) {\n    uvec2 q = uvec2(ivec2(floor(p)) + 0x7fff);\n    uint h = hashUint(q.x ^ hashUint(q.y * 0x9e3779b9u));\n    return float(h) * (1.0 / 4294967296.0);\n}\n\nfloat hashOf(vec2 p) {\n    if (method == 0) return hash11(p.x + p.y * 57.0);\n    if (method == 1) return hash21(p);\n    if (method == 2) return hash21b(p);\n    return hash21i(p);\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    float seed = offset + (animate ? floor(TIME * 2.0) * 137.0 : 0.0);\n\n    vec3 colour;\n\n    if (view == 0) {\n        // One number per pixel. At zoom 1 this is white noise; wind Zoom up and\n        // the cheap hashes start to show structure that should not be there.\n        vec2 q = p * zoom * 256.0 + seed;\n        colour = vec3(hashOf(q));\n\n    } else if (view == 1) {\n        // One number per cell, which is how a hash is actually used: to give\n        // each cell of a repetition its own value. Unit 13 builds noise out of\n        // exactly this by interpolating between neighbouring cells.\n        vec2 q = floor(p * cell + seed);\n        colour = vec3(hashOf(q));\n\n    } else {\n        // A correlation plot: plot each cell's value against its neighbour's.\n        // A good hash scatters evenly over the square; a bad one draws lines,\n        // because its output depends on its input in a way simple enough to\n        // see. This is the only view that separates methods 2 and 3, and it\n        // separates them immediately.\n        //\n        // Every pixel loops over the whole sample set rather than owning one\n        // sample, because a fragment shader cannot scatter: it can only ask\n        // \"does anything land on me\". The loop bound is a compile-time constant\n        // for the same portability reason as Unit 11's supersampler.\n        const int SAMPLES = 192;\n        float hit = 0.0;\n        float radius = 2.5 / RENDERSIZE.y;\n        for (int i = 0; i < SAMPLES; i++) {\n            float fi = float(i);\n            vec2 pt = vec2(hashOf(vec2(fi + seed, seed)),\n                           hashOf(vec2(fi + 1.0 + seed, seed)));\n            hit = max(hit, 1.0 - smoothstep(0.0, radius, length(uv - pt)));\n        }\n        colour = vec3(0.04, 0.05, 0.07) + vec3(0.30, 0.85, 0.80) * hit;\n        // A frame, so the square reads as a plot rather than as a field.\n        vec2 edge = min(uv, 1.0 - uv);\n        colour += vec3(0.14) * smoothstep(2.0 / RENDERSIZE.y, 0.0, min(edge.x, edge.y));\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "sourcePath": "library/shaders/12/hashes.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform int method;\nuniform int view;\nuniform float cell;\nuniform float zoom;\nuniform float offset;\nuniform bool animate;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}

@@ -152,6 +152,76 @@
  {
   "categories": [
    "Course",
+   "Noise"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The sine hash is folklore; the integer hash is after Chris Wellons and Mark Jarzynski.",
+  "description": "Four ways to get a repeatable random number out of a coordinate, with the failure modes of the cheap ones made visible rather than described.",
+  "id": "12-hashes",
+  "inputs": 6,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/12/hashes.fs",
+  "unit": "12"
+ },
+ {
+  "categories": [
+   "Course",
+   "Noise"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. Gradient noise after Ken Perlin and Inigo Quilez.",
+  "description": "Value noise and gradient noise side by side, with the interpolation curve on a control and a view that shows the grid both of them are built on.",
+  "id": "13-noise",
+  "inputs": 8,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/13/noise.fs",
+  "unit": "13"
+ },
+ {
+  "categories": [
+   "Course",
+   "Noise"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. Gradient noise after Ken Perlin and Inigo Quilez.",
+  "description": "Fractal Brownian motion with octaves, lacunarity, and gain on controls, and a view that shows each octave separately so the sum stops being mysterious.",
+  "id": "14-fbm",
+  "inputs": 10,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/14/fbm.fs",
+  "unit": "14"
+ },
+ {
+  "categories": [
+   "Course",
+   "Noise"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The technique and the two-level form are Inigo Quilez's.",
+  "description": "Domain warping: feed noise its own output as a coordinate offset, once or twice, with each stage on a control so the contribution of each is separable.",
+  "id": "15-warp",
+  "inputs": 10,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/15/warp.fs",
+  "unit": "15"
+ },
+ {
+  "categories": [
+   "Course",
+   "Noise"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The true-edge second pass is Inigo Quilez's.",
+  "description": "Voronoi from the 3x3 neighbourhood, with F1, the cell id, the F2 minus F1 edge distance, and the true edge distance as separate views.",
+  "id": "16-voronoi",
+  "inputs": 8,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/16/voronoi.fs",
+  "unit": "16"
+ },
+ {
+  "categories": [
+   "Course",
    "Generator"
   ],
   "credit": "Eduardo Meneses, Learn shader art",
@@ -162,5 +232,19 @@
   "passes": 1,
   "source": "library/shaders/p1/poster.fs",
   "unit": "P1"
+ },
+ {
+  "categories": [
+   "Course",
+   "Generator"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "The Module D milestone: an animated surface that repeats exactly, built by moving through noise on a closed path rather than by sliding through it forever.",
+  "id": "p2-living-surface",
+  "inputs": 12,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/p2/living-surface.fs",
+  "unit": "P2"
  }
 ]

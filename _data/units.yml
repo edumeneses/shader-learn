@@ -145,7 +145,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "13"
   module: D
   kind: lesson
@@ -154,7 +154,7 @@
   read: 14
   practice: 30
   score: false
-  written: false
+  written: true
 - num: "14"
   module: D
   kind: lesson
@@ -163,7 +163,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "15"
   module: D
   kind: lesson
@@ -172,7 +172,7 @@
   read: 13
   practice: 30
   score: false
-  written: false
+  written: true
 - num: "16"
   module: D
   kind: lesson
@@ -181,7 +181,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "P2"
   module: D
   kind: milestone
@@ -190,7 +190,7 @@
   read: 12
   practice: 60
   score: false
-  written: false
+  written: true
 
 # -- Phase 2 ---------------------------------------------------------------
 # Module E: Time, feedback, and state

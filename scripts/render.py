@@ -512,13 +512,23 @@ def _pipe(cmd: list[str], frames: Iterable[bytes], out: Path) -> None:
         raise SystemExit(f"ffmpeg failed with exit code {code} writing {out}")
 
 
-def write_png(frame: bytes, out: Path, width: int, height: int) -> None:
+def write_png(frame: bytes, out: Path, width: int, height: int,
+              max_width: int | None = None) -> None:
+    """Write a frame as a PNG, optionally downscaled.
+
+    A poster is only ever seen before a clip plays, so a clip's poster is
+    written at `max_width` rather than at full size. It matters: a PNG of a
+    noise field does not compress, and a 1280-wide poster for an eight-second
+    figure was larger than the H.264 clip it was a poster for.
+    """
     from PIL import Image
 
     out.parent.mkdir(parents=True, exist_ok=True)
-    Image.frombytes("RGBA", (width, height), frame).convert("RGB").save(
-        out, optimize=True
-    )
+    image = Image.frombytes("RGBA", (width, height), frame).convert("RGB")
+    if max_width and width > max_width:
+        height = max(1, round(height * max_width / width))
+        image = image.resize((max_width, height), Image.LANCZOS)
+    image.save(out, optimize=True)
 
 
 # ---------------------------------------------------------------------------
@@ -544,6 +554,8 @@ class Job:
     gif_width: int = 640
     quality: int = 20
     nvenc: bool = True
+    # Posters for clips are downscaled; a still figure is written full size.
+    poster_width: int | None = 960
 
 
 def defaults_for(shader: isf.ISFShader) -> dict[str, Any]:
@@ -638,7 +650,8 @@ def run(job: Job) -> list[Path]:
 
     if "png" in job.formats and poster_frame is not None:
         png = job.out.with_suffix(".png")
-        write_png(poster_frame, png, job.size[0], job.size[1])
+        write_png(poster_frame, png, job.size[0], job.size[1],
+                  job.poster_width if want_clip else None)
         written.append(png)
 
     return written
@@ -675,6 +688,7 @@ def job_from_spec(spec: dict[str, Any], base: Path) -> Job:
         gif_width=int(spec.get("gif_width", 640)),
         quality=int(spec.get("quality", 20)),
         nvenc=not bool(spec.get("no_nvenc", False)),
+        poster_width=spec.get("poster_width", 960),
     )
 
 
@@ -699,7 +713,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--synth-audio", action="store_true")
     ap.add_argument("--gif-fps", type=int, default=15)
     ap.add_argument("--gif-width", type=int, default=640)
-    ap.add_argument("--quality", type=int, default=20)
+    ap.add_argument("--quality", type=int, default=20,
+                    help="NVENC constant quality; higher is smaller")
+    ap.add_argument("--poster-width", type=int, default=960,
+                    help="downscale a clip's poster to this width")
     ap.add_argument("--no-nvenc", action="store_true",
                     help="encode on the CPU; use when NVENC sessions are exhausted")
     args = ap.parse_args(argv)
@@ -742,6 +759,7 @@ def main(argv: list[str] | None = None) -> int:
             gif_width=args.gif_width,
             quality=args.quality,
             nvenc=not args.no_nvenc,
+            poster_width=args.poster_width,
         ))
 
     for job in jobs:
