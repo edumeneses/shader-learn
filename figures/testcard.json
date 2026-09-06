@@ -1,0 +1,12 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/20/testcard.fs",
+      "out": "docs/learn/assets/images/testcard",
+      "size": [1280, 720],
+      "formats": ["png"],
+      "supersample": 2,
+      "_note": "The image every Module F shader reads. Generated from an ISF shader and committed as a PNG so that both the offline renderer and the browser player load the same bytes; writing the card twice, once in PIL and once in canvas 2D, would reintroduce exactly the divergence the manifest design exists to prevent."
+    }
+  ]
+}

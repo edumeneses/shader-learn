@@ -263,6 +263,76 @@
  {
   "categories": [
    "Course",
+   "Filter"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "Reading a texture: normalised against pixel coordinates, what happens between texels, and the coordinate mistakes that produce a flipped, stretched, or crawling image.",
+  "id": "20-sampling",
+  "inputs": 6,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/20/sampling.fs",
+  "unit": "20"
+ },
+ {
+  "categories": [
+   "Course",
+   "Utility"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "A procedural test card: colour bars, a greyscale ramp, frequency wedges, and fine detail. Rendered once and committed as a PNG, so every shader in Module F has something to read.",
+  "id": "20-testcard",
+  "inputs": 2,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/20/testcard.fs",
+  "unit": "20"
+ },
+ {
+  "categories": [
+   "Course",
+   "Filter"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "Convolution kernels, and a separable Gaussian done as two one-dimensional passes, with a control that switches to the naive two-dimensional version so the cost difference is visible rather than asserted.",
+  "id": "21-convolution",
+  "inputs": 6,
+  "mode": "fragment",
+  "passes": 2,
+  "source": "library/shaders/21/convolution.fs",
+  "unit": "21"
+ },
+ {
+  "categories": [
+   "Course",
+   "Color"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The filmic curve is Krzysztof Narkowicz's ACES approximation.",
+  "description": "A colour grade in the order a colourist works: exposure, white balance, contrast, lift/gamma/gain, saturation, then a tone curve, each on its own control and each applied in the space it belongs in.",
+  "id": "22-grading",
+  "inputs": 13,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/22/grading.fs",
+  "unit": "22"
+ },
+ {
+  "categories": [
+   "Course",
+   "Filter"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The separable blend modes follow the PDF and CSS compositing definitions.",
+  "description": "Three layers composited with selectable blend modes, showing the difference between premultiplied and straight alpha and why the order of the operators is not a detail.",
+  "id": "23-compositing",
+  "inputs": 10,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/23/compositing.fs",
+  "unit": "23"
+ },
+ {
+  "categories": [
+   "Course",
    "Generator"
   ],
   "credit": "Eduardo Meneses, Learn shader art",

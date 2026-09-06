@@ -231,7 +231,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "21"
   module: F
   kind: lesson
@@ -240,7 +240,7 @@
   read: 14
   practice: 30
   score: false
-  written: false
+  written: true
 - num: "22"
   module: F
   kind: lesson
@@ -249,7 +249,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "23"
   module: F
   kind: lesson
@@ -258,7 +258,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 
 # Module G: Three dimensions in a fragment shader
 - num: "24"
