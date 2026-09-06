@@ -1,0 +1,60 @@
+# Modules of the course, in syllabus order.
+#
+# A module is a cluster of units that share a question. Phases group modules
+# into the four stages a reader passes through: writing pixels, building
+# techniques, understanding formats, and shipping work in ossia score.
+
+- id: A
+  phase: 1
+  title: Orientation
+  blurb: "What a shader is, where one runs, and how to get a first one on screen."
+
+- id: B
+  phase: 1
+  title: Coordinates and colour
+  blurb: "The two things every fragment shader does before it does anything else."
+
+- id: C
+  phase: 1
+  title: Shapes as fields
+  blurb: "Signed distance fields, the operators that combine them, and edges that do not alias."
+
+- id: D
+  phase: 1
+  title: Noise and randomness
+  blurb: "Deterministic randomness, fractal noise, and the warping that turns it into art."
+
+- id: E
+  phase: 2
+  title: Time, feedback, and state
+  blurb: "Loops that loop, buffers that remember, and simulation without geometry."
+
+- id: F
+  phase: 2
+  title: Images and processing
+  blurb: "Sampling, convolution, grading, and compositing: shaders that take an input."
+
+- id: G
+  phase: 2
+  title: Three dimensions in a fragment shader
+  blurb: "Raymarching a distance field, lighting it, and stopping before it costs too much."
+
+- id: H
+  phase: 3
+  title: Formats and stages
+  blurb: "ISF, Shadertoy, vertex, compute, and the languages underneath all of them."
+
+- id: I
+  phase: 3
+  title: What a shader costs
+  blurb: "Reading the price of a line of GLSL, and paying less for the same picture."
+
+- id: J
+  phase: 4
+  title: Shaders in ossia score
+  blurb: "The graphics pipeline, live coding, parameters as inlets, and audio-reactive work."
+
+- id: K
+  phase: 4
+  title: Capstone
+  blurb: "One finished, controllable, documented piece."

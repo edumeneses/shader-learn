@@ -1,0 +1,10 @@
+# Overrides for the local preview only (./preview.sh). Keeps URLs clean at
+# http://127.0.0.1:4000 while _config.yml keeps the provisional published
+# paths. html-proofer in CI builds with this too, because it resolves links
+# against the _site root.
+baseurl: ""
+url: "http://127.0.0.1:4000"
+img: "/docs/learn/assets"
+shaders: "/docs/learn/assets/shaders"
+library: "/library"
+markdown: kramdown

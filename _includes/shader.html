@@ -1,0 +1,37 @@
+{%- comment -%}
+  Embed a live shader on a page.
+
+      {% include shader.html id="03-warp" height="380" pointer="focus"
+                             caption="Drag on the canvas to move the focus." %}
+
+  Parameters
+    id        required, the shader's id under docs/learn/assets/shaders/,
+              which build_shaders.py derives from its path under
+              library/shaders/ (so `03/warp.fs` is `03-warp`)
+    height    canvas height in CSS pixels, default 360
+    pointer   the point2D input the canvas pointer drives; "none" to leave the
+              canvas alone. Defaults to the shader's first point2D input.
+    controls  full (default) | compact | none
+    autoplay  "true" to start once it scrolls into view, unless the reader has
+              asked for reduced motion
+    loop      seconds after which TIME wraps
+    caption   a sentence under the player
+
+  The player never parses ISF: it reads the manifest scripts/build_shaders.py
+  writes, which is the same translation the offline renderer uses. That is why
+  a clip and the player under it agree.
+{%- endcomment -%}
+<shader-player
+  manifest="{{ site.baseurl }}/docs/learn/assets/shaders/{{ include.id }}.json"
+  height="{{ include.height | default: 360 }}"
+  {% if include.pointer %}pointer="{{ include.pointer }}"{% endif %}
+  {% if include.controls %}controls="{{ include.controls }}"{% endif %}
+  {% if include.autoplay %}autoplay{% endif %}
+  {% if include.loop %}loop="{{ include.loop }}"{% endif %}
+  {% if include.caption %}caption="{{ include.caption | escape }}"{% endif %}>
+  <noscript>
+    This shader runs in the browser and needs JavaScript. The source is at
+    <code>library/shaders/{{ include.id }}.fs</code> in the course repository,
+    and it runs unchanged in <em>ossia score</em>.
+  </noscript>
+</shader-player>

@@ -1,0 +1,15 @@
+[
+ {
+  "categories": [
+   "Generator",
+   "Course"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "A distance field to a circle, coloured by a palette, with every control exposed as a named parameter rather than a hard-coded number.",
+  "id": "00-hello-field",
+  "inputs": 6,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/00/hello-field.fs"
+ }
+]

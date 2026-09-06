@@ -1,0 +1,15 @@
+{%- comment -%}
+  A link to a Shadertoy that shows the technique this section just described,
+  with one line saying what to look at in it. Marked as an outward link so a
+  reader can see it leaves the course, and never used as a substitute for the
+  course's own runnable shader: a Shadertoy is a reference, and the shader in
+  the player above it is the one that runs in ossia score.
+
+      {% include toy.html id="Xds3zN" title="Raymarching primitives"
+                          by="Inigo Quilez" note="Read sdBox first." %}
+{%- endcomment -%}
+<p class="toy-link">
+  <a class="outward" href="https://www.shadertoy.com/view/{{ include.id }}">{{ include.title }}</a>
+  {%- if include.by %} by {{ include.by }}{% endif -%}.
+  {%- if include.note %} {{ include.note }}{% endif -%}
+</p>

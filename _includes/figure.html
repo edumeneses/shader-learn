@@ -1,0 +1,31 @@
+{%- comment -%}
+  A rendered figure: a clip with a still poster, or a still on its own.
+
+      {% include figure.html unit="03" name="03-01" video=true
+                             alt="..." caption="..." %}
+
+  Clips are produced by scripts/render.py on the local GPU and committed as
+  .mp4 with a .png poster. The video is muted, looping, and inline, so it
+  behaves like an animated illustration rather than like media; `preload` is
+  metadata only, because a unit can carry four of them and a reader on a
+  metered connection should pay for the ones they scroll to.
+
+  A reader who has asked for reduced motion sees the poster and a play button
+  instead, which the stylesheet handles by way of the `controls` attribute
+  being present on every clip.
+{%- endcomment -%}
+{%- assign base = site.baseurl | append: "/docs/learn/assets/" | append: include.unit | append: "/" | append: include.name -%}
+<figure id="fig-{{ include.name }}">
+  {%- if include.video -%}
+    <video
+      src="{{ base }}.mp4"
+      poster="{{ base }}.png"
+      muted loop playsinline controls preload="metadata"
+      aria-label="{{ include.alt | escape }}"></video>
+  {%- else -%}
+    <img src="{{ base }}.png" alt="{{ include.alt | escape }}">
+  {%- endif -%}
+  {%- if include.caption -%}
+    <figcaption><strong>Figure {{ include.name }}.</strong> {{ include.caption }}</figcaption>
+  {%- endif -%}
+</figure>

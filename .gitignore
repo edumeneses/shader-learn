@@ -1,0 +1,39 @@
+.jekyll-metadata
+.vscode
+# bundler's install path only. A bare `vendor` rule also swallows the theme's
+# _includes/vendor/, _layouts/vendor/, _sass/vendor/ and assets/js/vendor/,
+# which breaks the CI build while local builds keep working from disk.
+/vendor/
+*.gem
+.bundle
+.ruby-version
+.jekyll-cache
+.sass-cache
+_site
+Gemfile.lock
+node_modules
+.DS_Store
+
+# The Python toolchain's virtual environment. scripts/setup.sh rebuilds it.
+.venv/
+__pycache__/
+*.pyc
+
+# Raw GPU captures and intermediate frames. Figures are committed; the
+# multi-gigabyte intermediates that made them are not.
+figures/raw/*.mp4
+figures/raw/*.png
+!figures/raw/.gitkeep
+
+# editor-hook backups: same front matter, so they would shadow real pages
+backups/
+*.backup
+*.backupclaude*
+
+# Claude Code's local session state. CLAUDE.md is deliberately tracked: it is
+# the project's instructions, which is why it is committed.
+.claude/
+.claude.json
+.claude.json.backup
+CLAUDE.local.md
+.mcp.json

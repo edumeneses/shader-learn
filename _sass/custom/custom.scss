@@ -1,0 +1,473 @@
+// Learn shader art: everything the vendored theme does not provide.
+//
+// The bulk of it is the live shader player, which is a custom element rather
+// than a theme component. It appears on nearly every page, often three or four
+// times, so it is styled to be readable at a glance and quiet when idle.
+
+// ---------------------------------------------------------------------------
+// Page furniture
+// ---------------------------------------------------------------------------
+
+.unit-meta {
+  margin-bottom: 1.4rem;
+
+  .label {
+    margin-right: 0.35rem;
+  }
+}
+
+// The blockquote that opens every unit: what you need, what you will build.
+.main-content blockquote:first-of-type {
+  border-left: 3px solid $sl-violet;
+  background-color: $sl-ink-800;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1.6rem;
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+video,
+img {
+  max-width: 100%;
+}
+
+figure {
+  margin: 1.6rem 0;
+
+  video,
+  img {
+    display: block;
+    width: 100%;
+    border-radius: 6px;
+    background-color: #000;
+  }
+
+  figcaption {
+    color: $sl-text-dim;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    margin-top: 0.5rem;
+  }
+}
+
+// A link out to Shadertoy, ISF, or a paper. Marked so a reader can see at a
+// glance which links leave the course.
+.outward {
+  &::after {
+    content: " ↗";
+    color: $sl-text-dim;
+    font-size: 0.8em;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// The shader player
+// ---------------------------------------------------------------------------
+
+.shader-player {
+  display: block;
+  margin: 1.6rem 0 2rem;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: $sl-ink-800;
+}
+
+.sp-stage {
+  position: relative;
+  background-color: #000;
+  line-height: 0;
+}
+
+.sp-canvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+  background-color: #000;
+}
+
+.sp-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.sp-bigplay {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 120ms ease, background-color 120ms ease;
+
+  &:hover {
+    transform: scale(1.08);
+    background: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.sp-status {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: $sl-text-dim;
+  background: rgba(0, 0, 0, 0.75);
+
+  &.sp-error {
+    color: $sl-rose;
+    white-space: pre-wrap;
+    max-height: 9rem;
+    overflow: auto;
+  }
+}
+
+.sp-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  border-top: 1px solid $border-color;
+  background-color: $sl-ink-700;
+  flex-wrap: wrap;
+}
+
+.sp-spacer {
+  flex: 1 1 auto;
+}
+
+.sp-btn {
+  appearance: none;
+  border: 1px solid $sl-ink-500;
+  background-color: $sl-ink-800;
+  color: $sl-text;
+  border-radius: 4px;
+  padding: 0.18rem 0.5rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  line-height: 1.6;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $sl-cyan;
+    color: $sl-heading;
+  }
+
+  &.sp-play {
+    min-width: 2.2rem;
+  }
+
+  &.is-recording {
+    border-color: $sl-rose;
+    color: $sl-rose;
+  }
+}
+
+.sp-speed,
+.sp-audio {
+  background-color: $sl-ink-800;
+  color: $sl-text;
+  border: 1px solid $sl-ink-500;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.25rem;
+}
+
+.sp-clock {
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: $sl-text-dim;
+  min-width: 8.5rem;
+}
+
+// -- the parameter panel ----------------------------------------------------
+
+.sp-panel {
+  padding: 0.5rem 0.75rem 0.75rem;
+  border-top: 1px solid $border-color;
+}
+
+.sp-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $sl-text-dim;
+  margin-bottom: 0.5rem;
+}
+
+.sp-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 12rem) 1fr minmax(5rem, auto);
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.18rem 0;
+}
+
+.sp-label {
+  font-size: 0.78rem;
+  color: $sl-text;
+
+  code {
+    font-size: 0.68rem;
+    color: $sl-text-dim;
+    background: none;
+    padding: 0;
+  }
+}
+
+.sp-input {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: $sl-cyan;
+  }
+
+  input[type="color"] {
+    width: 2.4rem;
+    height: 1.4rem;
+    padding: 0;
+    border: 1px solid $sl-ink-500;
+    background: none;
+  }
+
+  select {
+    background-color: $sl-ink-800;
+    color: $sl-text;
+    border: 1px solid $sl-ink-500;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    padding: 0.1rem 0.25rem;
+  }
+}
+
+.sp-alpha {
+  max-width: 5rem;
+}
+
+.sp-readout {
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: $sl-text-dim;
+  text-align: right;
+}
+
+// The two-dimensional control. Named for what it is rather than for a mouse:
+// the same input takes a pointer here, an OSC pair in ossia score, and a pair
+// of automation curves in a score document.
+.sp-pad {
+  position: relative;
+  width: 100%;
+  max-width: 8rem;
+  aspect-ratio: 1;
+  border: 1px solid $sl-ink-500;
+  border-radius: 4px;
+  background:
+    linear-gradient(to right, rgba(70, 224, 212, 0.09), rgba(167, 139, 250, 0.09)),
+    $sl-ink-900;
+  cursor: crosshair;
+
+  &:focus-visible {
+    outline: 2px solid $sl-cyan;
+    outline-offset: 2px;
+  }
+}
+
+.sp-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background-color: $sl-cyan;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.sp-row-point2D {
+  align-items: start;
+  padding: 0.4rem 0;
+}
+
+// -- the source view --------------------------------------------------------
+
+.sp-source {
+  border-top: 1px solid $border-color;
+  background-color: $sl-ink-900;
+}
+
+.sp-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.4rem 0.5rem 0;
+}
+
+.sp-tab {
+  appearance: none;
+  border: 1px solid transparent;
+  border-bottom: none;
+  background: none;
+  color: $sl-text-dim;
+  font-family: inherit;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+
+  &.is-active {
+    color: $sl-heading;
+    background-color: $sl-ink-700;
+    border-color: $border-color;
+  }
+}
+
+.sp-pane {
+  position: relative;
+  background-color: $sl-ink-700;
+  border-top: 1px solid $border-color;
+
+  pre {
+    margin: 0;
+    max-height: 26rem;
+    overflow: auto;
+    background-color: transparent;
+    font-size: 0.72rem;
+    line-height: 1.5;
+    padding: 0.75rem;
+  }
+}
+
+.sp-note {
+  margin: 0;
+  padding: 0.5rem 0.75rem 0;
+  font-size: 0.72rem;
+  color: $sl-text-dim;
+  max-width: 46rem;
+}
+
+.sp-copy {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.5rem;
+  z-index: 1;
+}
+
+.sp-caption {
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.7rem;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: $sl-text-dim;
+  border-top: 1px solid $border-color;
+}
+
+@media (max-width: 40rem) {
+  .sp-row {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+
+  .sp-readout {
+    text-align: left;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Previous / next unit navigation
+// ---------------------------------------------------------------------------
+
+.page-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid $border-color;
+}
+
+.page-nav-link {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  max-width: 48%;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid $border-color;
+  border-radius: 6px;
+  text-decoration: none;
+
+  &:hover {
+    border-color: $sl-cyan;
+    background-color: $sl-ink-800;
+  }
+}
+
+.page-nav-empty {
+  border: none;
+  background: none;
+  pointer-events: none;
+}
+
+.page-nav-next {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.page-nav-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $sl-text-dim;
+}
+
+.page-nav-prev .page-nav-label::before {
+  content: "← ";
+}
+
+.page-nav-next .page-nav-label::after {
+  content: " →";
+}
+
+// ---------------------------------------------------------------------------
+// The syllabus table
+// ---------------------------------------------------------------------------
+
+.syllabus {
+  h2 {
+    margin-top: 2rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid $border-color;
+  }
+
+  td:first-child {
+    font-family: monospace;
+    color: $sl-text-dim;
+    white-space: nowrap;
+  }
+}
+
+.phase-label {
+  display: inline-block;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $sl-violet;
+  margin-bottom: 0.2rem;
+}

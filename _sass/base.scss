@@ -1,0 +1,174 @@
+//
+// Base element style overrides
+//
+// stylelint-disable selector-no-type, selector-max-type
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  color: $white;
+  background: $link-color;
+}
+
+html {
+  @include fs-4;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: $body-font-family;
+  font-size: inherit;
+  line-height: $body-line-height;
+  color: $body-text-color;
+  background-color: $body-background-color;
+}
+
+ol,
+ul,
+dl,
+pre,
+address,
+blockquote,
+table,
+div,
+hr,
+form,
+fieldset,
+noscript .table-wrapper {
+  margin-top: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+  font-family: Catamaran, sans-serif;
+  font-weight: 300;
+  line-height: $body-heading-line-height;
+  color: $body-heading-color;
+}
+
+h1 {
+  font-size: 38px;
+  font-weight: 400;
+}
+
+.software {
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+  padding-left: 0.24em;
+  margin: 0;
+  font-size: 42px !important;
+  font-weight: 700 !important;
+  line-height: 1;
+  color: $ossia-light-blue;
+  text-transform: none;
+  letter-spacing: 1px;
+}
+p {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  text-align: justify;
+}
+
+a {
+  font-weight: 400;
+  color: $link-color;
+  text-decoration: none !important;
+  border: 0;
+}
+
+a:not([class]) {
+  text-decoration: none !important;
+}
+
+a:hover,
+a:active {
+  color: $active-link-color;
+  text-decoration: none !important;
+}
+
+figure,
+pre {
+  margin: 0;
+}
+
+li {
+  margin: 0.25em 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+hr {
+  height: 1px;
+  padding: 0;
+  margin: $sp-6 0;
+  background-color: $border-color;
+  border: 0;
+}
+.shortcut {
+  display: inline-block;
+  padding: 0.1em 0.5em;
+  margin: 0 0.2em;
+  font-size: 9pt;
+  font-weight: 400;
+
+  /*   box-shadow: 0 1px 0px rgba(0, 0, 0, 0.2), 0 0 0 2px #fff inset; */
+  background-color: #f7f7f7;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+ol > li::before {
+  float: left;
+  width: 18px;
+  height: 18px;
+  font-weight: bold;
+  line-height: 18px;
+  color: #fff;
+  text-align: center;
+
+  /*   content:attr(data-badge); */
+
+  /*   font-size:.7em; */
+  background: $ossia-light-blue;
+  border-radius: 50%;
+
+  /*   margin-top: 7px; */
+}
+
+p > img {
+  text-align: center;
+}
+
+
+
+.videoWrapper {
+	position: relative;
+	padding-bottom: 56.25%; /* 16:9 */
+	padding-top: 25px;
+	height: 0;
+}
+.videoWrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+.videoWrapper img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}

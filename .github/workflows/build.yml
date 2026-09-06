@@ -1,0 +1,62 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      # Front matter, the reading budget, permalink stability, the pinned
+      # score version, re-verification notes, every internal unit link, and
+      # every embedded shader and figure, against _data/units.yml.
+      - name: Structural checks
+        run: python3 scripts/check_units.py
+
+      # The committed shader manifests must match their ISF sources. This is a
+      # text comparison, not a render, so it needs no GPU: the manifests are
+      # produced on the author's machine and committed, and this catches an
+      # edited shader whose manifest was not rebuilt.
+      - name: Shader manifests are current
+        run: python3 scripts/build_shaders.py --check
+
+      # glslang is stricter than the NVIDIA driver the figures are rendered
+      # on, so a shader that only compiles there fails here rather than in a
+      # reader's browser.
+      - name: Install glslang
+        run: sudo apt-get update && sudo apt-get install -y glslang-tools
+
+      - name: Validate every shader
+        run: python3 scripts/validate_glsl.py
+
+      # Built with _local_config.yml so baseurl is empty, which is what
+      # html-proofer needs to resolve links against the _site root.
+      - name: Build the site
+        run: bundle exec jekyll build --config _config.yml,_local_config.yml --trace
+
+      # Links to /learn/ are validated by check_units.py against
+      # _data/units.yml instead, because a forward reference to a unit that is
+      # planned but not yet written is expected while the course is in
+      # progress.
+      - name: Check links
+        run: |
+          bundle exec htmlproofer _site \
+            --disable-external \
+            --allow-missing-href \
+            --no-enforce-https \
+            --ignore-urls "/^\/learn\//"
+
+      # The published config must also build, since it is what a deployment
+      # uses and its baseurl is different.
+      - name: Build with the published config
+        run: bundle exec jekyll build --trace

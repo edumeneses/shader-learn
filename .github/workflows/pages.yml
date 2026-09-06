@@ -1,0 +1,64 @@
+name: pages
+
+# Deploys the course to GitHub Pages so it can be read and reviewed in its real
+# form, with the live shader players running. This is a review deployment, not
+# a decision about where the course finally lives: see the hosting note in the
+# README.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; queue rather than cancel, so a push during a
+# deploy still lands.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      - uses: actions/configure-pages@v5
+        id: pages
+
+      # A page that fails these is not published.
+      - name: Structural checks
+        run: python3 scripts/check_units.py
+
+      - name: Shader manifests are current
+        run: python3 scripts/build_shaders.py --check
+
+      # Built with the published config: baseurl /shader-learn, which is what a
+      # project Pages site serves from.
+      - name: Build the site
+        env:
+          JEKYLL_ENV: production
+        run: bundle exec jekyll build --trace
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

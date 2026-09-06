@@ -1,0 +1,12 @@
+{%- comment -%}
+  The badge strip at the top of every unit. Reads the front matter, so the
+  markup is edited once for all of them. `score_version` appears only on units
+  that touch ossia score, which is most but not all of them: Module A and
+  Module B are pure GLSL and run anywhere.
+{%- endcomment -%}
+<p class="unit-meta">
+  {%- if page.reading_time %}<span class="label label-blue">read {{ page.reading_time }}</span>{% endif -%}
+  {%- if page.practice_time and page.practice_time != "none" %}<span class="label label-purple">practice {{ page.practice_time }}</span>{% endif -%}
+  {%- if page.score_version %}<span class="label label-green">ossia score {{ page.score_version }}</span>{% endif -%}
+  {%- if page.glsl %}<span class="label">{{ page.glsl }}</span>{% endif -%}
+</p>

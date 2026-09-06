@@ -1,0 +1,27 @@
+// Colour scheme for Learn shader art.
+//
+// The palette itself lives in _sass/support/_variables.scss, because
+// _sass/custom/custom.scss is imported by every scheme and needs the variables
+// to exist in all of them. This file only maps the palette onto the names the
+// vendored theme uses.
+
+$body-background-color: $sl-ink-900;
+$sidebar-color: $sl-ink-800;
+$border-color: $sl-ink-600;
+
+$body-text-color: $sl-text;
+$body-heading-color: $sl-heading;
+$nav-child-link-color: $sl-text-dim;
+$search-result-preview-color: $sl-text-dim;
+
+$link-color: $sl-cyan;
+$active-link-color: $sl-violet;
+$btn-primary-color: $sl-violet;
+$base-button-color: $sl-ink-700;
+
+$code-background-color: $sl-ink-700;
+$search-background-color: $sl-ink-700;
+$table-background-color: $sl-ink-800;
+$feedback-color: $sl-ink-700;
+
+$body-heading-line-height: 1.5em;

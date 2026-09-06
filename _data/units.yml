@@ -1,0 +1,462 @@
+# Single source of truth for the course's unit numbering and slugs.
+#
+# Slugs become published permalinks (/learn/<slug>.html) and future videos will
+# point at them, so a slug is CONTRACTUAL once `written: true`. Renaming a
+# written unit is a breaking change; add a new number or a Part II instead.
+# scripts/check_units.py validates every unit page and every internal link
+# against this file.
+#
+# kind:      lesson | milestone | capstone
+# read:      minutes of prose
+# practice:  minutes at the keyboard; 0 means none
+# score:     true when the unit needs ossia score installed
+# written:   true once the page exists under docs/learn/
+
+# -- Phase 1 ---------------------------------------------------------------
+# Module A: Orientation
+- num: "00"
+  module: A
+  kind: lesson
+  slug: 00-what-a-shader-is
+  title: What a shader is, and what it is not
+  read: 12
+  practice: 0
+  score: false
+  written: false
+- num: "01"
+  module: A
+  kind: lesson
+  slug: 01-where-shaders-run
+  title: Where shaders run, and the four places this course uses
+  read: 12
+  practice: 20
+  score: true
+  written: false
+- num: "02"
+  module: A
+  kind: lesson
+  slug: 02-first-fragment-shader
+  title: Your first fragment shader
+  read: 13
+  practice: 25
+  score: false
+  written: false
+
+# Module B: Coordinates and colour
+- num: "03"
+  module: B
+  kind: lesson
+  slug: 03-coordinates
+  title: Coordinates, aspect ratio, and why the circle was an ellipse
+  read: 12
+  practice: 25
+  score: false
+  written: false
+- num: "04"
+  module: B
+  kind: lesson
+  slug: 04-colour
+  title: Colour, linear light, and mixing that does not go muddy
+  read: 13
+  practice: 20
+  score: false
+  written: false
+- num: "05"
+  module: B
+  kind: lesson
+  slug: 05-palettes
+  title: Palettes, and gradients that look designed
+  read: 12
+  practice: 25
+  score: false
+  written: false
+- num: "06"
+  module: B
+  kind: lesson
+  slug: 06-step-and-smoothstep
+  title: step, smoothstep, and the anatomy of an edge
+  read: 12
+  practice: 20
+  score: false
+  written: false
+
+# Module C: Shapes as fields
+- num: "07"
+  module: C
+  kind: lesson
+  slug: 07-distance-fields-2d
+  title: Signed distance fields in two dimensions
+  read: 14
+  practice: 30
+  score: false
+  written: false
+- num: "08"
+  module: C
+  kind: lesson
+  slug: 08-combining-fields
+  title: Union, subtraction, and the smooth minimum
+  read: 13
+  practice: 25
+  score: false
+  written: false
+- num: "09"
+  module: C
+  kind: lesson
+  slug: 09-transforms
+  title: Transforms, and doing them backwards
+  read: 12
+  practice: 25
+  score: false
+  written: false
+- num: "10"
+  module: C
+  kind: lesson
+  slug: 10-repetition
+  title: Repetition, tiling, and polar space
+  read: 13
+  practice: 25
+  score: false
+  written: false
+- num: "11"
+  module: C
+  kind: lesson
+  slug: 11-antialiasing
+  title: Antialiasing a field with fwidth
+  read: 12
+  practice: 20
+  score: false
+  written: false
+- num: "P1"
+  module: C
+  kind: milestone
+  slug: p1-poster
+  title: "Make it work: a poster from one shader"
+  read: 12
+  practice: 60
+  score: false
+  written: false
+
+# Module D: Noise and randomness
+- num: "12"
+  module: D
+  kind: lesson
+  slug: 12-hashes
+  title: Deterministic randomness without a texture
+  read: 13
+  practice: 25
+  score: false
+  written: false
+- num: "13"
+  module: D
+  kind: lesson
+  slug: 13-noise
+  title: Value noise, gradient noise, and how to read them
+  read: 14
+  practice: 30
+  score: false
+  written: false
+- num: "14"
+  module: D
+  kind: lesson
+  slug: 14-fbm
+  title: "Fractal Brownian motion: octaves, lacunarity, gain"
+  read: 13
+  practice: 25
+  score: false
+  written: false
+- num: "15"
+  module: D
+  kind: lesson
+  slug: 15-domain-warping
+  title: Domain warping, the technique that makes noise look like art
+  read: 13
+  practice: 30
+  score: false
+  written: false
+- num: "16"
+  module: D
+  kind: lesson
+  slug: 16-voronoi
+  title: Voronoi and cellular noise
+  read: 13
+  practice: 25
+  score: false
+  written: false
+- num: "P2"
+  module: D
+  kind: milestone
+  slug: p2-living-surface
+  title: "Make it work: a living surface that loops seamlessly"
+  read: 12
+  practice: 60
+  score: false
+  written: false
+
+# -- Phase 2 ---------------------------------------------------------------
+# Module E: Time, feedback, and state
+- num: "17"
+  module: E
+  kind: lesson
+  slug: 17-time
+  title: Time, phase, easing, and loops that actually loop
+  read: 13
+  practice: 25
+  score: false
+  written: false
+- num: "18"
+  module: E
+  kind: lesson
+  slug: 18-feedback
+  title: Feedback, persistent buffers, and multi-pass shaders
+  read: 14
+  practice: 30
+  score: false
+  written: false
+- num: "19"
+  module: E
+  kind: lesson
+  slug: 19-state-in-a-texture
+  title: Particles and simulation with state in a texture
+  read: 14
+  practice: 35
+  score: false
+  written: false
+
+# Module F: Images and processing
+- num: "20"
+  module: F
+  kind: lesson
+  slug: 20-sampling
+  title: Reading a texture, and the coordinate spaces that bite
+  read: 13
+  practice: 25
+  score: false
+  written: false
+- num: "21"
+  module: F
+  kind: lesson
+  slug: 21-convolution
+  title: Convolution, separable kernels, and a big blur that is cheap
+  read: 14
+  practice: 30
+  score: false
+  written: false
+- num: "22"
+  module: F
+  kind: lesson
+  slug: 22-grading
+  title: Colour grading, curves, and lookup tables
+  read: 13
+  practice: 25
+  score: false
+  written: false
+- num: "23"
+  module: F
+  kind: lesson
+  slug: 23-compositing
+  title: Blend modes, alpha, and compositing several layers
+  read: 13
+  practice: 25
+  score: false
+  written: false
+
+# Module G: Three dimensions in a fragment shader
+- num: "24"
+  module: G
+  kind: lesson
+  slug: 24-raymarching
+  title: "Raymarching: the sphere-traced loop"
+  read: 15
+  practice: 35
+  score: false
+  written: false
+- num: "25"
+  module: G
+  kind: lesson
+  slug: 25-fields-3d
+  title: Distance fields in three dimensions and their operators
+  read: 14
+  practice: 30
+  score: false
+  written: false
+- num: "26"
+  module: G
+  kind: lesson
+  slug: 26-lighting
+  title: Normals, lighting, and shadows from a field
+  read: 14
+  practice: 30
+  score: false
+  written: false
+- num: "27"
+  module: G
+  kind: lesson
+  slug: 27-materials-and-fog
+  title: Materials, fog, occlusion, and knowing when to stop
+  read: 14
+  practice: 30
+  score: false
+  written: false
+- num: "P3"
+  module: G
+  kind: milestone
+  slug: p3-raymarched-scene
+  title: "Make it work: a raymarched scene that runs at frame rate"
+  read: 13
+  practice: 75
+  score: false
+  written: false
+
+# -- Phase 3 ---------------------------------------------------------------
+# Module H: Formats and stages
+- num: "28"
+  module: H
+  kind: lesson
+  slug: 28-the-pipeline
+  title: What a shader program actually is
+  read: 14
+  practice: 15
+  score: false
+  written: false
+- num: "29"
+  module: H
+  kind: lesson
+  slug: 29-isf
+  title: The Interactive Shader Format in full
+  read: 15
+  practice: 30
+  score: true
+  written: false
+- num: "30"
+  module: H
+  kind: lesson
+  slug: 30-porting
+  title: "Porting: Shadertoy, glslsandbox, KodeLife, and ISF"
+  read: 14
+  practice: 35
+  score: true
+  written: false
+- num: "31"
+  module: H
+  kind: lesson
+  slug: 31-vertex-shaders
+  title: Vertex shaders, and Vertex Shader Art
+  read: 14
+  practice: 30
+  score: true
+  written: false
+- num: "32"
+  module: H
+  kind: lesson
+  slug: 32-compute-shaders
+  title: "Compute shaders: workgroups, images, and buffers"
+  read: 15
+  practice: 35
+  score: true
+  written: false
+- num: "33"
+  module: H
+  kind: lesson
+  slug: 33-beyond-glsl
+  title: Beyond GLSL, and what portability actually costs
+  read: 13
+  practice: 15
+  score: false
+  written: false
+
+# Module I: What a shader costs
+- num: "34"
+  module: I
+  kind: lesson
+  slug: 34-cost
+  title: Reading the cost of a shader, and paying less
+  read: 14
+  practice: 30
+  score: false
+  written: false
+
+# -- Phase 4 ---------------------------------------------------------------
+# Module J: Shaders in ossia score
+- num: "35"
+  module: J
+  kind: lesson
+  slug: 35-score-pipeline
+  title: The score graphics pipeline, end to end
+  read: 13
+  practice: 25
+  score: true
+  written: false
+- num: "36"
+  module: J
+  kind: lesson
+  slug: 36-live-coding
+  title: Loading, editing, and live-coding a shader in score
+  read: 13
+  practice: 30
+  score: true
+  written: false
+- num: "37"
+  module: J
+  kind: lesson
+  slug: 37-parameters-as-inlets
+  title: Parameters as inlets, and driving them from anything
+  read: 14
+  practice: 35
+  score: true
+  written: false
+- num: "38"
+  module: J
+  kind: lesson
+  slug: 38-chaining
+  title: Chaining generators, filters, and mixers
+  read: 13
+  practice: 30
+  score: true
+  written: false
+- num: "39"
+  module: J
+  kind: lesson
+  slug: 39-video-input
+  title: Video, camera, and images into a shader
+  read: 13
+  practice: 30
+  score: true
+  written: false
+- num: "40"
+  module: J
+  kind: lesson
+  slug: 40-audio-reactive
+  title: Audio-reactive shaders, done properly
+  read: 14
+  practice: 35
+  score: true
+  written: false
+- num: "41"
+  module: J
+  kind: lesson
+  slug: 41-geometry-and-compute
+  title: Compute, vertex, and 3D scenes inside score
+  read: 14
+  practice: 35
+  score: true
+  written: false
+- num: "P4"
+  module: J
+  kind: milestone
+  slug: p4-visual-instrument
+  title: "Make it work: a playable visual instrument"
+  read: 14
+  practice: 90
+  score: true
+  written: false
+
+# Module K: Capstone
+- num: "42"
+  module: K
+  kind: capstone
+  slug: 42-capstone
+  title: "Capstone: one finished, documented piece"
+  read: 14
+  practice: 180
+  score: true
+  written: false

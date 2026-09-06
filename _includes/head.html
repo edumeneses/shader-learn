@@ -1,0 +1,56 @@
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+
+  {% if site.noindex %}
+    {% comment %}
+      Keeps the course out of search engines while it is a draft. A robots.txt
+      cannot do this job for a project site: crawlers read robots.txt only at
+      the domain root, which belongs to the user-site repository rather than to
+      this one, so the policy has to travel on every page.
+    {% endcomment %}
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="googlebot" content="noindex, nofollow">
+  {% endif %}
+
+  {% unless site.plugins contains "jekyll-seo-tag" %}
+    <title>{{ page.title }} - {{ site.title }}</title>
+
+    {% if page.description %}
+      <meta name="Description" content="{{ page.description }}">
+    {% endif %}
+  {% endunless %}
+
+  <link rel="shortcut icon" href="{{ 'favicon.png' | relative_url }}" type="image/png">
+
+  <link rel="stylesheet" href="{{ '/assets/css/just-the-docs-default.css' | relative_url }}">
+
+  {% comment %}
+    Inter for prose and JetBrains Mono for code. The course is largely code
+    read on a screen, and a monospace with a distinguishable 1/l/I and 0/O is
+    not decoration here: a lesson can turn on whether a reader sees `iq` or
+    `1q` in a palette constant.
+  {% endcomment %}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+
+  {% if site.search_enabled != false %}
+    <script type="text/javascript" src="{{ '/assets/js/vendor/lunr.min.js' | relative_url }}"></script>
+  {% endif %}
+  <script type="text/javascript" src="{{ '/assets/js/just-the-docs.js' | relative_url }}"></script>
+
+  {% comment %}
+    The live player. Deferred, and it does nothing at all until a
+    <shader-player> element is on the page, so a page without a shader on it
+    pays only for the request.
+  {% endcomment %}
+  <script defer src="{{ '/assets/js/shader-player.js' | relative_url }}"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {% seo %}
+
+  {% include head_custom.html %}
+
+</head>
