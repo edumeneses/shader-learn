@@ -79,6 +79,36 @@ if else in out inout float int void bool true false invariant discard return
 mat2 mat3 mat4 vec2 vec3 vec4 ivec2 ivec3 ivec4 bvec2 bvec3 bvec4 uint uvec2
 uvec3 uvec4 lowp mediump highp precision struct sampler2D sampler3D samplerCube
 """.split())
+
+# Built-in function names. Declaring a uniform called `round` or `mix` is a
+# redefinition, not a shadowing, and glslang says so; the NVIDIA driver accepts
+# several of them, which is how `round` reached CI in the first place. Kept in a
+# separate set so the message can say "built-in" rather than "reserved word",
+# which is the difference between a reader renaming the input and a reader
+# wondering what is reserved about `round`.
+GLSL_BUILTINS = frozenset("""
+radians degrees sin cos tan asin acos atan sinh cosh tanh asinh acosh atanh
+pow exp log exp2 log2 sqrt inversesqrt abs sign floor trunc round roundEven
+ceil fract mod modf min max clamp mix step smoothstep isnan isinf
+floatBitsToInt floatBitsToUint intBitsToFloat uintBitsToFloat
+length distance dot cross normalize faceforward reflect refract
+matrixCompMult outerProduct transpose determinant inverse
+lessThan lessThanEqual greaterThan greaterThanEqual equal notEqual any all not
+textureSize texture textureProj textureLod textureOffset texelFetch
+texelFetchOffset textureProjOffset textureLodOffset textureProjLod
+textureProjLodOffset textureGrad textureGradOffset textureProjGrad
+textureProjGradOffset dFdx dFdy fwidth
+packSnorm2x16 unpackSnorm2x16 packUnorm2x16 unpackUnorm2x16
+packHalf2x16 unpackHalf2x16
+""".split())
+
+# Names the ISF preamble already declares. An input with one of these silently
+# replaces the host's own uniform, which is worse than a compile error: the
+# shader builds and TIME stops advancing.
+ISF_SUPPLIED = frozenset(
+    "RENDERSIZE TIME TIMEDELTA DATE FRAMEINDEX PASSINDEX "
+    "isf_FragNormCoord isf_FragCoord isf_FragColor isf_position isf_texel".split()
+)
 IMAGE_TYPES = {"image", "audio", "audioFFT"}
 
 
@@ -222,6 +252,17 @@ def parse(source: str, path: Path | None = None) -> ISFShader:
             raise ISFError(
                 f"input {name!r} in {path or '<string>'} is a GLSL reserved word, "
                 f"so the uniform it becomes will not compile. Rename it."
+            )
+        if name in GLSL_BUILTINS:
+            raise ISFError(
+                f"input {name!r} in {path or '<string>'} is a GLSL built-in "
+                f"function, so declaring a uniform with that name is a "
+                f"redefinition. Rename it."
+            )
+        if name in ISF_SUPPLIED:
+            raise ISFError(
+                f"input {name!r} in {path or '<string>'} is supplied by ISF "
+                f"itself; declaring it would shadow the host's own uniform."
             )
         if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
             raise ISFError(

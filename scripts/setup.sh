@@ -20,6 +20,25 @@ fi
 .venv/bin/python -m pip install --upgrade pip
 .venv/bin/python -m pip install moderngl numpy Pillow PyOpenGL
 
+# glslang, the reference GLSL front end. It is stricter than the NVIDIA driver
+# the figures are rendered on, and CI runs it, so having it locally is the
+# difference between finding a portability bug now and finding it in a failed
+# build. The Debian package needs root; the Khronos release does not, so it goes
+# in the venv alongside everything else.
+GLSLANG_VERSION="16.5.0"
+if ! command -v glslangValidator >/dev/null && [ ! -x .venv/bin/glslangValidator ]; then
+  echo
+  echo "Fetching glslang $GLSLANG_VERSION:"
+  mkdir -p .venv/opt
+  if curl -sSLf "https://github.com/KhronosGroup/glslang/releases/download/${GLSLANG_VERSION}/glslang-${GLSLANG_VERSION}-linux-x86_64-release.tar.gz" \
+      | tar xz -C .venv/opt; then
+    ln -sf "$PWD/.venv/opt/bin/glslangValidator" .venv/bin/glslangValidator
+    echo "  ok"
+  else
+    echo "  could not fetch it; scripts/validate_glsl.py will skip and CI will not."
+  fi
+fi
+
 echo
 echo "Checking the GPU path:"
 .venv/bin/python - <<'PY'

@@ -23,7 +23,7 @@
     { "NAME": "origin", "TYPE": "point2D", "LABEL": "Origin", "DEFAULT": [0.5, 0.5], "MIN": [0.0, 0.0], "MAX": [1.0, 1.0] },
     { "NAME": "handle", "TYPE": "point2D", "LABEL": "Handle", "DEFAULT": [0.72, 0.66], "MIN": [0.0, 0.0], "MAX": [1.0, 1.0] },
     { "NAME": "size",   "TYPE": "float",   "LABEL": "Size",   "DEFAULT": 0.26, "MIN": 0.02, "MAX": 0.60 },
-    { "NAME": "round",  "TYPE": "float",   "LABEL": "Round",  "DEFAULT": 0.06, "MIN": 0.00, "MAX": 0.30 },
+    { "NAME": "corner", "TYPE": "float",   "LABEL": "Round",  "DEFAULT": 0.06, "MIN": 0.00, "MAX": 0.30 },
     { "NAME": "rings",  "TYPE": "float",   "LABEL": "Isolines", "DEFAULT": 90.0, "MIN": 0.0, "MAX": 300.0 },
     { "NAME": "warm",   "TYPE": "color",   "LABEL": "Outside", "DEFAULT": [0.95, 0.62, 0.28, 1.0] },
     { "NAME": "cool",   "TYPE": "color",   "LABEL": "Inside",  "DEFAULT": [0.30, 0.72, 0.95, 1.0] }
@@ -88,8 +88,8 @@ float sdHexagon(vec2 p, float r) {
 float scene(vec2 p, vec2 a, vec2 b) {
     if (shape == 0) return sdCircle(p - a, size);
     if (shape == 1) return sdBox(p - a, vec2(size, size * 0.66));
-    if (shape == 2) return sdRoundedBox(p - a, vec2(size, size * 0.66), min(round, size * 0.65));
-    if (shape == 3) return sdSegment(p, a, b, max(round, 0.01));
+    if (shape == 2) return sdRoundedBox(p - a, vec2(size, size * 0.66), min(corner, size * 0.65));
+    if (shape == 3) return sdSegment(p, a, b, max(corner, 0.01));
     if (shape == 4) return sdEquilateralTriangle(p - a, size);
     return sdHexagon(p - a, size);
 }

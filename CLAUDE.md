@@ -119,10 +119,14 @@ manifest instead.
 - **`#version 300 es` compiles on desktop NVIDIA** through `ARB_ES3_compatibility`,
   which is what makes browser-and-renderer parity possible. Confirmed on driver
   580.173.02, GL 4.6.
-- **glslang is stricter than the NVIDIA driver.** A missing precision qualifier
-  or an implicit int-to-float conversion passes locally and fails in CI and in
-  Firefox. Run `validate_glsl.py` before pushing. It is not installed here; CI
-  installs `glslang-tools`, and `sudo apt install glslang-tools` gets it locally.
+- **glslang is stricter than the NVIDIA driver, and this has bitten twice.**
+  `flat` and `sample` are reserved words and `round` is a built-in; the driver
+  here compiled all three as ISF input names and glslang rejected them, which
+  would have reached a reader as a blank player. `scripts/isf.py` now refuses
+  reserved words, built-in function names, and the names ISF itself supplies, at
+  parse time and by name. **Run `validate_glsl.py` before pushing anyway**;
+  `scripts/setup.sh` fetches glslang into `.venv/bin`, so it is available without
+  root.
 - **OpenGL reads pixels bottom-up.** `render.py` flips before encoding. A figure
   that comes out mirrored vertically is that flip, not the shader.
 - **NVENC is used for mp4 and CPU libvpx for webm.** If NVENC sessions are
