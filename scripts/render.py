@@ -254,10 +254,13 @@ class Renderer:
                  supersample: int = 1) -> None:
         self.shader_path = shader_path
         self.shader = isf.load(shader_path)
+        # A compute shader has no fragment stage, so it takes a different path
+        # entirely: see ComputeRenderer below. The fragment machinery in this
+        # class does not apply to it at all.
         if self.shader.is_compute:
             raise SystemExit(
-                f"{shader_path} is a compute shader. Render it with "
-                f"scripts/render_compute.py, which dispatches instead of drawing."
+                f"{shader_path} is a compute shader; Renderer does not handle it. "
+                f"This is a bug in the caller: run() dispatches to ComputeRenderer."
             )
         self.compiled = isf.compile_shader(self.shader, name=shader_path.stem)
         self.width = width * supersample
@@ -277,8 +280,30 @@ class Renderer:
         except Exception as exc:
             raise SystemExit(_shader_error(shader_path, self.compiled, exc)) from exc
 
-        vbo = self.ctx.buffer(FULLSCREEN_TRIANGLE.tobytes())
-        self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f", "isf_position")])
+        self.is_vsa = self.shader.is_vsa
+        if self.is_vsa:
+            # One float per point, holding nothing but its own index. The shader
+            # decides where the point goes from that number alone: there is no
+            # mesh, no positions buffer, and nothing to load.
+            count = self.shader.point_count
+            ids = np.arange(count, dtype="f4")
+            vbo = self.ctx.buffer(ids.tobytes())
+            self.vao = self.ctx.vertex_array(self.program, [(vbo, "1f", "vertexId")])
+            self.point_count = count
+            self.primitive = {
+                "POINTS": moderngl.POINTS,
+                "LINES": moderngl.LINES,
+                "LINE_STRIP": moderngl.LINE_STRIP,
+                "LINE_LOOP": moderngl.LINE_STRIP,
+                "TRIANGLES": moderngl.TRIANGLES,
+                "TRIANGLE_STRIP": moderngl.TRIANGLE_STRIP,
+                "TRIANGLE_FAN": moderngl.TRIANGLE_FAN,
+            }.get(self.shader.primitive, moderngl.POINTS)
+        else:
+            vbo = self.ctx.buffer(FULLSCREEN_TRIANGLE.tobytes())
+            self.vao = self.ctx.vertex_array(self.program, [(vbo, "2f", "isf_position")])
+            self.point_count = 3
+            self.primitive = moderngl.TRIANGLES
 
         self.targets: dict[str, Target] = {}
         sizes: dict[str, tuple[int, int]] = {}
@@ -387,6 +412,18 @@ class Renderer:
         self._set("FRAMEINDEX", int(frame_index))
         self._set("DATE", [2026.0, 1.0, 1.0, float(time_s)])
 
+        if self.is_vsa:
+            # vertexshaderart.com's names. ossia score supplies both sets, so a
+            # shader written for either site runs unmodified.
+            self._set("vertexCount", float(self.point_count))
+            self._set("time", float(time_s))
+            self._set("resolution", [float(self.width), float(self.height)])
+            self._set("volume", 0.35)
+            self._set("background", self.shader.background)
+            self._set("soundRes", [256.0, 1.0])
+            pointer = values.get("pointer") or values.get("focus") or [0.5, 0.5]
+            self._set("mouse", [float(pointer[0]), float(pointer[1])])
+
         passes = self.shader.passes
         for index, p in enumerate(passes):
             self._set("PASSINDEX", index)
@@ -407,8 +444,20 @@ class Renderer:
                 fbo = self.screen_fbo
                 self._set("RENDERSIZE", [float(self.width), float(self.height)])
             fbo.use()
-            self.ctx.clear(0.0, 0.0, 0.0, 0.0)
-            self.vao.render(moderngl.TRIANGLES)
+            if self.is_vsa:
+                bg = self.shader.background
+                self.ctx.clear(bg[0], bg[1], bg[2], bg[3] if len(bg) > 3 else 1.0)
+                # Additive blending, which is what VSA shaders assume: tens of
+                # thousands of points overlap, and where they pile up the image
+                # should get brighter rather than the last one winning.
+                self.ctx.enable(moderngl.BLEND)
+                self.ctx.blend_func = moderngl.ONE, moderngl.ONE
+                self.ctx.enable(moderngl.PROGRAM_POINT_SIZE)
+            else:
+                self.ctx.clear(0.0, 0.0, 0.0, 0.0)
+            self.vao.render(self.primitive, vertices=self.point_count)
+            if self.is_vsa:
+                self.ctx.disable(moderngl.BLEND)
 
             # A persistent target swaps immediately after the pass that wrote
             # it, not at the end of the frame. Two consequences, both wanted:
@@ -456,6 +505,131 @@ class Renderer:
             tex.filter = (moderngl.LINEAR, moderngl.LINEAR)
             self.audio_tex[name] = tex
         tex.write(rgba.tobytes())
+
+
+class ComputeRenderer:
+    """Dispatch an ossia score compute shader and read its output image.
+
+    A compute shader is not a drawing operation. There is no vertex stage, no
+    rasteriser, and no fragment stage; there is a grid of invocations and some
+    images they may read and write. Rendering one therefore means creating its
+    declared images, binding them, dispatching a workgroup grid, waiting for the
+    writes to land, and reading the output back.
+
+    Desktop GLSL 4.30 rather than ES 3.00, because GLSL ES has no compute stage
+    at all. That is the same reason the browser player cannot run these: WebGL 2
+    is ES 3.0, and it says so on the page rather than failing silently.
+    """
+
+    def __init__(self, shader_path: Path, width: int, height: int) -> None:
+        self.shader_path = shader_path
+        self.shader = isf.load(shader_path)
+        self.width = width
+        self.height = height
+        self.ctx = moderngl.create_context(standalone=True, backend="egl", require=460)
+        self.renderer_name = self.ctx.info.get("GL_RENDERER", "unknown")
+
+        source = isf.compute_source(self.shader)
+        try:
+            self.program = self.ctx.compute_shader(source)
+        except Exception as exc:
+            numbered = "\n".join(
+                f"{i + 1:4d} | {line}" for i, line in enumerate(source.splitlines())
+            )
+            raise SystemExit(
+                f"{shader_path}: compute shader did not compile\n\n{exc}\n\n"
+                f"--- generated compute source ---\n{numbered}"
+            ) from exc
+
+        self.images: dict[str, Any] = {}
+        self.output_name: str | None = None
+
+    def _format_for(self, fmt: str | None) -> tuple[int, str]:
+        return {
+            "RGBA8": (4, "f1"),
+            "R8": (1, "f1"),
+            "RGBA16F": (4, "f2"),
+            "RGBA32F": (4, "f4"),
+            "R32F": (1, "f4"),
+            "RG32F": (2, "f4"),
+        }.get(str(fmt or "RGBA8").upper(), (4, "f1"))
+
+    def prepare(self, sources: dict[str, Path]) -> None:
+        """Create every declared image, filling inputs from files."""
+        from PIL import Image
+
+        sizes: dict[str, tuple[int, int]] = {}
+        for inp in self.shader.inputs:
+            if inp.type.lower() != "image":
+                continue
+            components, dtype = self._format_for(inp.image_format)
+            access = (inp.access or "").lower()
+
+            if access in ("read_only", "readonly") and inp.name in sources:
+                image = Image.open(sources[inp.name]).convert("RGBA")
+                image = image.resize((self.width, self.height), Image.LANCZOS)
+                tex = self.ctx.texture(image.size, 4, image.tobytes(), dtype="f1")
+                sizes[inp.name] = image.size
+            else:
+                w = isf.eval_size(inp.width_expr, self.width, self.height, sizes)
+                h = isf.eval_size(inp.height_expr, self.width, self.height, sizes)
+                tex = self.ctx.texture((w, h), components, dtype=dtype)
+                sizes[inp.name] = (w, h)
+                self.output_name = inp.name
+            self.images[inp.name] = tex
+
+        if self.output_name is None:
+            raise SystemExit(
+                f"{self.shader_path}: no writable image in RESOURCES, so there is "
+                f"nothing to read back."
+            )
+
+    def dispatch(self, values: dict[str, Any]) -> None:
+        for name, value in values.items():
+            member = self.program.get(name, None)
+            if member is None:
+                continue
+            try:
+                member.value = tuple(value) if isinstance(value, (list, tuple)) else value
+            except Exception:
+                pass
+
+        binding = 0
+        for inp in self.shader.inputs:
+            if inp.type.lower() not in ("image", "texture"):
+                continue
+            self.images[inp.name].bind_to_image(binding, read=True, write=True)
+            binding += 1
+
+        # The workgroup grid. 2D_IMAGE means "enough workgroups to cover this
+        # image", which is a ceiling division, and getting it wrong by rounding
+        # down leaves a strip of the image never written at all.
+        model = self.shader.passes[0].execution_model or {}
+        local = self.shader.passes[0].local_size or [16, 16, 1]
+        if str(model.get("TYPE", "")).upper() == "2D_IMAGE":
+            target = self.images[model.get("TARGET", self.output_name)]
+            groups = (
+                (target.width + local[0] - 1) // local[0],
+                (target.height + local[1] - 1) // local[1],
+                1,
+            )
+        else:
+            groups = tuple(model.get("WORKGROUPS", [1, 1, 1]))
+
+        self.program.run(*groups)
+        # Without the barrier the read below can outrun the writes, and the
+        # symptom is an image that is partly the previous frame.
+        self.ctx.memory_barrier()
+
+    def read(self) -> bytes:
+        tex = self.images[self.output_name]
+        data = tex.read()
+        arr = np.frombuffer(data, dtype=np.uint8).reshape(tex.height, tex.width, -1)
+        if arr.shape[2] == 4:
+            return arr.tobytes()
+        rgb = np.repeat(arr[:, :, :1], 3, axis=2)
+        alpha = np.full((tex.height, tex.width, 1), 255, dtype=np.uint8)
+        return np.concatenate([rgb, alpha], axis=2).tobytes()
 
 
 def _flip_rows(data: bytes, width: int, height: int) -> bytes:
@@ -624,7 +798,29 @@ def defaults_for(shader: isf.ISFShader) -> dict[str, Any]:
 TESTCARD = ROOT / "docs" / "learn" / "assets" / "images" / "testcard.png"
 
 
+def run_compute(job: Job) -> list[Path]:
+    renderer = ComputeRenderer(job.shader, job.size[0], job.size[1])
+    print(f"GPU: {renderer.renderer_name}  (compute)")
+
+    sources = {}
+    for inp in renderer.shader.inputs:
+        if inp.type.lower() == "image" and (inp.access or "").lower() in ("read_only", "readonly"):
+            sources[inp.name] = job.images.get(inp.name, TESTCARD)
+
+    renderer.prepare(sources)
+    values = defaults_for(renderer.shader)
+    values.update(job.values)
+    renderer.dispatch(values)
+
+    png = job.out.with_suffix(".png")
+    write_png(renderer.read(), png, job.size[0], job.size[1])
+    return [png]
+
+
 def run(job: Job) -> list[Path]:
+    if isf.load(job.shader).is_compute:
+        return run_compute(job)
+
     renderer = Renderer(job.shader, job.size[0], job.size[1], job.supersample)
     print(f"GPU: {renderer.renderer_name}")
 

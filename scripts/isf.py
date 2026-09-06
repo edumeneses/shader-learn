@@ -127,6 +127,11 @@ class ISFInput:
     values: list[Any] = field(default_factory=list)
     labels: list[str] = field(default_factory=list)
     identity: Any = None
+    # Compute-only, from ossia score's RESOURCES block.
+    image_format: str | None = None
+    access: str | None = None
+    width_expr: str | None = None
+    height_expr: str | None = None
 
     @property
     def is_image(self) -> bool:
@@ -199,6 +204,30 @@ class ISFShader:
     @property
     def is_compute(self) -> bool:
         return self.mode == "COMPUTE_SHADER"
+
+    @property
+    def is_vsa(self) -> bool:
+        """A Vertex Shader Art shader, in ossia score's spelling.
+
+        VSA inverts ISF: the shader is a vertex shader that decides where each
+        of many points lands and what colour it is, and the fragment stage is
+        fixed. It is the only way a fragment-based pipeline can scatter, which
+        is what Unit 19 said a particle system needs.
+        """
+        return self.mode in ("VERTEX_SHADER_ART", "VERTEX_SHADER")
+
+    @property
+    def point_count(self) -> int:
+        return int(self.header.get("POINT_COUNT", 10000))
+
+    @property
+    def primitive(self) -> str:
+        return str(self.header.get("PRIMITIVE_MODE", "POINTS")).upper()
+
+    @property
+    def background(self) -> list[float]:
+        bg = self.header.get("BACKGROUND_COLOR") or [0.0, 0.0, 0.0, 1.0]
+        return [float(v) for v in bg]
 
     @property
     def description(self) -> str:
@@ -283,6 +312,10 @@ def parse(source: str, path: Path | None = None) -> ISFShader:
                 values=list(entry.get("VALUES", []) or []),
                 labels=[str(x) for x in entry.get("LABELS", []) or []],
                 identity=entry.get("IDENTITY"),
+                image_format=entry.get("FORMAT"),
+                access=entry.get("ACCESS"),
+                width_expr=str(entry["WIDTH"]) if "WIDTH" in entry else None,
+                height_expr=str(entry["HEIGHT"]) if "HEIGHT" in entry else None,
             )
         )
 
@@ -398,6 +431,111 @@ ATTRIBUTE = re.compile(r"^(\s*)attribute\b", re.M)
 DEFAULT_VERTEX_BODY = """
 void main() {
     isf_vertShaderInit();
+}
+"""
+
+# ossia score's compute variant. It is not ISF with a different stage: a
+# compute shader has no predefined input or output at all, so the RESOURCES
+# block declares every image, texture, and buffer the shader touches, and the
+# PASSES block says how many invocations to launch. GLSL ES has no compute
+# stage, so this one target is desktop GLSL 4.30 rather than ES 3.00; that is
+# also why the browser player cannot run these and says so.
+COMPUTE_PREAMBLE = """#version 430
+
+layout(local_size_x = {lx}, local_size_y = {ly}, local_size_z = {lz}) in;
+"""
+
+IMAGE_FORMATS = {
+    "RGBA8": "rgba8",
+    "RGBA16F": "rgba16f",
+    "RGBA32F": "rgba32f",
+    "R32F": "r32f",
+    "RG32F": "rg32f",
+    "R8": "r8",
+}
+
+
+def compute_source(shader: "ISFShader", pass_index: int = 0) -> str:
+    """Assemble the GLSL a compute pass actually compiles as."""
+    p = shader.passes[pass_index]
+    local = p.local_size or [16, 16, 1]
+    lines = [COMPUTE_PREAMBLE.format(lx=local[0], ly=local[1], lz=local[2] if len(local) > 2 else 1)]
+
+    binding = 0
+    for inp in shader.inputs:
+        # ossia score writes compute resource types in upper case, "IMAGE" and
+        # "TEXTURE", while classic ISF input types are lower case. Both
+        # spellings appear in real files, so neither is normalised at parse
+        # time and the comparison is folded here instead.
+        kind = inp.type.lower()
+        if kind == "image":
+            fmt = IMAGE_FORMATS.get(str(inp.image_format or "RGBA8").upper(), "rgba8")
+            access = (inp.access or "readonly").lower()
+            qualifier = {"read_only": "readonly", "write_only": "writeonly",
+                         "read_write": "", "readonly": "readonly",
+                         "writeonly": "writeonly"}.get(access, "")
+            lines.append(
+                f"layout(binding = {binding}, {fmt}) uniform {qualifier} image2D {inp.name};".replace("  ", " ")
+            )
+            binding += 1
+        elif kind == "texture":
+            lines.append(f"layout(binding = {binding}) uniform sampler2D {inp.name};")
+            binding += 1
+        else:
+            glsl_type = GLSL_TYPE.get(inp.type) or GLSL_TYPE.get(kind)
+            if glsl_type is None:
+                raise ISFError(f"unsupported compute resource type {inp.type!r}")
+            lines.append(f"uniform {glsl_type} {inp.name};")
+
+    lines.append("")
+    lines.append(_sanitise_body(shader.body))
+    return "\n".join(lines)
+
+
+# The Vertex Shader Art preamble. The names come from vertexshaderart.com and
+# ossia score reproduces them, so a shader written for either runs here
+# unmodified. `vertexId` is the only per-vertex input: a shader is handed a
+# number and has to decide, from that number alone, where the point goes. There
+# is no mesh and no buffer of positions.
+VSA_VERTEX_PREAMBLE = """#version 300 es
+precision highp float;
+precision highp int;
+
+in float vertexId;
+
+uniform float vertexCount;
+uniform float time;
+uniform vec2 resolution;
+uniform vec2 mouse;
+uniform float volume;
+uniform vec4 background;
+uniform sampler2D sound;
+uniform sampler2D floatSound;
+uniform vec2 soundRes;
+
+// ISF's own names, so a shader can use either vocabulary. ossia score supplies
+// both and a reader porting from vertexshaderart.com should not have to choose.
+uniform vec2 RENDERSIZE;
+uniform float TIME;
+uniform float TIMEDELTA;
+uniform vec4 DATE;
+uniform int FRAMEINDEX;
+uniform int PASSINDEX;
+
+out vec4 v_color;
+"""
+
+# The fragment stage a VSA shader does not write. It exists only to hand the
+# interpolated colour through, which is why the format can call itself a vertex
+# shader format at all.
+VSA_FRAGMENT = """#version 300 es
+precision highp float;
+
+in vec4 v_color;
+out vec4 isf_FragColor;
+
+void main() {
+    isf_FragColor = v_color;
 }
 """
 
@@ -635,11 +773,34 @@ def compile_shader(shader: ISFShader, name: str = "") -> CompiledShader:
     source, only this. That is deliberate, and it is the reason the live
     player and the recorded figure cannot drift apart.
     """
+    if shader.is_vsa:
+        imgs = image_names(shader)
+        body = _vertex_legacy_fixups(shader.body)
+        body = _expand_img_calls(body, imgs)
+        vertex = "\n".join((
+            VSA_VERTEX_PREAMBLE,
+            _uniform_declarations(shader),
+            IMG_ACCESSORS,
+            _img_macros(shader),
+            body,
+        ))
+        manifest = _manifest(shader, name, vertex=vertex, fragment=VSA_FRAGMENT,
+                             compute=False)
+        manifest["mode"] = "vertex"
+        manifest["pointCount"] = shader.point_count
+        manifest["primitive"] = shader.primitive
+        manifest["background"] = shader.background
+        return CompiledShader(vertex=vertex, fragment=VSA_FRAGMENT,
+                              manifest=manifest, shader=shader)
+
     if shader.is_compute:
         # A compute shader has no fragment stage to translate. It is reported
         # so the caller can route it to the offline renderer and so the page
         # can say why there is no live player.
         manifest = _manifest(shader, name, vertex="", fragment="", compute=True)
+        manifest["compute"] = compute_source(shader)
+        manifest["localSize"] = shader.passes[0].local_size or [16, 16, 1]
+        manifest["executionModel"] = shader.passes[0].execution_model or {}
         return CompiledShader(vertex="", fragment="", manifest=manifest, shader=shader)
 
     imgs = image_names(shader)

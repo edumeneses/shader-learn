@@ -1,0 +1,11 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/32/histogram.fs",
+      "out": "docs/learn/assets/32/32-01",
+      "size": [900, 506],
+      "formats": ["png"],
+      "_note": "A compute shader, so render.py routes it to ComputeRenderer: no draw call, a workgroup grid instead. The size is the test card's aspect ratio; the input image defaults to docs/learn/assets/images/testcard.png."
+    }
+  ]
+}

@@ -376,10 +376,40 @@
       gl.bindVertexArray(vao);
       const buf = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-      const loc = gl.getAttribLocation(this._program, "isf_position");
-      gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+      this._isVSA = m.mode === "vertex";
+      if (this._isVSA) {
+        // One float per point, holding nothing but its own index. A vertex
+        // shader decides where each point lands from that number alone, which
+        // is how a GPU pipeline scatters: there is no mesh to load and nothing
+        // else in the buffer.
+        const count = m.pointCount || 10000;
+        const ids = new Float32Array(count);
+        for (let i = 0; i < count; i++) ids[i] = i;
+        gl.bufferData(gl.ARRAY_BUFFER, ids, gl.STATIC_DRAW);
+        const loc = gl.getAttribLocation(this._program, "vertexId");
+        gl.enableVertexAttribArray(loc);
+        gl.vertexAttribPointer(loc, 1, gl.FLOAT, false, 0, 0);
+        this._drawCount = count;
+        this._primitive = {
+          POINTS: gl.POINTS,
+          LINES: gl.LINES,
+          LINE_STRIP: gl.LINE_STRIP,
+          LINE_LOOP: gl.LINE_LOOP,
+          TRIANGLES: gl.TRIANGLES,
+          TRIANGLE_STRIP: gl.TRIANGLE_STRIP,
+          TRIANGLE_FAN: gl.TRIANGLE_FAN,
+        }[m.primitive] ?? gl.POINTS;
+        this._background = m.background || [0, 0, 0, 1];
+      } else {
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+        const loc = gl.getAttribLocation(this._program, "isf_position");
+        gl.enableVertexAttribArray(loc);
+        gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+        this._drawCount = 3;
+        this._primitive = gl.TRIANGLES;
+        this._background = [0, 0, 0, 1];
+      }
       gl.bindVertexArray(null);
       this._vao = vao;
 
@@ -973,6 +1003,18 @@
         this._setUniform(input.name, this._values[input.name]);
       }
       this._setUniform("TIME", this._time);
+      if (this._isVSA) {
+        // vertexshaderart.com's names, alongside ISF's. ossia score supplies
+        // both, so a shader written for either runs unmodified.
+        this._setUniform("vertexCount", this._drawCount);
+        this._setUniform("time", this._time);
+        this._setUniform("resolution", [canvas.width, canvas.height]);
+        this._setUniform("volume", 0.35);
+        this._setUniform("background", this._background);
+        this._setUniform("soundRes", [256, 1]);
+        const pt = this._pointerInput ? this._values[this._pointerInput] : [0.5, 0.5];
+        this._setUniform("mouse", pt || [0.5, 0.5]);
+      }
       this._setUniform("TIMEDELTA", dt);
       this._setUniform("FRAMEINDEX", this._frame);
       const now = new Date();
@@ -1021,9 +1063,19 @@
         }
         gl.viewport(0, 0, width, height);
         this._setUniform("RENDERSIZE", [width, height]);
-        gl.clearColor(0, 0, 0, 1);
+        const bg = this._background;
+        gl.clearColor(bg[0], bg[1], bg[2], bg.length > 3 ? bg[3] : 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        if (this._isVSA) {
+          // Additive blending, which VSA shaders assume: tens of thousands of
+          // points overlap, and where they pile up the image should brighten
+          // rather than the last one drawn winning. It is also why each point
+          // is written dim.
+          gl.enable(gl.BLEND);
+          gl.blendFunc(gl.ONE, gl.ONE);
+        }
+        gl.drawArrays(this._primitive, 0, this._drawCount);
+        if (this._isVSA) gl.disable(gl.BLEND);
 
         // A persistent target swaps immediately after the pass that wrote it,
         // not at the end of the frame. A later pass in the same frame then

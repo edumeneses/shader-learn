@@ -389,6 +389,63 @@
  {
   "categories": [
    "Course",
+   "Utility"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "One shader exercising every ISF input type and both pass features, so the header can be read against the panel it produces.",
+  "id": "29-every-input",
+  "inputs": 8,
+  "mode": "fragment",
+  "passes": 3,
+  "source": "library/shaders/29/every-input.fs",
+  "unit": "29"
+ },
+ {
+  "categories": [
+   "Course",
+   "Generator"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The plasma is the common Shadertoy idiom, not any one author's.",
+  "description": "A Shadertoy-shaped shader translated into ISF, with the original's uniform names kept as defines so the two versions can be compared line by line.",
+  "id": "30-ported",
+  "inputs": 6,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/30/ported.fs",
+  "unit": "30"
+ },
+ {
+  "categories": [
+   "Course",
+   "Geometry",
+   "Particles"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The format is the Vertex Shader Art spec, as ossia score implements it.",
+  "description": "Sixty thousand points, each deciding where it goes from nothing but its own index. A vertex shader can scatter, which is the thing Unit 19 said a fragment shader cannot do.",
+  "id": "31-lissajous",
+  "inputs": 11,
+  "mode": "vertex",
+  "passes": 1,
+  "source": "library/shaders/31/lissajous.fs",
+  "unit": "31"
+ },
+ {
+  "categories": [
+   "Course",
+   "Utility"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "A luminance histogram computed with atomics, which is the operation a fragment shader cannot perform: every invocation writes to a location it chooses rather than to the one it was given.",
+  "id": "32-histogram",
+  "inputs": 4,
+  "mode": "compute",
+  "passes": 1,
+  "source": "library/shaders/32/histogram.fs",
+  "unit": "32"
+ },
+ {
+  "categories": [
+   "Course",
    "Generator"
   ],
   "credit": "Eduardo Meneses, Learn shader art",

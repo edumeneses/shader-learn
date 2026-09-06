@@ -1,0 +1,65 @@
+{
+ "categories": [
+  "Course",
+  "Utility"
+ ],
+ "compute": "#version 430\n\nlayout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;\n\nlayout(binding = 0, rgba8) uniform readonly image2D inputImage;\nlayout(binding = 1, rgba8) uniform writeonly image2D outputImage;\nuniform float gain;\nuniform float overlay;\n\n\n\n// The whole point of this shader is the two lines with `atomicAdd` in them.\n//\n// A fragment shader writes exactly one texel: its own. It can read anywhere and\n// write nowhere else, which is why Unit 22's histogram had to sample a scanline\n// and call itself an approximation, and why Unit 19 could simulate a field but\n// not a particle system.\n//\n// A compute invocation writes wherever it likes. Two thousand invocations\n// wanting to increment the same counter is a data race, and `atomicAdd` is the\n// hardware's answer: the increment happens once per caller, in some order, with\n// none lost. That single guarantee is what compute buys.\n\nshared uint bins[64];\n\nvoid main() {\n    ivec2 coord = ivec2(gl_GlobalInvocationID.xy);\n    ivec2 size = imageSize(inputImage);\n\n    uint local = gl_LocalInvocationIndex;\n\n    // Clear this workgroup's shared bins. Shared memory is per workgroup and is\n    // uninitialised, so a shader that forgets this reads whatever the last\n    // workgroup left, which looks like a wildly unstable histogram.\n    if (local < 64u) {\n        bins[local] = 0u;\n    }\n    barrier();\n\n    vec4 texel = vec4(0.0);\n    if (coord.x < size.x && coord.y < size.y) {\n        texel = imageLoad(inputImage, coord);\n        float luma = dot(texel.rgb, vec3(0.2126, 0.7152, 0.0722));\n        uint bin = uint(clamp(luma, 0.0, 0.999) * 64.0);\n        // Scatter. This invocation decides which counter to touch.\n        atomicAdd(bins[bin], 1u);\n    }\n    barrier();\n\n    if (coord.x >= size.x || coord.y >= size.y) return;\n\n    // Draw each workgroup's own histogram *inside its own tile*.\n    //\n    // This is not a global histogram and it is not pretending to be one. A\n    // workgroup's shared memory is private to that workgroup, so one pass can\n    // only produce one histogram per group; combining them needs a second pass\n    // reducing through a buffer, which is a different unit's worth of material.\n    //\n    // Drawn this way it is honest and it is more informative than a global one\n    // would have been: the mosaic shows how the tonal distribution varies\n    // across the frame, and each tile is visibly the work of one workgroup.\n    vec2 tile = vec2(gl_LocalInvocationID.xy) / vec2(gl_WorkGroupSize.xy);\n    uint bin = uint(clamp(tile.x, 0.0, 0.999) * 64.0);\n    float groupPixels = float(gl_WorkGroupSize.x * gl_WorkGroupSize.y);\n    float height = clamp(float(bins[bin]) / groupPixels * 64.0 * gain, 0.0, 1.0);\n\n    // Row 0 is the top of the image, so the bar grows downward unless the\n    // comparison is inverted. Getting this backwards is the compute equivalent\n    // of Unit 20's Y flip.\n    float fromBottom = 1.0 - tile.y;\n    vec3 bar = fromBottom < height ? vec3(0.90, 0.94, 1.00) : vec3(0.03, 0.04, 0.06);\n\n    vec3 colour = mix(texel.rgb, bar, overlay);\n\n    imageStore(outputImage, coord, vec4(colour, 1.0));\n}\n",
+ "credit": "Eduardo Meneses, Learn shader art",
+ "description": "A luminance histogram computed with atomics, which is the operation a fragment shader cannot perform: every invocation writes to a location it chooses rather than to the one it was given.",
+ "executionModel": {
+  "TARGET": "outputImage",
+  "TYPE": "2D_IMAGE"
+ },
+ "fragment": "",
+ "id": "32-histogram",
+ "imported": {},
+ "inputs": [
+  {
+   "name": "inputImage",
+   "type": "IMAGE"
+  },
+  {
+   "name": "outputImage",
+   "type": "IMAGE"
+  },
+  {
+   "default": 1.0,
+   "label": "Histogram gain",
+   "max": 8.0,
+   "min": 0.1,
+   "name": "gain",
+   "type": "float"
+  },
+  {
+   "default": 0.55,
+   "label": "Overlay amount",
+   "max": 1.0,
+   "min": 0.0,
+   "name": "overlay",
+   "type": "float"
+  }
+ ],
+ "localSize": [
+  16,
+  16,
+  1
+ ],
+ "mode": "compute",
+ "name": "32-histogram",
+ "passes": [
+  {
+   "executionModel": {
+    "TARGET": "outputImage",
+    "TYPE": "2D_IMAGE"
+   },
+   "localSize": [
+    16,
+    16,
+    1
+   ]
+  }
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"A luminance histogram computed with atomics, which is the operation a fragment shader cannot perform: every invocation writes to a location it chooses rather than to the one it was given.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art\",\n  \"ISFVSN\": \"2.0\",\n  \"MODE\": \"COMPUTE_SHADER\",\n  \"CATEGORIES\": [\"Course\", \"Utility\"],\n  \"RESOURCES\": [\n    {\n      \"NAME\": \"inputImage\",\n      \"TYPE\": \"IMAGE\",\n      \"ACCESS\": \"read_only\",\n      \"FORMAT\": \"RGBA8\"\n    },\n    {\n      \"NAME\": \"outputImage\",\n      \"TYPE\": \"IMAGE\",\n      \"ACCESS\": \"write_only\",\n      \"FORMAT\": \"RGBA8\",\n      \"WIDTH\": \"$WIDTH_inputImage\",\n      \"HEIGHT\": \"$HEIGHT_inputImage\"\n    },\n    {\n      \"NAME\": \"gain\",\n      \"TYPE\": \"float\",\n      \"LABEL\": \"Histogram gain\",\n      \"DEFAULT\": 1.0,\n      \"MIN\": 0.1,\n      \"MAX\": 8.0\n    },\n    {\n      \"NAME\": \"overlay\",\n      \"TYPE\": \"float\",\n      \"LABEL\": \"Overlay amount\",\n      \"DEFAULT\": 0.55,\n      \"MIN\": 0.0,\n      \"MAX\": 1.0\n    }\n  ],\n  \"PASSES\": [\n    {\n      \"LOCAL_SIZE\": [16, 16, 1],\n      \"EXECUTION_MODEL\": { \"TYPE\": \"2D_IMAGE\", \"TARGET\": \"outputImage\" }\n    }\n  ]\n}*/\n\n// The whole point of this shader is the two lines with `atomicAdd` in them.\n//\n// A fragment shader writes exactly one texel: its own. It can read anywhere and\n// write nowhere else, which is why Unit 22's histogram had to sample a scanline\n// and call itself an approximation, and why Unit 19 could simulate a field but\n// not a particle system.\n//\n// A compute invocation writes wherever it likes. Two thousand invocations\n// wanting to increment the same counter is a data race, and `atomicAdd` is the\n// hardware's answer: the increment happens once per caller, in some order, with\n// none lost. That single guarantee is what compute buys.\n\nshared uint bins[64];\n\nvoid main() {\n    ivec2 coord = ivec2(gl_GlobalInvocationID.xy);\n    ivec2 size = imageSize(inputImage);\n\n    uint local = gl_LocalInvocationIndex;\n\n    // Clear this workgroup's shared bins. Shared memory is per workgroup and is\n    // uninitialised, so a shader that forgets this reads whatever the last\n    // workgroup left, which looks like a wildly unstable histogram.\n    if (local < 64u) {\n        bins[local] = 0u;\n    }\n    barrier();\n\n    vec4 texel = vec4(0.0);\n    if (coord.x < size.x && coord.y < size.y) {\n        texel = imageLoad(inputImage, coord);\n        float luma = dot(texel.rgb, vec3(0.2126, 0.7152, 0.0722));\n        uint bin = uint(clamp(luma, 0.0, 0.999) * 64.0);\n        // Scatter. This invocation decides which counter to touch.\n        atomicAdd(bins[bin], 1u);\n    }\n    barrier();\n\n    if (coord.x >= size.x || coord.y >= size.y) return;\n\n    // Draw each workgroup's own histogram *inside its own tile*.\n    //\n    // This is not a global histogram and it is not pretending to be one. A\n    // workgroup's shared memory is private to that workgroup, so one pass can\n    // only produce one histogram per group; combining them needs a second pass\n    // reducing through a buffer, which is a different unit's worth of material.\n    //\n    // Drawn this way it is honest and it is more informative than a global one\n    // would have been: the mosaic shows how the tonal distribution varies\n    // across the frame, and each tile is visibly the work of one workgroup.\n    vec2 tile = vec2(gl_LocalInvocationID.xy) / vec2(gl_WorkGroupSize.xy);\n    uint bin = uint(clamp(tile.x, 0.0, 0.999) * 64.0);\n    float groupPixels = float(gl_WorkGroupSize.x * gl_WorkGroupSize.y);\n    float height = clamp(float(bins[bin]) / groupPixels * 64.0 * gain, 0.0, 1.0);\n\n    // Row 0 is the top of the image, so the bar grows downward unless the\n    // comparison is inverted. Getting this backwards is the compute equivalent\n    // of Unit 20's Y flip.\n    float fromBottom = 1.0 - tile.y;\n    vec3 bar = fromBottom < height ? vec3(0.90, 0.94, 1.00) : vec3(0.03, 0.04, 0.06);\n\n    vec3 colour = mix(texel.rgb, bar, overlay);\n\n    imageStore(outputImage, coord, vec4(colour, 1.0));\n}\n",
+ "sourcePath": "library/shaders/32/histogram.fs",
+ "vertex": ""
+}

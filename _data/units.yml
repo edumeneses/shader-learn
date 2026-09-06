@@ -317,7 +317,7 @@
   read: 14
   practice: 15
   score: false
-  written: false
+  written: true
 - num: "29"
   module: H
   kind: lesson
@@ -326,16 +326,16 @@
   read: 15
   practice: 30
   score: true
-  written: false
+  written: true
 - num: "30"
   module: H
   kind: lesson
   slug: 30-porting
-  title: "Porting: Shadertoy, glslsandbox, KodeLife, and ISF"
+  title: Porting between Shadertoy, glslsandbox, KodeLife, and ISF
   read: 14
   practice: 35
   score: true
-  written: false
+  written: true
 - num: "31"
   module: H
   kind: lesson
@@ -344,16 +344,16 @@
   read: 14
   practice: 30
   score: true
-  written: false
+  written: true
 - num: "32"
   module: H
   kind: lesson
   slug: 32-compute-shaders
-  title: "Compute shaders: workgroups, images, and buffers"
+  title: Compute shaders, workgroups, images, and buffers
   read: 15
   practice: 35
   score: true
-  written: false
+  written: true
 - num: "33"
   module: H
   kind: lesson
@@ -362,7 +362,7 @@
   read: 13
   practice: 15
   score: false
-  written: false
+  written: true
 
 # Module I: What a shader costs
 - num: "34"
@@ -373,7 +373,7 @@
   read: 14
   practice: 30
   score: false
-  written: false
+  written: true
 
 # -- Phase 4 ---------------------------------------------------------------
 # Module J: Shaders in ossia score

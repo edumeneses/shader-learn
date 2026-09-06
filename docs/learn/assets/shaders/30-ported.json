@@ -1,0 +1,78 @@
+{
+ "categories": [
+  "Course",
+  "Generator"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art. The plasma is the common Shadertoy idiom, not any one author's.",
+ "description": "A Shadertoy-shaped shader translated into ISF, with the original's uniform names kept as defines so the two versions can be compared line by line.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform vec2 pointer;\nuniform float rate;\nuniform float scale;\nuniform float layers;\nuniform float hue;\nuniform float spread;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\n\n// ---------------------------------------------------------------------------\n// The compatibility shim. Five lines, and a Shadertoy body compiles unchanged.\n//\n// iTime         -> TIME\n// iResolution   -> vec3(RENDERSIZE, 1.0)\n// iMouse        -> a named point2D input, in pixels\n// fragCoord     -> isf_FragNormCoord * RENDERSIZE\n// mainImage()   -> called from main()\n//\n// The one that is not a rename is iMouse. Shadertoy hands you a device; ISF\n// hands you a parameter. This course never names an input after a device, so\n// the shim maps `pointer` into iMouse's shape rather than the other way round,\n// and the shader can then be driven by an automation curve or an OSC message\n// with nothing renamed. That is the whole argument of Unit 30 in five lines.\n// ---------------------------------------------------------------------------\n\n#define iTime TIME\n#define iResolution vec3(RENDERSIZE, 1.0)\n#define iMouse vec4(pointer * RENDERSIZE, 0.0, 0.0)\n\nconst float TAU = 6.28318530718;\n\nvec3 palette(float t) {\n    vec3 d = vec3(hue) + spread * vec3(0.0, 0.30, 0.60);\n    return 0.5 + 0.46 * cos(TAU * (vec3(t) + d));\n}\n\n// Below this line is written exactly as it would be on Shadertoy: same entry\n// point, same signature, same uniform names, same pixel-space fragCoord.\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;\n    vec2 m = (iMouse.xy - 0.5 * iResolution.xy) / iResolution.y;\n\n    float t = iTime * rate;\n    vec2 p = uv * scale;\n\n    // A stack of rotating sine layers: the plasma every shader site has a\n    // hundred versions of, and a fair test for a port because it touches time,\n    // resolution, and the pointer.\n    float acc = 0.0;\n    int n = int(floor(layers + 0.5));\n    for (int i = 0; i < 10; i++) {\n        if (i >= n) break;\n        float fi = float(i);\n        float a = fi * 2.399 + t * (0.2 + 0.1 * fi);\n        vec2 dir = vec2(cos(a), sin(a));\n        acc += sin(dot(p, dir) + t * (1.0 + 0.3 * fi) + length(p - m * scale) * 0.6);\n    }\n    acc /= float(n);\n\n    vec3 col = palette(0.5 + acc * 0.45);\n    col *= 0.75 + 0.35 * cos(acc * TAU);\n\n    fragColor = vec4(col, 1.0);\n}\n\nvoid main() {\n    mainImage(gl_FragColor, isf_FragNormCoord * RENDERSIZE);\n}\n",
+ "id": "30-ported",
+ "imported": {},
+ "inputs": [
+  {
+   "default": [
+    0.5,
+    0.5
+   ],
+   "label": "Pointer",
+   "max": [
+    1.0,
+    1.0
+   ],
+   "min": [
+    0.0,
+    0.0
+   ],
+   "name": "pointer",
+   "type": "point2D"
+  },
+  {
+   "default": 0.4,
+   "label": "Rate",
+   "max": 2.0,
+   "min": 0.0,
+   "name": "rate",
+   "type": "float"
+  },
+  {
+   "default": 4.0,
+   "label": "Scale",
+   "max": 16.0,
+   "min": 1.0,
+   "name": "scale",
+   "type": "float"
+  },
+  {
+   "default": 5.0,
+   "label": "Layers",
+   "max": 10.0,
+   "min": 1.0,
+   "name": "layers",
+   "type": "float"
+  },
+  {
+   "default": 0.55,
+   "label": "Hue",
+   "max": 1.0,
+   "min": 0.0,
+   "name": "hue",
+   "type": "float"
+  },
+  {
+   "default": 0.28,
+   "label": "Hue spread",
+   "max": 1.0,
+   "min": 0.0,
+   "name": "spread",
+   "type": "float"
+  }
+ ],
+ "mode": "fragment",
+ "name": "30-ported",
+ "passes": [
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"A Shadertoy-shaped shader translated into ISF, with the original's uniform names kept as defines so the two versions can be compared line by line.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art. The plasma is the common Shadertoy idiom, not any one author's.\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\", \"Generator\"],\n  \"INPUTS\": [\n    { \"NAME\": \"pointer\",  \"TYPE\": \"point2D\", \"LABEL\": \"Pointer\",  \"DEFAULT\": [0.5, 0.5], \"MIN\": [0.0, 0.0], \"MAX\": [1.0, 1.0] },\n    { \"NAME\": \"rate\",     \"TYPE\": \"float\",   \"LABEL\": \"Rate\",     \"DEFAULT\": 0.4, \"MIN\": 0.0, \"MAX\": 2.0 },\n    { \"NAME\": \"scale\",    \"TYPE\": \"float\",   \"LABEL\": \"Scale\",    \"DEFAULT\": 4.0, \"MIN\": 1.0, \"MAX\": 16.0 },\n    { \"NAME\": \"layers\",   \"TYPE\": \"float\",   \"LABEL\": \"Layers\",   \"DEFAULT\": 5.0, \"MIN\": 1.0, \"MAX\": 10.0 },\n    { \"NAME\": \"hue\",      \"TYPE\": \"float\",   \"LABEL\": \"Hue\",      \"DEFAULT\": 0.55, \"MIN\": 0.0, \"MAX\": 1.0 },\n    { \"NAME\": \"spread\",   \"TYPE\": \"float\",   \"LABEL\": \"Hue spread\",\"DEFAULT\": 0.28, \"MIN\": 0.0, \"MAX\": 1.0 }\n  ]\n}*/\n\n// ---------------------------------------------------------------------------\n// The compatibility shim. Five lines, and a Shadertoy body compiles unchanged.\n//\n// iTime         -> TIME\n// iResolution   -> vec3(RENDERSIZE, 1.0)\n// iMouse        -> a named point2D input, in pixels\n// fragCoord     -> isf_FragNormCoord * RENDERSIZE\n// mainImage()   -> called from main()\n//\n// The one that is not a rename is iMouse. Shadertoy hands you a device; ISF\n// hands you a parameter. This course never names an input after a device, so\n// the shim maps `pointer` into iMouse's shape rather than the other way round,\n// and the shader can then be driven by an automation curve or an OSC message\n// with nothing renamed. That is the whole argument of Unit 30 in five lines.\n// ---------------------------------------------------------------------------\n\n#define iTime TIME\n#define iResolution vec3(RENDERSIZE, 1.0)\n#define iMouse vec4(pointer * RENDERSIZE, 0.0, 0.0)\n\nconst float TAU = 6.28318530718;\n\nvec3 palette(float t) {\n    vec3 d = vec3(hue) + spread * vec3(0.0, 0.30, 0.60);\n    return 0.5 + 0.46 * cos(TAU * (vec3(t) + d));\n}\n\n// Below this line is written exactly as it would be on Shadertoy: same entry\n// point, same signature, same uniform names, same pixel-space fragCoord.\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = (fragCoord - 0.5 * iResolution.xy) / iResolution.y;\n    vec2 m = (iMouse.xy - 0.5 * iResolution.xy) / iResolution.y;\n\n    float t = iTime * rate;\n    vec2 p = uv * scale;\n\n    // A stack of rotating sine layers: the plasma every shader site has a\n    // hundred versions of, and a fair test for a port because it touches time,\n    // resolution, and the pointer.\n    float acc = 0.0;\n    int n = int(floor(layers + 0.5));\n    for (int i = 0; i < 10; i++) {\n        if (i >= n) break;\n        float fi = float(i);\n        float a = fi * 2.399 + t * (0.2 + 0.1 * fi);\n        vec2 dir = vec2(cos(a), sin(a));\n        acc += sin(dot(p, dir) + t * (1.0 + 0.3 * fi) + length(p - m * scale) * 0.6);\n    }\n    acc /= float(n);\n\n    vec3 col = palette(0.5 + acc * 0.45);\n    col *= 0.75 + 0.35 * cos(acc * TAU);\n\n    fragColor = vec4(col, 1.0);\n}\n\nvoid main() {\n    mainImage(gl_FragColor, isf_FragNormCoord * RENDERSIZE);\n}\n",
+ "sourcePath": "library/shaders/30/ported.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform vec2 pointer;\nuniform float rate;\nuniform float scale;\nuniform float layers;\nuniform float hue;\nuniform float spread;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}

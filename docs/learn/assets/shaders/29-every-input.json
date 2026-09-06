@@ -1,0 +1,107 @@
+{
+ "categories": [
+  "Course",
+  "Utility"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art",
+ "description": "One shader exercising every ISF input type and both pass features, so the header can be read against the panel it produces.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform sampler2D _source;\nuniform vec2 _source_imgSize;\nuniform bool _source_flip;\nuniform bool enabled;\nuniform int arrangement;\nuniform float amount;\nuniform vec2 anchor;\nuniform vec4 tintA;\nuniform sampler2D _level;\nuniform vec2 _level_imgSize;\nuniform bool _level_flip;\nuniform float trailing;\nuniform sampler2D _quarter;\nuniform vec2 _quarter_imgSize;\nuniform bool _quarter_flip;\nuniform sampler2D _memory;\nuniform vec2 _memory_imgSize;\nuniform bool _memory_flip;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n#define IMG_NORM_PIXEL_source(nc) isf_texel(_source, (nc), _source_flip)\n#define IMG_NORM_PIXEL_level(nc) isf_texel(_level, (nc), _level_flip)\n#define IMG_NORM_PIXEL_quarter(nc) isf_texel(_quarter, (nc), _quarter_flip)\n#define IMG_NORM_PIXEL_memory(nc) isf_texel(_memory, (nc), _memory_flip)\n\n\n\nconst float TAU = 6.28318530718;\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n\n    if (PASSINDEX == 0) {\n        // A pass with a sized target. WIDTH and HEIGHT are expressions in\n        // $WIDTH and $HEIGHT, so a buffer can be a fraction of the output\n        // without the shader knowing the output's size in advance. This one is\n        // a quarter, which is how a cheap blur or a downsample is done.\n        gl_FragColor = isf_texel(_source, uv, _source_flip);\n        return;\n    }\n\n    if (PASSINDEX == 1) {\n        // A persistent pass. It reads its own previous frame, which is the only\n        // memory a shader has.\n        vec4 previous = isf_texel(_memory, uv, _memory_flip);\n\n        // audioFFT arrives as a one-row texture: x is frequency, and the value\n        // is that band's level. Reading a few bands and taking the maximum is\n        // the usual way to get a single number to drive something with, and it\n        // is a good deal steadier than reading one band.\n        float bass = 0.0;\n        for (int i = 0; i < 8; i++) {\n            bass = max(bass, isf_texel(_level, vec2(float(i) / 64.0, 0.5), _level_flip).r);\n        }\n\n        float d = length((uv - anchor) * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.0));\n        float pulse = smoothstep(0.06 + 0.20 * bass, 0.0, d);\n\n        vec3 fresh = tintA.rgb * pulse * (0.4 + 1.6 * bass);\n        gl_FragColor = vec4(max(previous.rgb * trailing, fresh), 1.0);\n        return;\n    }\n\n    // The display pass, showing all three sources side by side so the header\n    // and the picture can be read against each other.\n    vec3 colour;\n\n    if (arrangement == 0) {\n        vec2 q = fract(uv * 2.0);\n        bool right = uv.x > 0.5, top = uv.y > 0.5;\n        if (top && !right)      colour = isf_texel(_source, q, _source_flip).rgb;\n        else if (top && right)  colour = isf_texel(_quarter, q, _quarter_flip).rgb;\n        else if (!top && !right) colour = isf_texel(_memory, q, _memory_flip).rgb;\n        else                    colour = vec3(uv.x, uv.y, amount);\n    } else if (arrangement == 1) {\n        float band = floor(uv.x * 3.0);\n        vec2 q = vec2(fract(uv.x * 3.0), uv.y);\n        if (band < 0.5)      colour = isf_texel(_source, q, _source_flip).rgb;\n        else if (band < 1.5) colour = isf_texel(_quarter, q, _quarter_flip).rgb;\n        else                 colour = isf_texel(_memory, q, _memory_flip).rgb;\n    } else {\n        float r = length((uv - 0.5) * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.0));\n        float ring = fract(r * 3.0 - TIME * 0.2);\n        colour = mix(isf_texel(_source, uv, _source_flip).rgb,\n                     isf_texel(_memory, uv, _memory_flip).rgb, step(0.5, ring));\n    }\n\n    // A bool used as an actual switch, and a float used as a mix amount, so the\n    // two simplest input types are visible in the result.\n    if (!enabled) colour = vec3(dot(colour, vec3(0.2126, 0.7152, 0.0722)));\n    colour = mix(colour, colour * tintA.rgb * 1.6, amount);\n\n    gl_FragColor = vec4(clamp(colour, 0.0, 1.0), 1.0);\n}\n",
+ "id": "29-every-input",
+ "imported": {},
+ "inputs": [
+  {
+   "label": "An image input",
+   "name": "source",
+   "type": "image"
+  },
+  {
+   "default": true,
+   "label": "A bool",
+   "name": "enabled",
+   "type": "bool"
+  },
+  {
+   "default": 0,
+   "label": "A long, with labels",
+   "labels": [
+    "quarters",
+    "columns",
+    "rings"
+   ],
+   "name": "arrangement",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  {
+   "default": 0.45,
+   "label": "A float",
+   "max": 1.0,
+   "min": 0.0,
+   "name": "amount",
+   "type": "float"
+  },
+  {
+   "default": [
+    0.5,
+    0.5
+   ],
+   "label": "A point2D",
+   "max": [
+    1.0,
+    1.0
+   ],
+   "min": [
+    0.0,
+    0.0
+   ],
+   "name": "anchor",
+   "type": "point2D"
+  },
+  {
+   "default": [
+    0.27,
+    0.88,
+    0.83,
+    1.0
+   ],
+   "label": "A color",
+   "name": "tintA",
+   "type": "color"
+  },
+  {
+   "label": "An audioFFT input",
+   "name": "level",
+   "type": "audioFFT"
+  },
+  {
+   "default": 0.9,
+   "label": "Trail",
+   "max": 0.99,
+   "min": 0.0,
+   "name": "trailing",
+   "type": "float"
+  }
+ ],
+ "mode": "fragment",
+ "name": "29-every-input",
+ "passes": [
+  {
+   "height": "$HEIGHT/4",
+   "target": "quarter",
+   "width": "$WIDTH/4"
+  },
+  {
+   "float": true,
+   "persistent": true,
+   "target": "memory"
+  },
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"One shader exercising every ISF input type and both pass features, so the header can be read against the panel it produces.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\", \"Utility\"],\n  \"INPUTS\": [\n    { \"NAME\": \"source\",  \"TYPE\": \"image\", \"LABEL\": \"An image input\" },\n    { \"NAME\": \"enabled\", \"TYPE\": \"bool\",  \"LABEL\": \"A bool\", \"DEFAULT\": true },\n    {\n      \"NAME\": \"arrangement\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"A long, with labels\",\n      \"VALUES\": [0, 1, 2],\n      \"LABELS\": [\"quarters\", \"columns\", \"rings\"],\n      \"DEFAULT\": 0\n    },\n    { \"NAME\": \"amount\",  \"TYPE\": \"float\",   \"LABEL\": \"A float\", \"DEFAULT\": 0.45, \"MIN\": 0.0, \"MAX\": 1.0 },\n    { \"NAME\": \"anchor\",  \"TYPE\": \"point2D\", \"LABEL\": \"A point2D\", \"DEFAULT\": [0.5, 0.5], \"MIN\": [0.0, 0.0], \"MAX\": [1.0, 1.0] },\n    { \"NAME\": \"tintA\",   \"TYPE\": \"color\",   \"LABEL\": \"A color\", \"DEFAULT\": [0.27, 0.88, 0.83, 1.0] },\n    { \"NAME\": \"level\",   \"TYPE\": \"audioFFT\",\"LABEL\": \"An audioFFT input\" },\n    { \"NAME\": \"trailing\",\"TYPE\": \"float\",   \"LABEL\": \"Trail\", \"DEFAULT\": 0.90, \"MIN\": 0.0, \"MAX\": 0.99 }\n  ],\n  \"PASSES\": [\n    { \"TARGET\": \"quarter\", \"WIDTH\": \"$WIDTH/4\", \"HEIGHT\": \"$HEIGHT/4\" },\n    { \"TARGET\": \"memory\", \"PERSISTENT\": true, \"FLOAT\": true },\n    { }\n  ]\n}*/\n\nconst float TAU = 6.28318530718;\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n\n    if (PASSINDEX == 0) {\n        // A pass with a sized target. WIDTH and HEIGHT are expressions in\n        // $WIDTH and $HEIGHT, so a buffer can be a fraction of the output\n        // without the shader knowing the output's size in advance. This one is\n        // a quarter, which is how a cheap blur or a downsample is done.\n        gl_FragColor = IMG_NORM_PIXEL(source, uv);\n        return;\n    }\n\n    if (PASSINDEX == 1) {\n        // A persistent pass. It reads its own previous frame, which is the only\n        // memory a shader has.\n        vec4 previous = IMG_NORM_PIXEL(memory, uv);\n\n        // audioFFT arrives as a one-row texture: x is frequency, and the value\n        // is that band's level. Reading a few bands and taking the maximum is\n        // the usual way to get a single number to drive something with, and it\n        // is a good deal steadier than reading one band.\n        float bass = 0.0;\n        for (int i = 0; i < 8; i++) {\n            bass = max(bass, IMG_NORM_PIXEL(level, vec2(float(i) / 64.0, 0.5)).r);\n        }\n\n        float d = length((uv - anchor) * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.0));\n        float pulse = smoothstep(0.06 + 0.20 * bass, 0.0, d);\n\n        vec3 fresh = tintA.rgb * pulse * (0.4 + 1.6 * bass);\n        gl_FragColor = vec4(max(previous.rgb * trailing, fresh), 1.0);\n        return;\n    }\n\n    // The display pass, showing all three sources side by side so the header\n    // and the picture can be read against each other.\n    vec3 colour;\n\n    if (arrangement == 0) {\n        vec2 q = fract(uv * 2.0);\n        bool right = uv.x > 0.5, top = uv.y > 0.5;\n        if (top && !right)      colour = IMG_NORM_PIXEL(source, q).rgb;\n        else if (top && right)  colour = IMG_NORM_PIXEL(quarter, q).rgb;\n        else if (!top && !right) colour = IMG_NORM_PIXEL(memory, q).rgb;\n        else                    colour = vec3(uv.x, uv.y, amount);\n    } else if (arrangement == 1) {\n        float band = floor(uv.x * 3.0);\n        vec2 q = vec2(fract(uv.x * 3.0), uv.y);\n        if (band < 0.5)      colour = IMG_NORM_PIXEL(source, q).rgb;\n        else if (band < 1.5) colour = IMG_NORM_PIXEL(quarter, q).rgb;\n        else                 colour = IMG_NORM_PIXEL(memory, q).rgb;\n    } else {\n        float r = length((uv - 0.5) * vec2(RENDERSIZE.x / RENDERSIZE.y, 1.0));\n        float ring = fract(r * 3.0 - TIME * 0.2);\n        colour = mix(IMG_NORM_PIXEL(source, uv).rgb,\n                     IMG_NORM_PIXEL(memory, uv).rgb, step(0.5, ring));\n    }\n\n    // A bool used as an actual switch, and a float used as a mix amount, so the\n    // two simplest input types are visible in the result.\n    if (!enabled) colour = vec3(dot(colour, vec3(0.2126, 0.7152, 0.0722)));\n    colour = mix(colour, colour * tintA.rgb * 1.6, amount);\n\n    gl_FragColor = vec4(clamp(colour, 0.0, 1.0), 1.0);\n}\n",
+ "sourcePath": "library/shaders/29/every-input.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform sampler2D _source;\nuniform vec2 _source_imgSize;\nuniform bool _source_flip;\nuniform bool enabled;\nuniform int arrangement;\nuniform float amount;\nuniform vec2 anchor;\nuniform vec4 tintA;\nuniform sampler2D _level;\nuniform vec2 _level_imgSize;\nuniform bool _level_flip;\nuniform float trailing;\nuniform sampler2D _quarter;\nuniform vec2 _quarter_imgSize;\nuniform bool _quarter_flip;\nuniform sampler2D _memory;\nuniform vec2 _memory_imgSize;\nuniform bool _memory_flip;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n#define IMG_NORM_PIXEL_source(nc) isf_texel(_source, (nc), _source_flip)\n#define IMG_NORM_PIXEL_level(nc) isf_texel(_level, (nc), _level_flip)\n#define IMG_NORM_PIXEL_quarter(nc) isf_texel(_quarter, (nc), _quarter_flip)\n#define IMG_NORM_PIXEL_memory(nc) isf_texel(_memory, (nc), _memory_flip)\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}
