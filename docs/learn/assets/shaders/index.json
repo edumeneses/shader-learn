@@ -73,5 +73,82 @@
   "mode": "fragment",
   "passes": 1,
   "source": "library/shaders/06/edge.fs"
+ },
+ {
+  "categories": [
+   "Course",
+   "Generator"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The distance functions and the field visualisation are Inigo Quilez's.",
+  "description": "Six two-dimensional signed distance functions, shown either as a shape or as the whole field, so that what a field is stops being an abstraction.",
+  "id": "07-sdf-2d",
+  "inputs": 9,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/07/sdf-2d.fs"
+ },
+ {
+  "categories": [
+   "Course",
+   "Generator"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The smooth minimum is Inigo Quilez's polynomial form.",
+  "description": "Two fields combined six ways, with the smoothing radius on a control, shown as a field so that what the operators do to the space between the shapes is visible.",
+  "id": "08-combine",
+  "inputs": 10,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/08/combine.fs"
+ },
+ {
+  "categories": [
+   "Course",
+   "Generator"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "Translation, rotation, and scale applied to the space rather than to the shape, with a mode that shows what happens when you forget to compensate the scale.",
+  "id": "09-transforms",
+  "inputs": 10,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/09/transforms.fs"
+ },
+ {
+  "categories": [
+   "Course",
+   "Generator"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The limited-repetition clamp is Inigo Quilez's.",
+  "description": "Infinite repetition, limited repetition, and polar repetition, with a cell size that can be made smaller than the shape so the tiling trap is visible.",
+  "id": "10-repetition",
+  "inputs": 12,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/10/repetition.fs"
+ },
+ {
+  "categories": [
+   "Course"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "A deliberately hostile scene rendered four ways: no antialiasing, fwidth, and two supersampled ground truths, so that what fwidth buys and where it stops helping are both visible.",
+  "id": "11-antialias",
+  "inputs": 8,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/11/antialias.fs"
+ },
+ {
+  "categories": [
+   "Course",
+   "Generator"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "The Module C milestone: one still image built only from distance fields, their operators, domain repetition, a cosine palette, and antialiasing measured with fwidth.",
+  "id": "p1-poster",
+  "inputs": 11,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/p1/poster.fs"
  }
 ]

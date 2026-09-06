@@ -1,0 +1,103 @@
+{
+ "categories": [
+  "Course"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art",
+ "description": "A deliberately hostile scene rendered four ways: no antialiasing, fwidth, and two supersampled ground truths, so that what fwidth buys and where it stops helping are both visible.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform int method;\nuniform int scene;\nuniform float detail;\nuniform float arms;\nuniform float thin;\nuniform float drift;\nuniform bool prefilter;\nuniform vec4 ink;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\n\nconst float TAU = 6.28318530718;\n\n// A zone plate: rings whose frequency rises with the square of the radius. Near\n// the edge the pattern is finer than a pixel, so it is the standard torture\n// test for a sampler. Whatever a renderer does wrong, it does wrong here first.\nfloat zone(vec2 p) {\n    float r = dot(p, p);\n    return sin(r * detail + TIME * drift * 3.0);\n}\n\n// A fan of rays converging on a point. Every ray is the same width in angle, so\n// its width in pixels goes to zero at the centre: an honest sampler fades them\n// out, and a naive one turns them into a moir\u00e9 rosette.\nfloat fan(vec2 p) {\n    float a = atan(p.y, p.x) / TAU + TIME * drift * 0.05;\n    float w = fract(a * arms);\n    return (abs(w - 0.5) * 2.0) - (1.0 - thin);\n}\n\n// The scene, as a signed value: positive is ink.\nfloat field(vec2 p) {\n    if (scene == 0) return zone(p);\n    if (scene == 1) return -fan(p);\n    return max(zone(p) * 0.8, -fan(p));\n}\n\n// One sample, thresholded hard. This is what the hardware would do with no help\n// at all, and it is the ground truth that supersampling averages.\nfloat hard(vec2 p) {\n    return step(0.0, field(p));\n}\n\nvoid main() {\n    vec2 p = (isf_FragNormCoord - 0.5) * RENDERSIZE / RENDERSIZE.y;\n    float px = 1.0 / RENDERSIZE.y;   // one pixel, in field units\n\n    float cov;\n\n    if (method == 0) {\n        cov = hard(p);\n\n    } else if (method == 1) {\n        // One sample, plus the derivative. fwidth measures how fast the field\n        // changes between neighbouring pixels, so the smoothstep width is\n        // exactly the band the edge occupies. It costs almost nothing and it\n        // fixes an edge. It cannot fix detail finer than a pixel, because there\n        // is no information in one sample about what happened between samples.\n        float d = field(p);\n        float w = fwidth(d);\n        cov = smoothstep(-w, w, d);\n\n        if (prefilter) {\n            // What to do about rays too thin to sample: do not try to draw\n            // them, fade them. Coverage below a pixel is genuinely partial, so\n            // scaling the ink by the sub-pixel width is the correct answer and\n            // it is what a good line renderer has always done.\n            float rayPx = length(p) * TAU / max(arms, 1.0) * thin / px;\n            cov *= clamp(rayPx, 0.0, 1.0);\n        }\n\n    } else {\n        // Supersampling: take the samples that were missing. Cost is linear in\n        // the sample count and it is the only thing that helps with detail\n        // finer than a pixel, which is why an offline renderer does it and a\n        // real-time one usually cannot afford to.\n        int n = (method == 2) ? 2 : 4;\n        float total = 0.0;\n        for (int y = 0; y < 4; y++) {\n            for (int x = 0; x < 4; x++) {\n                if (x >= n || y >= n) continue;\n                vec2 off = (vec2(float(x), float(y)) + 0.5) / float(n) - 0.5;\n                total += hard(p + off * px);\n            }\n        }\n        cov = total / float(n * n);\n    }\n\n    vec3 colour = mix(vec3(0.04, 0.05, 0.07), ink.rgb, cov);\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "id": "11-antialias",
+ "imported": {},
+ "inputs": [
+  {
+   "default": 0,
+   "label": "Method",
+   "labels": [
+    "none  step",
+    "fwidth  1 sample",
+    "supersample  4",
+    "supersample  16"
+   ],
+   "name": "method",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "default": 2,
+   "label": "Scene",
+   "labels": [
+    "zone plate",
+    "converging rays",
+    "both"
+   ],
+   "name": "scene",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  {
+   "default": 60.0,
+   "label": "Detail",
+   "max": 260.0,
+   "min": 5.0,
+   "name": "detail",
+   "type": "float"
+  },
+  {
+   "default": 24.0,
+   "label": "Rays",
+   "max": 96.0,
+   "min": 3.0,
+   "name": "arms",
+   "type": "float"
+  },
+  {
+   "default": 0.35,
+   "label": "Ray width",
+   "max": 1.0,
+   "min": 0.02,
+   "name": "thin",
+   "type": "float"
+  },
+  {
+   "default": 0.1,
+   "label": "Drift",
+   "max": 1.0,
+   "min": 0.0,
+   "name": "drift",
+   "type": "float"
+  },
+  {
+   "default": false,
+   "label": "Fade thin rays",
+   "name": "prefilter",
+   "type": "bool"
+  },
+  {
+   "default": [
+    0.9,
+    0.94,
+    1.0,
+    1.0
+   ],
+   "label": "Ink",
+   "name": "ink",
+   "type": "color"
+  }
+ ],
+ "mode": "fragment",
+ "name": "11-antialias",
+ "passes": [
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"A deliberately hostile scene rendered four ways: no antialiasing, fwidth, and two supersampled ground truths, so that what fwidth buys and where it stops helping are both visible.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\"],\n  \"INPUTS\": [\n    {\n      \"NAME\": \"method\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Method\",\n      \"VALUES\": [0, 1, 2, 3],\n      \"LABELS\": [\"none  step\", \"fwidth  1 sample\", \"supersample  4\", \"supersample  16\"],\n      \"DEFAULT\": 0\n    },\n    {\n      \"NAME\": \"scene\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Scene\",\n      \"VALUES\": [0, 1, 2],\n      \"LABELS\": [\"zone plate\", \"converging rays\", \"both\"],\n      \"DEFAULT\": 2\n    },\n    { \"NAME\": \"detail\",  \"TYPE\": \"float\", \"LABEL\": \"Detail\",     \"DEFAULT\": 60.0, \"MIN\": 5.0, \"MAX\": 260.0 },\n    { \"NAME\": \"arms\",    \"TYPE\": \"float\", \"LABEL\": \"Rays\",       \"DEFAULT\": 24.0, \"MIN\": 3.0, \"MAX\": 96.0 },\n    { \"NAME\": \"thin\",    \"TYPE\": \"float\", \"LABEL\": \"Ray width\",  \"DEFAULT\": 0.35, \"MIN\": 0.02, \"MAX\": 1.00 },\n    { \"NAME\": \"drift\",   \"TYPE\": \"float\", \"LABEL\": \"Drift\",      \"DEFAULT\": 0.10, \"MIN\": 0.0, \"MAX\": 1.0 },\n    { \"NAME\": \"prefilter\",\"TYPE\": \"bool\", \"LABEL\": \"Fade thin rays\", \"DEFAULT\": false },\n    { \"NAME\": \"ink\",     \"TYPE\": \"color\", \"LABEL\": \"Ink\",        \"DEFAULT\": [0.90, 0.94, 1.00, 1.0] }\n  ]\n}*/\n\nconst float TAU = 6.28318530718;\n\n// A zone plate: rings whose frequency rises with the square of the radius. Near\n// the edge the pattern is finer than a pixel, so it is the standard torture\n// test for a sampler. Whatever a renderer does wrong, it does wrong here first.\nfloat zone(vec2 p) {\n    float r = dot(p, p);\n    return sin(r * detail + TIME * drift * 3.0);\n}\n\n// A fan of rays converging on a point. Every ray is the same width in angle, so\n// its width in pixels goes to zero at the centre: an honest sampler fades them\n// out, and a naive one turns them into a moir\u00e9 rosette.\nfloat fan(vec2 p) {\n    float a = atan(p.y, p.x) / TAU + TIME * drift * 0.05;\n    float w = fract(a * arms);\n    return (abs(w - 0.5) * 2.0) - (1.0 - thin);\n}\n\n// The scene, as a signed value: positive is ink.\nfloat field(vec2 p) {\n    if (scene == 0) return zone(p);\n    if (scene == 1) return -fan(p);\n    return max(zone(p) * 0.8, -fan(p));\n}\n\n// One sample, thresholded hard. This is what the hardware would do with no help\n// at all, and it is the ground truth that supersampling averages.\nfloat hard(vec2 p) {\n    return step(0.0, field(p));\n}\n\nvoid main() {\n    vec2 p = (isf_FragNormCoord - 0.5) * RENDERSIZE / RENDERSIZE.y;\n    float px = 1.0 / RENDERSIZE.y;   // one pixel, in field units\n\n    float cov;\n\n    if (method == 0) {\n        cov = hard(p);\n\n    } else if (method == 1) {\n        // One sample, plus the derivative. fwidth measures how fast the field\n        // changes between neighbouring pixels, so the smoothstep width is\n        // exactly the band the edge occupies. It costs almost nothing and it\n        // fixes an edge. It cannot fix detail finer than a pixel, because there\n        // is no information in one sample about what happened between samples.\n        float d = field(p);\n        float w = fwidth(d);\n        cov = smoothstep(-w, w, d);\n\n        if (prefilter) {\n            // What to do about rays too thin to sample: do not try to draw\n            // them, fade them. Coverage below a pixel is genuinely partial, so\n            // scaling the ink by the sub-pixel width is the correct answer and\n            // it is what a good line renderer has always done.\n            float rayPx = length(p) * TAU / max(arms, 1.0) * thin / px;\n            cov *= clamp(rayPx, 0.0, 1.0);\n        }\n\n    } else {\n        // Supersampling: take the samples that were missing. Cost is linear in\n        // the sample count and it is the only thing that helps with detail\n        // finer than a pixel, which is why an offline renderer does it and a\n        // real-time one usually cannot afford to.\n        int n = (method == 2) ? 2 : 4;\n        float total = 0.0;\n        for (int y = 0; y < 4; y++) {\n            for (int x = 0; x < 4; x++) {\n                if (x >= n || y >= n) continue;\n                vec2 off = (vec2(float(x), float(y)) + 0.5) / float(n) - 0.5;\n                total += hard(p + off * px);\n            }\n        }\n        cov = total / float(n * n);\n    }\n\n    vec3 colour = mix(vec3(0.04, 0.05, 0.07), ink.rgb, cov);\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "sourcePath": "library/shaders/11/antialias.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform int method;\nuniform int scene;\nuniform float detail;\nuniform float arms;\nuniform float thin;\nuniform float drift;\nuniform bool prefilter;\nuniform vec4 ink;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}

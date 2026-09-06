@@ -1,0 +1,148 @@
+{
+ "categories": [
+  "Course",
+  "Generator"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art. The limited-repetition clamp is Inigo Quilez's.",
+ "description": "Infinite repetition, limited repetition, and polar repetition, with a cell size that can be made smaller than the shape so the tiling trap is visible.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform int kind;\nuniform int view;\nuniform vec2 origin;\nuniform float cell;\nuniform float size;\nuniform float limit;\nuniform float arms;\nuniform float turn;\nuniform float drift;\nuniform float rings;\nuniform vec4 warm;\nuniform vec4 cool;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\n\nconst float TAU = 6.28318530718;\n\nmat2 rot(float turns) {\n    float a = turns * TAU;\n    float c = cos(a), s = sin(a);\n    return mat2(c, -s, s, c);\n}\n\nfloat box(vec2 p, vec2 b) {\n    vec2 d = abs(p) - b;\n    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);\n}\n\nfloat shape(vec2 p) {\n    return box(rot(turn + TIME * drift * 0.1) * p, vec2(size, size * 0.55)) - size * 0.18;\n}\n\nvoid main() {\n    vec2 p = (isf_FragNormCoord - 0.5) * RENDERSIZE / RENDERSIZE.y;\n    p -= (origin - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    float d;\n\n    if (kind == 0) {\n        d = shape(p);\n\n    } else if (kind == 1) {\n        // Infinite repetition: fold the whole plane into one cell. The shape is\n        // written once and appears everywhere, at no cost, forever. This is the\n        // cheapest thing in shader art and it is why fields are used at all.\n        //\n        // The catch, which the Cell size control lets you meet: the fold is\n        // only correct while the shape fits inside its cell. Make the cell\n        // smaller than the shape and each cell measures the distance to its own\n        // copy while a neighbour's copy is nearer, so the field lies and the\n        // shapes are cut off at the cell boundaries.\n        vec2 q = mod(p + 0.5 * cell, cell) - 0.5 * cell;\n        d = shape(q);\n\n    } else if (kind == 2) {\n        // Limited repetition: round to the nearest cell index, then clamp the\n        // index. Rounding rather than mod is what makes the clamp possible, and\n        // clamping the index rather than the position is what keeps the cells\n        // the same size at the edge of the grid.\n        vec2 id = clamp(round(p / cell), -vec2(floor(limit)), vec2(floor(limit)));\n        d = shape(p - cell * id);\n\n    } else {\n        // Polar repetition: fold the angle instead of the position. Everything\n        // that radiates is this. The sector width is TAU / arms, and the same\n        // trap applies: a shape wider than its sector is cut by the fold.\n        float r = length(p);\n        float a = atan(p.y, p.x);\n        float sector = TAU / max(arms, 1.0);\n        a = mod(a + 0.5 * sector, sector) - 0.5 * sector;\n        vec2 q = vec2(cos(a), sin(a)) * r - vec2(cell, 0.0);\n        d = shape(q);\n    }\n\n    float aa = fwidth(d);\n\n    vec3 colour;\n    if (view == 1) {\n        colour = mix(vec3(0.05, 0.06, 0.09), cool.rgb, smoothstep(aa, -aa, d));\n    } else {\n        colour = d > 0.0 ? warm.rgb : cool.rgb;\n        colour *= 1.0 - exp(-7.0 * abs(d));\n        colour *= 0.85 + 0.15 * cos(rings * d);\n        colour = mix(colour, vec3(1.0), 1.0 - smoothstep(0.0, aa * 2.0, abs(d)));\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "id": "10-repetition",
+ "imported": {},
+ "inputs": [
+  {
+   "default": 1,
+   "label": "Repetition",
+   "labels": [
+    "none",
+    "infinite grid",
+    "limited grid",
+    "polar"
+   ],
+   "name": "kind",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "default": 1,
+   "label": "View",
+   "labels": [
+    "the field",
+    "the shape only"
+   ],
+   "name": "view",
+   "type": "long",
+   "values": [
+    0,
+    1
+   ]
+  },
+  {
+   "default": [
+    0.5,
+    0.5
+   ],
+   "label": "Origin",
+   "max": [
+    1.0,
+    1.0
+   ],
+   "min": [
+    0.0,
+    0.0
+   ],
+   "name": "origin",
+   "type": "point2D"
+  },
+  {
+   "default": 0.34,
+   "label": "Cell size",
+   "max": 1.2,
+   "min": 0.05,
+   "name": "cell",
+   "type": "float"
+  },
+  {
+   "default": 0.1,
+   "label": "Shape size",
+   "max": 0.5,
+   "min": 0.01,
+   "name": "size",
+   "type": "float"
+  },
+  {
+   "default": 2.0,
+   "label": "Limit",
+   "max": 6.0,
+   "min": 0.0,
+   "name": "limit",
+   "type": "float"
+  },
+  {
+   "default": 7.0,
+   "label": "Arms",
+   "max": 24.0,
+   "min": 2.0,
+   "name": "arms",
+   "type": "float"
+  },
+  {
+   "default": 0.0,
+   "label": "Turn",
+   "max": 1.0,
+   "min": -1.0,
+   "name": "turn",
+   "type": "float"
+  },
+  {
+   "default": 0.0,
+   "label": "Drift",
+   "max": 1.0,
+   "min": -1.0,
+   "name": "drift",
+   "type": "float"
+  },
+  {
+   "default": 90.0,
+   "label": "Isolines",
+   "max": 300.0,
+   "min": 0.0,
+   "name": "rings",
+   "type": "float"
+  },
+  {
+   "default": [
+    0.95,
+    0.62,
+    0.28,
+    1.0
+   ],
+   "label": "Outside",
+   "name": "warm",
+   "type": "color"
+  },
+  {
+   "default": [
+    0.3,
+    0.72,
+    0.95,
+    1.0
+   ],
+   "label": "Inside",
+   "name": "cool",
+   "type": "color"
+  }
+ ],
+ "mode": "fragment",
+ "name": "10-repetition",
+ "passes": [
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"Infinite repetition, limited repetition, and polar repetition, with a cell size that can be made smaller than the shape so the tiling trap is visible.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art. The limited-repetition clamp is Inigo Quilez's.\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\", \"Generator\"],\n  \"INPUTS\": [\n    {\n      \"NAME\": \"kind\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Repetition\",\n      \"VALUES\": [0, 1, 2, 3],\n      \"LABELS\": [\"none\", \"infinite grid\", \"limited grid\", \"polar\"],\n      \"DEFAULT\": 1\n    },\n    {\n      \"NAME\": \"view\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"View\",\n      \"VALUES\": [0, 1],\n      \"LABELS\": [\"the field\", \"the shape only\"],\n      \"DEFAULT\": 1\n    },\n    { \"NAME\": \"origin\", \"TYPE\": \"point2D\", \"LABEL\": \"Origin\",    \"DEFAULT\": [0.5, 0.5], \"MIN\": [0.0, 0.0], \"MAX\": [1.0, 1.0] },\n    { \"NAME\": \"cell\",   \"TYPE\": \"float\",   \"LABEL\": \"Cell size\", \"DEFAULT\": 0.34, \"MIN\": 0.05, \"MAX\": 1.20 },\n    { \"NAME\": \"size\",   \"TYPE\": \"float\",   \"LABEL\": \"Shape size\",\"DEFAULT\": 0.10, \"MIN\": 0.01, \"MAX\": 0.50 },\n    { \"NAME\": \"limit\",  \"TYPE\": \"float\",   \"LABEL\": \"Limit\",     \"DEFAULT\": 2.0,  \"MIN\": 0.0,  \"MAX\": 6.0 },\n    { \"NAME\": \"arms\",   \"TYPE\": \"float\",   \"LABEL\": \"Arms\",      \"DEFAULT\": 7.0,  \"MIN\": 2.0,  \"MAX\": 24.0 },\n    { \"NAME\": \"turn\",   \"TYPE\": \"float\",   \"LABEL\": \"Turn\",      \"DEFAULT\": 0.0,  \"MIN\": -1.0, \"MAX\": 1.0 },\n    { \"NAME\": \"drift\",  \"TYPE\": \"float\",   \"LABEL\": \"Drift\",     \"DEFAULT\": 0.0,  \"MIN\": -1.0, \"MAX\": 1.0 },\n    { \"NAME\": \"rings\",  \"TYPE\": \"float\",   \"LABEL\": \"Isolines\",  \"DEFAULT\": 90.0, \"MIN\": 0.0,  \"MAX\": 300.0 },\n    { \"NAME\": \"warm\",   \"TYPE\": \"color\",   \"LABEL\": \"Outside\",   \"DEFAULT\": [0.95, 0.62, 0.28, 1.0] },\n    { \"NAME\": \"cool\",   \"TYPE\": \"color\",   \"LABEL\": \"Inside\",    \"DEFAULT\": [0.30, 0.72, 0.95, 1.0] }\n  ]\n}*/\n\nconst float TAU = 6.28318530718;\n\nmat2 rot(float turns) {\n    float a = turns * TAU;\n    float c = cos(a), s = sin(a);\n    return mat2(c, -s, s, c);\n}\n\nfloat box(vec2 p, vec2 b) {\n    vec2 d = abs(p) - b;\n    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);\n}\n\nfloat shape(vec2 p) {\n    return box(rot(turn + TIME * drift * 0.1) * p, vec2(size, size * 0.55)) - size * 0.18;\n}\n\nvoid main() {\n    vec2 p = (isf_FragNormCoord - 0.5) * RENDERSIZE / RENDERSIZE.y;\n    p -= (origin - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    float d;\n\n    if (kind == 0) {\n        d = shape(p);\n\n    } else if (kind == 1) {\n        // Infinite repetition: fold the whole plane into one cell. The shape is\n        // written once and appears everywhere, at no cost, forever. This is the\n        // cheapest thing in shader art and it is why fields are used at all.\n        //\n        // The catch, which the Cell size control lets you meet: the fold is\n        // only correct while the shape fits inside its cell. Make the cell\n        // smaller than the shape and each cell measures the distance to its own\n        // copy while a neighbour's copy is nearer, so the field lies and the\n        // shapes are cut off at the cell boundaries.\n        vec2 q = mod(p + 0.5 * cell, cell) - 0.5 * cell;\n        d = shape(q);\n\n    } else if (kind == 2) {\n        // Limited repetition: round to the nearest cell index, then clamp the\n        // index. Rounding rather than mod is what makes the clamp possible, and\n        // clamping the index rather than the position is what keeps the cells\n        // the same size at the edge of the grid.\n        vec2 id = clamp(round(p / cell), -vec2(floor(limit)), vec2(floor(limit)));\n        d = shape(p - cell * id);\n\n    } else {\n        // Polar repetition: fold the angle instead of the position. Everything\n        // that radiates is this. The sector width is TAU / arms, and the same\n        // trap applies: a shape wider than its sector is cut by the fold.\n        float r = length(p);\n        float a = atan(p.y, p.x);\n        float sector = TAU / max(arms, 1.0);\n        a = mod(a + 0.5 * sector, sector) - 0.5 * sector;\n        vec2 q = vec2(cos(a), sin(a)) * r - vec2(cell, 0.0);\n        d = shape(q);\n    }\n\n    float aa = fwidth(d);\n\n    vec3 colour;\n    if (view == 1) {\n        colour = mix(vec3(0.05, 0.06, 0.09), cool.rgb, smoothstep(aa, -aa, d));\n    } else {\n        colour = d > 0.0 ? warm.rgb : cool.rgb;\n        colour *= 1.0 - exp(-7.0 * abs(d));\n        colour *= 0.85 + 0.15 * cos(rings * d);\n        colour = mix(colour, vec3(1.0), 1.0 - smoothstep(0.0, aa * 2.0, abs(d)));\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "sourcePath": "library/shaders/10/repetition.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform int kind;\nuniform int view;\nuniform vec2 origin;\nuniform float cell;\nuniform float size;\nuniform float limit;\nuniform float arms;\nuniform float turn;\nuniform float drift;\nuniform float rings;\nuniform vec4 warm;\nuniform vec4 cool;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}

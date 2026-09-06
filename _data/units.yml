@@ -89,7 +89,7 @@
   read: 14
   practice: 30
   score: false
-  written: false
+  written: true
 - num: "08"
   module: C
   kind: lesson
@@ -98,7 +98,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "09"
   module: C
   kind: lesson
@@ -107,7 +107,7 @@
   read: 12
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "10"
   module: C
   kind: lesson
@@ -116,7 +116,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "11"
   module: C
   kind: lesson
@@ -125,7 +125,7 @@
   read: 12
   practice: 20
   score: false
-  written: false
+  written: true
 - num: "P1"
   module: C
   kind: milestone
@@ -134,7 +134,7 @@
   read: 12
   practice: 60
   score: false
-  written: false
+  written: true
 
 # Module D: Noise and randomness
 - num: "12"

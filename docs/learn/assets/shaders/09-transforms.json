@@ -1,0 +1,130 @@
+{
+ "categories": [
+  "Course",
+  "Generator"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art",
+ "description": "Translation, rotation, and scale applied to the space rather than to the shape, with a mode that shows what happens when you forget to compensate the scale.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform int mode;\nuniform int view;\nuniform vec2 origin;\nuniform float turn;\nuniform float scale;\nuniform float stretch;\nuniform float size;\nuniform float rings;\nuniform vec4 warm;\nuniform vec4 cool;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\n\nconst float TAU = 6.28318530718;\n\nmat2 rot(float turns) {\n    float a = turns * TAU;\n    float c = cos(a), s = sin(a);\n    return mat2(c, -s, s, c);\n}\n\n// A cross, so that rotation is unmistakable and non-uniform scale is obvious.\nfloat sdCross(vec2 p, vec2 b, float r) {\n    p = abs(p);\n    if (p.y > p.x) p = p.yx;\n    vec2 q = p - b;\n    float k = max(q.y, q.x);\n    vec2 w = k > 0.0 ? q : vec2(b.y - p.x, -k);\n    return sign(k) * length(max(w, 0.0)) + r;\n}\n\nfloat shape(vec2 p) {\n    return sdCross(p, vec2(size, size * 0.30), -0.02);\n}\n\nvoid main() {\n    vec2 p = (isf_FragNormCoord - 0.5) * RENDERSIZE / RENDERSIZE.y;\n    vec2 t = (origin - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    float d;\n\n    // Every one of these transforms the *coordinate*, not the shape. To move a\n    // shape to the right you subtract from p, because you are asking \"where\n    // would this pixel be if the shape were at the origin\". The transform you\n    // write is the inverse of the transform you see, always.\n    if (mode == 0) {\n        vec2 q = rot(-turn) * (p - t) / scale;\n        // Dividing the coordinate by s shrinks the space, so distances measured\n        // in it are s times too small. Multiplying the result back is what\n        // keeps the field a true distance, which everything downstream needs.\n        d = shape(q) * scale;\n\n    } else if (mode == 1) {\n        vec2 q = rot(-turn) * (p - t) / scale;\n        // The same shape, drawn correctly, with a field that lies about\n        // distance by a factor of `scale`. The outline is right and the\n        // isolines are wrong, which is why this bug survives until the field is\n        // used for something other than a threshold.\n        d = shape(q);\n\n    } else {\n        vec2 q = rot(-turn) * (p - t) / vec2(scale * stretch, scale);\n        // Non-uniform scale cannot be undone by one multiplication, because the\n        // space is now stretched differently along different directions. The\n        // conservative fix is to multiply by the smallest scale factor, which\n        // never over-estimates the distance and therefore never breaks a\n        // raymarcher; it is what Unit 25 has to do in three dimensions.\n        d = shape(q) * min(scale * stretch, scale);\n    }\n\n    float aa = fwidth(d);\n\n    vec3 colour;\n    if (view == 1) {\n        colour = mix(vec3(0.05, 0.06, 0.09), cool.rgb, smoothstep(aa, -aa, d));\n    } else {\n        colour = d > 0.0 ? warm.rgb : cool.rgb;\n        colour *= 1.0 - exp(-7.0 * abs(d));\n        colour *= 0.85 + 0.15 * cos(rings * d);\n        colour = mix(colour, vec3(1.0), 1.0 - smoothstep(0.0, aa * 2.0, abs(d)));\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "id": "09-transforms",
+ "imported": {},
+ "inputs": [
+  {
+   "default": 0,
+   "label": "Scale handling",
+   "labels": [
+    "correct: divide p, multiply d",
+    "wrong: divide p only",
+    "wrong: non-uniform, uncompensated"
+   ],
+   "name": "mode",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  {
+   "default": 0,
+   "label": "View",
+   "labels": [
+    "the field",
+    "the shape only"
+   ],
+   "name": "view",
+   "type": "long",
+   "values": [
+    0,
+    1
+   ]
+  },
+  {
+   "default": [
+    0.5,
+    0.5
+   ],
+   "label": "Translate",
+   "max": [
+    1.0,
+    1.0
+   ],
+   "min": [
+    0.0,
+    0.0
+   ],
+   "name": "origin",
+   "type": "point2D"
+  },
+  {
+   "default": 0.08,
+   "label": "Rotate",
+   "max": 0.5,
+   "min": -0.5,
+   "name": "turn",
+   "type": "float"
+  },
+  {
+   "default": 1.0,
+   "label": "Scale",
+   "max": 3.0,
+   "min": 0.2,
+   "name": "scale",
+   "type": "float"
+  },
+  {
+   "default": 1.0,
+   "label": "Stretch x",
+   "max": 3.0,
+   "min": 0.3,
+   "name": "stretch",
+   "type": "float"
+  },
+  {
+   "default": 0.22,
+   "label": "Size",
+   "max": 0.5,
+   "min": 0.04,
+   "name": "size",
+   "type": "float"
+  },
+  {
+   "default": 90.0,
+   "label": "Isolines",
+   "max": 300.0,
+   "min": 0.0,
+   "name": "rings",
+   "type": "float"
+  },
+  {
+   "default": [
+    0.95,
+    0.62,
+    0.28,
+    1.0
+   ],
+   "label": "Outside",
+   "name": "warm",
+   "type": "color"
+  },
+  {
+   "default": [
+    0.3,
+    0.72,
+    0.95,
+    1.0
+   ],
+   "label": "Inside",
+   "name": "cool",
+   "type": "color"
+  }
+ ],
+ "mode": "fragment",
+ "name": "09-transforms",
+ "passes": [
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"Translation, rotation, and scale applied to the space rather than to the shape, with a mode that shows what happens when you forget to compensate the scale.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\", \"Generator\"],\n  \"INPUTS\": [\n    {\n      \"NAME\": \"mode\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Scale handling\",\n      \"VALUES\": [0, 1, 2],\n      \"LABELS\": [\"correct: divide p, multiply d\", \"wrong: divide p only\", \"wrong: non-uniform, uncompensated\"],\n      \"DEFAULT\": 0\n    },\n    {\n      \"NAME\": \"view\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"View\",\n      \"VALUES\": [0, 1],\n      \"LABELS\": [\"the field\", \"the shape only\"],\n      \"DEFAULT\": 0\n    },\n    { \"NAME\": \"origin\", \"TYPE\": \"point2D\", \"LABEL\": \"Translate\", \"DEFAULT\": [0.5, 0.5], \"MIN\": [0.0, 0.0], \"MAX\": [1.0, 1.0] },\n    { \"NAME\": \"turn\",   \"TYPE\": \"float\",   \"LABEL\": \"Rotate\",    \"DEFAULT\": 0.08, \"MIN\": -0.5, \"MAX\": 0.5 },\n    { \"NAME\": \"scale\",  \"TYPE\": \"float\",   \"LABEL\": \"Scale\",     \"DEFAULT\": 1.00, \"MIN\": 0.20, \"MAX\": 3.00 },\n    { \"NAME\": \"stretch\",\"TYPE\": \"float\",   \"LABEL\": \"Stretch x\", \"DEFAULT\": 1.00, \"MIN\": 0.30, \"MAX\": 3.00 },\n    { \"NAME\": \"size\",   \"TYPE\": \"float\",   \"LABEL\": \"Size\",      \"DEFAULT\": 0.22, \"MIN\": 0.04, \"MAX\": 0.50 },\n    { \"NAME\": \"rings\",  \"TYPE\": \"float\",   \"LABEL\": \"Isolines\",  \"DEFAULT\": 90.0, \"MIN\": 0.0, \"MAX\": 300.0 },\n    { \"NAME\": \"warm\",   \"TYPE\": \"color\",   \"LABEL\": \"Outside\",   \"DEFAULT\": [0.95, 0.62, 0.28, 1.0] },\n    { \"NAME\": \"cool\",   \"TYPE\": \"color\",   \"LABEL\": \"Inside\",    \"DEFAULT\": [0.30, 0.72, 0.95, 1.0] }\n  ]\n}*/\n\nconst float TAU = 6.28318530718;\n\nmat2 rot(float turns) {\n    float a = turns * TAU;\n    float c = cos(a), s = sin(a);\n    return mat2(c, -s, s, c);\n}\n\n// A cross, so that rotation is unmistakable and non-uniform scale is obvious.\nfloat sdCross(vec2 p, vec2 b, float r) {\n    p = abs(p);\n    if (p.y > p.x) p = p.yx;\n    vec2 q = p - b;\n    float k = max(q.y, q.x);\n    vec2 w = k > 0.0 ? q : vec2(b.y - p.x, -k);\n    return sign(k) * length(max(w, 0.0)) + r;\n}\n\nfloat shape(vec2 p) {\n    return sdCross(p, vec2(size, size * 0.30), -0.02);\n}\n\nvoid main() {\n    vec2 p = (isf_FragNormCoord - 0.5) * RENDERSIZE / RENDERSIZE.y;\n    vec2 t = (origin - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    float d;\n\n    // Every one of these transforms the *coordinate*, not the shape. To move a\n    // shape to the right you subtract from p, because you are asking \"where\n    // would this pixel be if the shape were at the origin\". The transform you\n    // write is the inverse of the transform you see, always.\n    if (mode == 0) {\n        vec2 q = rot(-turn) * (p - t) / scale;\n        // Dividing the coordinate by s shrinks the space, so distances measured\n        // in it are s times too small. Multiplying the result back is what\n        // keeps the field a true distance, which everything downstream needs.\n        d = shape(q) * scale;\n\n    } else if (mode == 1) {\n        vec2 q = rot(-turn) * (p - t) / scale;\n        // The same shape, drawn correctly, with a field that lies about\n        // distance by a factor of `scale`. The outline is right and the\n        // isolines are wrong, which is why this bug survives until the field is\n        // used for something other than a threshold.\n        d = shape(q);\n\n    } else {\n        vec2 q = rot(-turn) * (p - t) / vec2(scale * stretch, scale);\n        // Non-uniform scale cannot be undone by one multiplication, because the\n        // space is now stretched differently along different directions. The\n        // conservative fix is to multiply by the smallest scale factor, which\n        // never over-estimates the distance and therefore never breaks a\n        // raymarcher; it is what Unit 25 has to do in three dimensions.\n        d = shape(q) * min(scale * stretch, scale);\n    }\n\n    float aa = fwidth(d);\n\n    vec3 colour;\n    if (view == 1) {\n        colour = mix(vec3(0.05, 0.06, 0.09), cool.rgb, smoothstep(aa, -aa, d));\n    } else {\n        colour = d > 0.0 ? warm.rgb : cool.rgb;\n        colour *= 1.0 - exp(-7.0 * abs(d));\n        colour *= 0.85 + 0.15 * cos(rings * d);\n        colour = mix(colour, vec3(1.0), 1.0 - smoothstep(0.0, aa * 2.0, abs(d)));\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "sourcePath": "library/shaders/09/transforms.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform int mode;\nuniform int view;\nuniform vec2 origin;\nuniform float turn;\nuniform float scale;\nuniform float stretch;\nuniform float size;\nuniform float rings;\nuniform vec4 warm;\nuniform vec4 cool;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}
