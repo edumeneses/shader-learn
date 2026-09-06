@@ -333,6 +333,62 @@
  {
   "categories": [
    "Course",
+   "3D"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. Sphere tracing is John Hart's; the raymarching idiom is Inigo Quilez's.",
+  "description": "The sphere-traced loop, with a two-dimensional cross-section that draws every step's safety circle so the algorithm can be watched rather than imagined.",
+  "id": "24-raymarch",
+  "inputs": 8,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/24/raymarch.fs",
+  "unit": "24"
+ },
+ {
+  "categories": [
+   "Course",
+   "3D"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The distance functions are Inigo Quilez's.",
+  "description": "Eight three-dimensional distance primitives and the operators that combine them, rendered with a step-count view so the cost of each is visible alongside its shape.",
+  "id": "25-fields-3d",
+  "inputs": 11,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/25/fields-3d.fs",
+  "unit": "25"
+ },
+ {
+  "categories": [
+   "Course",
+   "3D"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The soft-shadow estimator is Inigo Quilez's.",
+  "description": "Normals from the field's own gradient, then diffuse, specular, and shadows built one at a time so each term's contribution is separable.",
+  "id": "26-lighting",
+  "inputs": 10,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/26/lighting.fs",
+  "unit": "26"
+ },
+ {
+  "categories": [
+   "Course",
+   "3D"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The occlusion estimator is Inigo Quilez's.",
+  "description": "Ambient occlusion, fog, per-object materials, and one bounce of reflection, each on a switch, with a step-count view so the price of each is visible.",
+  "id": "27-materials",
+  "inputs": 10,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/27/materials.fs",
+  "unit": "27"
+ },
+ {
+  "categories": [
+   "Course",
    "Generator"
   ],
   "credit": "Eduardo Meneses, Learn shader art",
@@ -357,5 +413,19 @@
   "passes": 1,
   "source": "library/shaders/p2/living-surface.fs",
   "unit": "P2"
+ },
+ {
+  "categories": [
+   "Course",
+   "3D"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. Distance functions and estimators after Inigo Quilez.",
+  "description": "The Module G milestone: a raymarched scene assembled from Units 24 to 27, with a step budget, a cost view, and every quality control exposed so it can be tuned down to the machine it has to run on.",
+  "id": "p3-scene",
+  "inputs": 12,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/p3/scene.fs",
+  "unit": "P3"
  }
 ]

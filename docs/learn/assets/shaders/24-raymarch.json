@@ -1,0 +1,100 @@
+{
+ "categories": [
+  "Course",
+  "3D"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art. Sphere tracing is John Hart's; the raymarching idiom is Inigo Quilez's.",
+ "description": "The sphere-traced loop, with a two-dimensional cross-section that draws every step's safety circle so the algorithm can be watched rather than imagined.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform int view;\nuniform vec2 aim;\nuniform float maxSteps;\nuniform float epsilon;\nuniform float stepScale;\nuniform float far;\nuniform float spin;\nuniform bool showCircles;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\n\nconst float TAU = 6.28318530718;\n\nmat2 rot(float a) { return mat2(cos(a), -sin(a), sin(a), cos(a)); }\n\n// --- the 3D scene -----------------------------------------------------------\n\nfloat sdSphere(vec3 p, float r) { return length(p) - r; }\n\nfloat sdBox(vec3 p, vec3 b) {\n    vec3 d = abs(p) - b;\n    return length(max(d, 0.0)) + min(max(d.x, max(d.y, d.z)), 0.0);\n}\n\nfloat map(vec3 p) {\n    float t = TIME * spin;\n    vec3 q = p;\n    q.xz = rot(t) * q.xz;\n    float box = sdBox(q - vec3(0.0, 0.0, 0.0), vec3(0.55)) - 0.08;\n    float ball = sdSphere(p - vec3(0.9 * cos(t * 1.3), 0.35, 0.9 * sin(t * 1.3)), 0.32);\n    float ground = p.y + 0.75;\n    return min(min(box, ball), ground);\n}\n\n// --- the 2D scene, for the cross-section ------------------------------------\n//\n// The same algorithm in two dimensions, because in two dimensions it can be\n// drawn. Everything about the loop is identical; only the number of components\n// changes, which is the point.\n\nfloat map2(vec2 p) {\n    float t = TIME * spin;\n    vec2 q = rot(t) * (p - vec2(0.35, 0.05));\n    vec2 d = abs(q) - vec2(0.30, 0.20);\n    float box = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - 0.06;\n    float ball = length(p - vec2(-0.45, 0.30 + 0.18 * sin(t * 2.0))) - 0.22;\n    float bar = abs(p.y + 0.52) - 0.03;\n    return min(min(box, ball), bar);\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    int limit = int(floor(maxSteps + 0.5));\n\n    if (view == 2) {\n        // The cross-section. A ray leaves the origin, and at each step the\n        // field is asked how far the nearest surface is. That distance is a\n        // radius the ray may advance through without hitting anything, which is\n        // why the circles never overlap a surface and why the method is called\n        // sphere tracing.\n        vec2 ro = vec2(-1.05, -0.15);\n        vec2 rd = normalize((aim - vec2(0.5)) * vec2(2.2, 1.4) - (ro - vec2(0.0)));\n\n        vec3 colour = vec3(0.05, 0.06, 0.09);\n\n        // The scene, as a field, so the reader can see what the ray is asking.\n        float d0 = map2(p);\n        colour = mix(colour, vec3(0.14, 0.17, 0.23), smoothstep(0.0, 0.004, -d0));\n        colour = mix(colour, vec3(0.35, 0.42, 0.55),\n                     smoothstep(fwidth(d0) * 1.5, 0.0, abs(d0)));\n\n        // March, drawing as we go.\n        float travelled = 0.0;\n        int used = 0;\n        for (int i = 0; i < 128; i++) {\n            if (i >= limit) break;\n            vec2 at = ro + rd * travelled;\n            float d = map2(at);\n            used = i;\n\n            if (showCircles) {\n                float ring = abs(length(p - at) - abs(d) * stepScale);\n                float fade = 1.0 - float(i) / float(limit);\n                colour = mix(colour, vec3(0.30, 0.85, 0.80),\n                             smoothstep(fwidth(ring) * 1.6, 0.0, ring) * (0.20 + 0.55 * fade));\n            }\n            // The sample point itself.\n            colour = mix(colour, vec3(1.0, 0.72, 0.25),\n                         smoothstep(0.012, 0.006, length(p - at)));\n\n            if (d < epsilon || travelled > far) break;\n            travelled += d * stepScale;\n        }\n\n        // The ray, drawn under everything as a thin line to its stopping point.\n        vec2 pa = p - ro, ba = rd * travelled;\n        float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);\n        float line = length(pa - ba * h);\n        colour = mix(colour, vec3(0.95, 0.55, 0.20),\n                     smoothstep(0.004, 0.002, line) * 0.7);\n\n        gl_FragColor = vec4(colour, 1.0);\n        return;\n    }\n\n    // --- the ordinary raymarcher ------------------------------------------\n\n    vec3 ro = vec3(0.0, 0.55, 3.0);\n    vec3 rd = normalize(vec3(p, -1.6));\n\n    float travelled = 0.0;\n    int used = 0;\n    bool hit = false;\n\n    // The loop bound is a compile-time constant and the real limit is a\n    // `break`. Some WebGL drivers reject a loop whose bound is a uniform, and a\n    // raymarcher written the natural way fails in a browser and nowhere else.\n    for (int i = 0; i < 128; i++) {\n        if (i >= limit) break;\n        used = i;\n        vec3 at = ro + rd * travelled;\n        float d = map(at);\n        if (d < epsilon) { hit = true; break; }\n        if (travelled > far) break;\n        // Advance by the distance to the nearest surface, which is guaranteed\n        // safe. Scaling it below 1 is the fix for a field that over-estimates;\n        // scaling above 1 is faster and will punch through thin geometry.\n        travelled += d * stepScale;\n    }\n\n    vec3 colour;\n\n    if (view == 1) {\n        // Step count as a heat map. This is the single most useful debugging\n        // view in three-dimensional shader work: it shows exactly where the\n        // marcher is spending its time, and it is almost always at grazing\n        // angles and near silhouettes.\n        float t = float(used) / float(limit);\n        colour = mix(vec3(0.05, 0.10, 0.25), vec3(1.0, 0.95, 0.55), sqrt(t));\n        colour = mix(colour, vec3(1.0, 0.25, 0.25), step(0.985, t));\n\n    } else {\n        if (hit) {\n            // Normals by central differences, which Unit 26 explains properly.\n            vec3 at = ro + rd * travelled;\n            vec2 e = vec2(0.0015, 0.0);\n            vec3 n = normalize(vec3(\n                map(at + e.xyy) - map(at - e.xyy),\n                map(at + e.yxy) - map(at - e.yxy),\n                map(at + e.yyx) - map(at - e.yyx)));\n            float lam = clamp(dot(n, normalize(vec3(0.6, 0.8, 0.4))), 0.0, 1.0);\n            colour = vec3(0.30, 0.55, 0.85) * (0.15 + 0.85 * lam);\n            colour = mix(colour, vec3(0.04, 0.05, 0.08),\n                         1.0 - exp(-0.06 * travelled * travelled));\n        } else {\n            colour = mix(vec3(0.05, 0.07, 0.12), vec3(0.10, 0.13, 0.20), uv.y);\n        }\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "id": "24-raymarch",
+ "imported": {},
+ "inputs": [
+  {
+   "default": 2,
+   "label": "View",
+   "labels": [
+    "the render",
+    "steps taken",
+    "cross-section: watch it march"
+   ],
+   "name": "view",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2
+   ]
+  },
+  {
+   "default": [
+    0.72,
+    0.56
+   ],
+   "label": "Ray direction",
+   "max": [
+    1.0,
+    1.0
+   ],
+   "min": [
+    0.0,
+    0.0
+   ],
+   "name": "aim",
+   "type": "point2D"
+  },
+  {
+   "default": 64.0,
+   "label": "Max steps",
+   "max": 128.0,
+   "min": 4.0,
+   "name": "maxSteps",
+   "type": "float"
+  },
+  {
+   "default": 0.002,
+   "label": "Hit epsilon",
+   "max": 0.08,
+   "min": 0.0002,
+   "name": "epsilon",
+   "type": "float"
+  },
+  {
+   "default": 1.0,
+   "label": "Step scale",
+   "max": 1.6,
+   "min": 0.15,
+   "name": "stepScale",
+   "type": "float"
+  },
+  {
+   "default": 12.0,
+   "label": "Far",
+   "max": 40.0,
+   "min": 2.0,
+   "name": "far",
+   "type": "float"
+  },
+  {
+   "default": 0.1,
+   "label": "Spin",
+   "max": 1.0,
+   "min": 0.0,
+   "name": "spin",
+   "type": "float"
+  },
+  {
+   "default": true,
+   "label": "Draw the safety circles",
+   "name": "showCircles",
+   "type": "bool"
+  }
+ ],
+ "mode": "fragment",
+ "name": "24-raymarch",
+ "passes": [
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"The sphere-traced loop, with a two-dimensional cross-section that draws every step's safety circle so the algorithm can be watched rather than imagined.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art. Sphere tracing is John Hart's; the raymarching idiom is Inigo Quilez's.\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\", \"3D\"],\n  \"INPUTS\": [\n    {\n      \"NAME\": \"view\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"View\",\n      \"VALUES\": [0, 1, 2],\n      \"LABELS\": [\"the render\", \"steps taken\", \"cross-section: watch it march\"],\n      \"DEFAULT\": 2\n    },\n    { \"NAME\": \"aim\",      \"TYPE\": \"point2D\", \"LABEL\": \"Ray direction\", \"DEFAULT\": [0.72, 0.56], \"MIN\": [0.0, 0.0], \"MAX\": [1.0, 1.0] },\n    { \"NAME\": \"maxSteps\", \"TYPE\": \"float\",   \"LABEL\": \"Max steps\",  \"DEFAULT\": 64.0, \"MIN\": 4.0,  \"MAX\": 128.0 },\n    { \"NAME\": \"epsilon\",  \"TYPE\": \"float\",   \"LABEL\": \"Hit epsilon\",\"DEFAULT\": 0.002, \"MIN\": 0.0002, \"MAX\": 0.08 },\n    { \"NAME\": \"stepScale\",\"TYPE\": \"float\",   \"LABEL\": \"Step scale\", \"DEFAULT\": 1.0,  \"MIN\": 0.15, \"MAX\": 1.6 },\n    { \"NAME\": \"far\",      \"TYPE\": \"float\",   \"LABEL\": \"Far\",        \"DEFAULT\": 12.0, \"MIN\": 2.0,  \"MAX\": 40.0 },\n    { \"NAME\": \"spin\",     \"TYPE\": \"float\",   \"LABEL\": \"Spin\",       \"DEFAULT\": 0.10, \"MIN\": 0.0,  \"MAX\": 1.0 },\n    { \"NAME\": \"showCircles\",\"TYPE\": \"bool\",  \"LABEL\": \"Draw the safety circles\", \"DEFAULT\": true }\n  ]\n}*/\n\nconst float TAU = 6.28318530718;\n\nmat2 rot(float a) { return mat2(cos(a), -sin(a), sin(a), cos(a)); }\n\n// --- the 3D scene -----------------------------------------------------------\n\nfloat sdSphere(vec3 p, float r) { return length(p) - r; }\n\nfloat sdBox(vec3 p, vec3 b) {\n    vec3 d = abs(p) - b;\n    return length(max(d, 0.0)) + min(max(d.x, max(d.y, d.z)), 0.0);\n}\n\nfloat map(vec3 p) {\n    float t = TIME * spin;\n    vec3 q = p;\n    q.xz = rot(t) * q.xz;\n    float box = sdBox(q - vec3(0.0, 0.0, 0.0), vec3(0.55)) - 0.08;\n    float ball = sdSphere(p - vec3(0.9 * cos(t * 1.3), 0.35, 0.9 * sin(t * 1.3)), 0.32);\n    float ground = p.y + 0.75;\n    return min(min(box, ball), ground);\n}\n\n// --- the 2D scene, for the cross-section ------------------------------------\n//\n// The same algorithm in two dimensions, because in two dimensions it can be\n// drawn. Everything about the loop is identical; only the number of components\n// changes, which is the point.\n\nfloat map2(vec2 p) {\n    float t = TIME * spin;\n    vec2 q = rot(t) * (p - vec2(0.35, 0.05));\n    vec2 d = abs(q) - vec2(0.30, 0.20);\n    float box = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - 0.06;\n    float ball = length(p - vec2(-0.45, 0.30 + 0.18 * sin(t * 2.0))) - 0.22;\n    float bar = abs(p.y + 0.52) - 0.03;\n    return min(min(box, ball), bar);\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    int limit = int(floor(maxSteps + 0.5));\n\n    if (view == 2) {\n        // The cross-section. A ray leaves the origin, and at each step the\n        // field is asked how far the nearest surface is. That distance is a\n        // radius the ray may advance through without hitting anything, which is\n        // why the circles never overlap a surface and why the method is called\n        // sphere tracing.\n        vec2 ro = vec2(-1.05, -0.15);\n        vec2 rd = normalize((aim - vec2(0.5)) * vec2(2.2, 1.4) - (ro - vec2(0.0)));\n\n        vec3 colour = vec3(0.05, 0.06, 0.09);\n\n        // The scene, as a field, so the reader can see what the ray is asking.\n        float d0 = map2(p);\n        colour = mix(colour, vec3(0.14, 0.17, 0.23), smoothstep(0.0, 0.004, -d0));\n        colour = mix(colour, vec3(0.35, 0.42, 0.55),\n                     smoothstep(fwidth(d0) * 1.5, 0.0, abs(d0)));\n\n        // March, drawing as we go.\n        float travelled = 0.0;\n        int used = 0;\n        for (int i = 0; i < 128; i++) {\n            if (i >= limit) break;\n            vec2 at = ro + rd * travelled;\n            float d = map2(at);\n            used = i;\n\n            if (showCircles) {\n                float ring = abs(length(p - at) - abs(d) * stepScale);\n                float fade = 1.0 - float(i) / float(limit);\n                colour = mix(colour, vec3(0.30, 0.85, 0.80),\n                             smoothstep(fwidth(ring) * 1.6, 0.0, ring) * (0.20 + 0.55 * fade));\n            }\n            // The sample point itself.\n            colour = mix(colour, vec3(1.0, 0.72, 0.25),\n                         smoothstep(0.012, 0.006, length(p - at)));\n\n            if (d < epsilon || travelled > far) break;\n            travelled += d * stepScale;\n        }\n\n        // The ray, drawn under everything as a thin line to its stopping point.\n        vec2 pa = p - ro, ba = rd * travelled;\n        float h = clamp(dot(pa, ba) / max(dot(ba, ba), 1e-6), 0.0, 1.0);\n        float line = length(pa - ba * h);\n        colour = mix(colour, vec3(0.95, 0.55, 0.20),\n                     smoothstep(0.004, 0.002, line) * 0.7);\n\n        gl_FragColor = vec4(colour, 1.0);\n        return;\n    }\n\n    // --- the ordinary raymarcher ------------------------------------------\n\n    vec3 ro = vec3(0.0, 0.55, 3.0);\n    vec3 rd = normalize(vec3(p, -1.6));\n\n    float travelled = 0.0;\n    int used = 0;\n    bool hit = false;\n\n    // The loop bound is a compile-time constant and the real limit is a\n    // `break`. Some WebGL drivers reject a loop whose bound is a uniform, and a\n    // raymarcher written the natural way fails in a browser and nowhere else.\n    for (int i = 0; i < 128; i++) {\n        if (i >= limit) break;\n        used = i;\n        vec3 at = ro + rd * travelled;\n        float d = map(at);\n        if (d < epsilon) { hit = true; break; }\n        if (travelled > far) break;\n        // Advance by the distance to the nearest surface, which is guaranteed\n        // safe. Scaling it below 1 is the fix for a field that over-estimates;\n        // scaling above 1 is faster and will punch through thin geometry.\n        travelled += d * stepScale;\n    }\n\n    vec3 colour;\n\n    if (view == 1) {\n        // Step count as a heat map. This is the single most useful debugging\n        // view in three-dimensional shader work: it shows exactly where the\n        // marcher is spending its time, and it is almost always at grazing\n        // angles and near silhouettes.\n        float t = float(used) / float(limit);\n        colour = mix(vec3(0.05, 0.10, 0.25), vec3(1.0, 0.95, 0.55), sqrt(t));\n        colour = mix(colour, vec3(1.0, 0.25, 0.25), step(0.985, t));\n\n    } else {\n        if (hit) {\n            // Normals by central differences, which Unit 26 explains properly.\n            vec3 at = ro + rd * travelled;\n            vec2 e = vec2(0.0015, 0.0);\n            vec3 n = normalize(vec3(\n                map(at + e.xyy) - map(at - e.xyy),\n                map(at + e.yxy) - map(at - e.yxy),\n                map(at + e.yyx) - map(at - e.yyx)));\n            float lam = clamp(dot(n, normalize(vec3(0.6, 0.8, 0.4))), 0.0, 1.0);\n            colour = vec3(0.30, 0.55, 0.85) * (0.15 + 0.85 * lam);\n            colour = mix(colour, vec3(0.04, 0.05, 0.08),\n                         1.0 - exp(-0.06 * travelled * travelled));\n        } else {\n            colour = mix(vec3(0.05, 0.07, 0.12), vec3(0.10, 0.13, 0.20), uv.y);\n        }\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "sourcePath": "library/shaders/24/raymarch.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform int view;\nuniform vec2 aim;\nuniform float maxSteps;\nuniform float epsilon;\nuniform float stepScale;\nuniform float far;\nuniform float spin;\nuniform bool showCircles;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}

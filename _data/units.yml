@@ -269,7 +269,7 @@
   read: 15
   practice: 35
   score: false
-  written: false
+  written: true
 - num: "25"
   module: G
   kind: lesson
@@ -278,7 +278,7 @@
   read: 14
   practice: 30
   score: false
-  written: false
+  written: true
 - num: "26"
   module: G
   kind: lesson
@@ -287,7 +287,7 @@
   read: 14
   practice: 30
   score: false
-  written: false
+  written: true
 - num: "27"
   module: G
   kind: lesson
@@ -296,7 +296,7 @@
   read: 14
   practice: 30
   score: false
-  written: false
+  written: true
 - num: "P3"
   module: G
   kind: milestone
@@ -305,7 +305,7 @@
   read: 13
   practice: 75
   score: false
-  written: false
+  written: true
 
 # -- Phase 3 ---------------------------------------------------------------
 # Module H: Formats and stages

@@ -1,0 +1,154 @@
+{
+ "categories": [
+  "Course",
+  "3D"
+ ],
+ "credit": "Eduardo Meneses, Learn shader art. The distance functions are Inigo Quilez's.",
+ "description": "Eight three-dimensional distance primitives and the operators that combine them, rendered with a step-count view so the cost of each is visible alongside its shape.",
+ "fragment": "#version 300 es\nprecision highp float;\nprecision highp int;\nprecision highp sampler2D;\n\nin vec2 isf_FragNormCoord;\nin vec2 isf_FragCoord;\nout vec4 isf_FragColor;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\n#define gl_FragColor isf_FragColor\n\nuniform int shape;\nuniform int op;\nuniform int view;\nuniform vec2 orbit;\nuniform float size;\nuniform float blend;\nuniform float cutter;\nuniform float offset;\nuniform float repeat;\nuniform float stepScale;\nuniform float spin;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\n\nconst float TAU = 6.28318530718;\nmat2 rot(float a) { return mat2(cos(a), -sin(a), sin(a), cos(a)); }\n\nfloat sdSphere(vec3 p, float r) { return length(p) - r; }\n\nfloat sdBox(vec3 p, vec3 b) {\n    vec3 d = abs(p) - b;\n    return length(max(d, 0.0)) + min(max(d.x, max(d.y, d.z)), 0.0);\n}\n\n// The torus is the clearest example of dimension reduction: measure the\n// distance to the circle in xz, pair it with y, and you have a 2D problem.\nfloat sdTorus(vec3 p, vec2 t) {\n    vec2 q = vec2(length(p.xz) - t.x, p.y);\n    return length(q) - t.y;\n}\n\nfloat sdCapsule(vec3 p, vec3 a, vec3 b, float r) {\n    vec3 pa = p - a, ba = b - a;\n    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);\n    return length(pa - ba * h) - r;\n}\n\nfloat sdCylinder(vec3 p, float h, float r) {\n    vec2 d = abs(vec2(length(p.xz), p.y)) - vec2(r, h);\n    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));\n}\n\nfloat sdOctahedron(vec3 p, float s) {\n    p = abs(p);\n    return (p.x + p.y + p.z - s) * 0.57735027;\n}\n\n// A gyroid is not a distance field at all: it is an implicit surface, and the\n// value it returns is not a distance to anything. It is included precisely\n// because of that. Dividing by a bound on its gradient makes it *safe* to march\n// rather than correct, and the step-count view shows what that costs.\nfloat sdGyroid(vec3 p, float scale) {\n    p *= scale;\n    return (dot(sin(p), cos(p.zxy))) / scale * 0.55;\n}\n\nfloat smin(float a, float b, float k) {\n    float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);\n    return mix(b, a, h) - k * h * (1.0 - h);\n}\n\nfloat primitive(vec3 p) {\n    if (shape == 0) return sdSphere(p, size);\n    if (shape == 1) return sdBox(p, vec3(size * 0.8));\n    if (shape == 2) return sdBox(p, vec3(size * 0.8) - 0.12) - 0.12;\n    if (shape == 3) return sdTorus(p, vec2(size, size * 0.35));\n    if (shape == 4) return sdCapsule(p, vec3(0.0, -size, 0.0), vec3(0.0, size, 0.0), size * 0.45);\n    if (shape == 5) return sdCylinder(p, size * 0.8, size * 0.6);\n    if (shape == 6) return sdOctahedron(p, size * 1.2);\n    return sdGyroid(p, 5.0 / max(size, 0.2));\n}\n\nfloat map(vec3 p) {\n    float t = TIME * spin * TAU;\n    vec3 q = p;\n    q.xz = rot(t) * q.xz;\n    q.yz = rot(t * 0.6) * q.yz;\n\n    // Domain repetition, unchanged from Unit 10 except for the extra component.\n    if (repeat > 0.05) {\n        float c = 3.4 / repeat;\n        q = mod(q + 0.5 * c, c) - 0.5 * c;\n    }\n\n    float a = primitive(q);\n    if (op == 0) return a;\n\n    float b = sdSphere(q - vec3(offset, 0.0, 0.0), cutter);\n    if (op == 1) return min(a, b);\n    if (op == 2) return smin(a, b, blend);\n    if (op == 3) return max(a, -b);\n    return max(a, b);\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    // An orbit camera, built from a target and two angles. Every raymarched\n    // scene in this course uses this, and it is worth having as a habit: a\n    // camera that cannot be moved is a scene you cannot inspect.\n    float yaw = (orbit.x - 0.5) * TAU;\n    float pitch = (orbit.y - 0.5) * 2.4;\n    vec3 ro = vec3(0.0, 0.0, 3.4);\n    ro.yz = rot(pitch) * ro.yz;\n    ro.xz = rot(yaw) * ro.xz;\n\n    vec3 fw = normalize(-ro);\n    vec3 rt = normalize(cross(vec3(0.0, 1.0, 0.0), fw));\n    vec3 up = cross(fw, rt);\n    vec3 rd = normalize(p.x * rt + p.y * up + 1.7 * fw);\n\n    float travelled = 0.0;\n    int used = 0;\n    bool hit = false;\n    for (int i = 0; i < 128; i++) {\n        used = i;\n        vec3 at = ro + rd * travelled;\n        float d = map(at);\n        if (d < 0.0012) { hit = true; break; }\n        if (travelled > 14.0) break;\n        travelled += d * stepScale;\n    }\n\n    vec3 colour;\n\n    if (view == 1) {\n        float t = float(used) / 128.0;\n        colour = mix(vec3(0.05, 0.10, 0.25), vec3(1.0, 0.95, 0.55), sqrt(t));\n        colour = mix(colour, vec3(1.0, 0.25, 0.25), step(0.97, t));\n    } else if (hit) {\n        vec3 at = ro + rd * travelled;\n        vec2 e = vec2(0.0012, 0.0);\n        vec3 n = normalize(vec3(\n            map(at + e.xyy) - map(at - e.xyy),\n            map(at + e.yxy) - map(at - e.yxy),\n            map(at + e.yyx) - map(at - e.yyx)));\n        float key = clamp(dot(n, normalize(vec3(0.7, 0.8, 0.5))), 0.0, 1.0);\n        float fill = clamp(dot(n, normalize(vec3(-0.6, 0.2, 0.5))), 0.0, 1.0);\n        colour = vec3(0.95, 0.62, 0.30) * key\n               + vec3(0.20, 0.34, 0.60) * fill * 0.7\n               + vec3(0.05, 0.06, 0.10);\n        colour = mix(colour, vec3(0.04, 0.05, 0.08), 1.0 - exp(-0.02 * travelled * travelled));\n    } else {\n        colour = mix(vec3(0.05, 0.06, 0.10), vec3(0.09, 0.11, 0.17), uv.y);\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "id": "25-fields-3d",
+ "imported": {},
+ "inputs": [
+  {
+   "default": 3,
+   "label": "Primitive",
+   "labels": [
+    "sphere",
+    "box",
+    "rounded box",
+    "torus",
+    "capsule",
+    "cylinder",
+    "octahedron",
+    "gyroid"
+   ],
+   "name": "shape",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  {
+   "default": 2,
+   "label": "Combined with a sphere by",
+   "labels": [
+    "nothing",
+    "union",
+    "smooth union",
+    "subtraction",
+    "intersection"
+   ],
+   "name": "op",
+   "type": "long",
+   "values": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "default": 0,
+   "label": "View",
+   "labels": [
+    "shaded",
+    "steps taken"
+   ],
+   "name": "view",
+   "type": "long",
+   "values": [
+    0,
+    1
+   ]
+  },
+  {
+   "default": [
+    0.5,
+    0.55
+   ],
+   "label": "Camera",
+   "max": [
+    1.0,
+    1.0
+   ],
+   "min": [
+    0.0,
+    0.0
+   ],
+   "name": "orbit",
+   "type": "point2D"
+  },
+  {
+   "default": 0.62,
+   "label": "Size",
+   "max": 1.2,
+   "min": 0.15,
+   "name": "size",
+   "type": "float"
+  },
+  {
+   "default": 0.22,
+   "label": "Smoothing",
+   "max": 0.6,
+   "min": 0.01,
+   "name": "blend",
+   "type": "float"
+  },
+  {
+   "default": 0.55,
+   "label": "Sphere size",
+   "max": 1.2,
+   "min": 0.05,
+   "name": "cutter",
+   "type": "float"
+  },
+  {
+   "default": 0.55,
+   "label": "Sphere offset",
+   "max": 1.5,
+   "min": -1.5,
+   "name": "offset",
+   "type": "float"
+  },
+  {
+   "default": 0.0,
+   "label": "Repeat",
+   "max": 4.0,
+   "min": 0.0,
+   "name": "repeat",
+   "type": "float"
+  },
+  {
+   "default": 0.85,
+   "label": "Step scale",
+   "max": 1.2,
+   "min": 0.1,
+   "name": "stepScale",
+   "type": "float"
+  },
+  {
+   "default": 0.08,
+   "label": "Spin",
+   "max": 0.6,
+   "min": 0.0,
+   "name": "spin",
+   "type": "float"
+  }
+ ],
+ "mode": "fragment",
+ "name": "25-fields-3d",
+ "passes": [
+  {}
+ ],
+ "source": "/*{\n  \"DESCRIPTION\": \"Eight three-dimensional distance primitives and the operators that combine them, rendered with a step-count view so the cost of each is visible alongside its shape.\",\n  \"CREDIT\": \"Eduardo Meneses, Learn shader art. The distance functions are Inigo Quilez's.\",\n  \"ISFVSN\": \"2.0\",\n  \"CATEGORIES\": [\"Course\", \"3D\"],\n  \"INPUTS\": [\n    {\n      \"NAME\": \"shape\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Primitive\",\n      \"VALUES\": [0, 1, 2, 3, 4, 5, 6, 7],\n      \"LABELS\": [\"sphere\", \"box\", \"rounded box\", \"torus\", \"capsule\", \"cylinder\", \"octahedron\", \"gyroid\"],\n      \"DEFAULT\": 3\n    },\n    {\n      \"NAME\": \"op\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"Combined with a sphere by\",\n      \"VALUES\": [0, 1, 2, 3, 4],\n      \"LABELS\": [\"nothing\", \"union\", \"smooth union\", \"subtraction\", \"intersection\"],\n      \"DEFAULT\": 2\n    },\n    {\n      \"NAME\": \"view\",\n      \"TYPE\": \"long\",\n      \"LABEL\": \"View\",\n      \"VALUES\": [0, 1],\n      \"LABELS\": [\"shaded\", \"steps taken\"],\n      \"DEFAULT\": 0\n    },\n    { \"NAME\": \"orbit\",    \"TYPE\": \"point2D\", \"LABEL\": \"Camera\",     \"DEFAULT\": [0.5, 0.55], \"MIN\": [0.0, 0.0], \"MAX\": [1.0, 1.0] },\n    { \"NAME\": \"size\",     \"TYPE\": \"float\",   \"LABEL\": \"Size\",       \"DEFAULT\": 0.62, \"MIN\": 0.15, \"MAX\": 1.2 },\n    { \"NAME\": \"blend\",    \"TYPE\": \"float\",   \"LABEL\": \"Smoothing\",  \"DEFAULT\": 0.22, \"MIN\": 0.01, \"MAX\": 0.6 },\n    { \"NAME\": \"cutter\",   \"TYPE\": \"float\",   \"LABEL\": \"Sphere size\",\"DEFAULT\": 0.55, \"MIN\": 0.05, \"MAX\": 1.2 },\n    { \"NAME\": \"offset\",   \"TYPE\": \"float\",   \"LABEL\": \"Sphere offset\",\"DEFAULT\": 0.55, \"MIN\": -1.5, \"MAX\": 1.5 },\n    { \"NAME\": \"repeat\",   \"TYPE\": \"float\",   \"LABEL\": \"Repeat\",     \"DEFAULT\": 0.0,  \"MIN\": 0.0, \"MAX\": 4.0 },\n    { \"NAME\": \"stepScale\",\"TYPE\": \"float\",   \"LABEL\": \"Step scale\", \"DEFAULT\": 0.85, \"MIN\": 0.1, \"MAX\": 1.2 },\n    { \"NAME\": \"spin\",     \"TYPE\": \"float\",   \"LABEL\": \"Spin\",       \"DEFAULT\": 0.08, \"MIN\": 0.0, \"MAX\": 0.6 }\n  ]\n}*/\n\nconst float TAU = 6.28318530718;\nmat2 rot(float a) { return mat2(cos(a), -sin(a), sin(a), cos(a)); }\n\nfloat sdSphere(vec3 p, float r) { return length(p) - r; }\n\nfloat sdBox(vec3 p, vec3 b) {\n    vec3 d = abs(p) - b;\n    return length(max(d, 0.0)) + min(max(d.x, max(d.y, d.z)), 0.0);\n}\n\n// The torus is the clearest example of dimension reduction: measure the\n// distance to the circle in xz, pair it with y, and you have a 2D problem.\nfloat sdTorus(vec3 p, vec2 t) {\n    vec2 q = vec2(length(p.xz) - t.x, p.y);\n    return length(q) - t.y;\n}\n\nfloat sdCapsule(vec3 p, vec3 a, vec3 b, float r) {\n    vec3 pa = p - a, ba = b - a;\n    float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);\n    return length(pa - ba * h) - r;\n}\n\nfloat sdCylinder(vec3 p, float h, float r) {\n    vec2 d = abs(vec2(length(p.xz), p.y)) - vec2(r, h);\n    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0));\n}\n\nfloat sdOctahedron(vec3 p, float s) {\n    p = abs(p);\n    return (p.x + p.y + p.z - s) * 0.57735027;\n}\n\n// A gyroid is not a distance field at all: it is an implicit surface, and the\n// value it returns is not a distance to anything. It is included precisely\n// because of that. Dividing by a bound on its gradient makes it *safe* to march\n// rather than correct, and the step-count view shows what that costs.\nfloat sdGyroid(vec3 p, float scale) {\n    p *= scale;\n    return (dot(sin(p), cos(p.zxy))) / scale * 0.55;\n}\n\nfloat smin(float a, float b, float k) {\n    float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);\n    return mix(b, a, h) - k * h * (1.0 - h);\n}\n\nfloat primitive(vec3 p) {\n    if (shape == 0) return sdSphere(p, size);\n    if (shape == 1) return sdBox(p, vec3(size * 0.8));\n    if (shape == 2) return sdBox(p, vec3(size * 0.8) - 0.12) - 0.12;\n    if (shape == 3) return sdTorus(p, vec2(size, size * 0.35));\n    if (shape == 4) return sdCapsule(p, vec3(0.0, -size, 0.0), vec3(0.0, size, 0.0), size * 0.45);\n    if (shape == 5) return sdCylinder(p, size * 0.8, size * 0.6);\n    if (shape == 6) return sdOctahedron(p, size * 1.2);\n    return sdGyroid(p, 5.0 / max(size, 0.2));\n}\n\nfloat map(vec3 p) {\n    float t = TIME * spin * TAU;\n    vec3 q = p;\n    q.xz = rot(t) * q.xz;\n    q.yz = rot(t * 0.6) * q.yz;\n\n    // Domain repetition, unchanged from Unit 10 except for the extra component.\n    if (repeat > 0.05) {\n        float c = 3.4 / repeat;\n        q = mod(q + 0.5 * c, c) - 0.5 * c;\n    }\n\n    float a = primitive(q);\n    if (op == 0) return a;\n\n    float b = sdSphere(q - vec3(offset, 0.0, 0.0), cutter);\n    if (op == 1) return min(a, b);\n    if (op == 2) return smin(a, b, blend);\n    if (op == 3) return max(a, -b);\n    return max(a, b);\n}\n\nvoid main() {\n    vec2 uv = isf_FragNormCoord;\n    vec2 p = (uv - 0.5) * RENDERSIZE / RENDERSIZE.y;\n\n    // An orbit camera, built from a target and two angles. Every raymarched\n    // scene in this course uses this, and it is worth having as a habit: a\n    // camera that cannot be moved is a scene you cannot inspect.\n    float yaw = (orbit.x - 0.5) * TAU;\n    float pitch = (orbit.y - 0.5) * 2.4;\n    vec3 ro = vec3(0.0, 0.0, 3.4);\n    ro.yz = rot(pitch) * ro.yz;\n    ro.xz = rot(yaw) * ro.xz;\n\n    vec3 fw = normalize(-ro);\n    vec3 rt = normalize(cross(vec3(0.0, 1.0, 0.0), fw));\n    vec3 up = cross(fw, rt);\n    vec3 rd = normalize(p.x * rt + p.y * up + 1.7 * fw);\n\n    float travelled = 0.0;\n    int used = 0;\n    bool hit = false;\n    for (int i = 0; i < 128; i++) {\n        used = i;\n        vec3 at = ro + rd * travelled;\n        float d = map(at);\n        if (d < 0.0012) { hit = true; break; }\n        if (travelled > 14.0) break;\n        travelled += d * stepScale;\n    }\n\n    vec3 colour;\n\n    if (view == 1) {\n        float t = float(used) / 128.0;\n        colour = mix(vec3(0.05, 0.10, 0.25), vec3(1.0, 0.95, 0.55), sqrt(t));\n        colour = mix(colour, vec3(1.0, 0.25, 0.25), step(0.97, t));\n    } else if (hit) {\n        vec3 at = ro + rd * travelled;\n        vec2 e = vec2(0.0012, 0.0);\n        vec3 n = normalize(vec3(\n            map(at + e.xyy) - map(at - e.xyy),\n            map(at + e.yxy) - map(at - e.yxy),\n            map(at + e.yyx) - map(at - e.yyx)));\n        float key = clamp(dot(n, normalize(vec3(0.7, 0.8, 0.5))), 0.0, 1.0);\n        float fill = clamp(dot(n, normalize(vec3(-0.6, 0.2, 0.5))), 0.0, 1.0);\n        colour = vec3(0.95, 0.62, 0.30) * key\n               + vec3(0.20, 0.34, 0.60) * fill * 0.7\n               + vec3(0.05, 0.06, 0.10);\n        colour = mix(colour, vec3(0.04, 0.05, 0.08), 1.0 - exp(-0.02 * travelled * travelled));\n    } else {\n        colour = mix(vec3(0.05, 0.06, 0.10), vec3(0.09, 0.11, 0.17), uv.y);\n    }\n\n    gl_FragColor = vec4(colour, 1.0);\n}\n",
+ "sourcePath": "library/shaders/25/fields-3d.fs",
+ "vertex": "#version 300 es\nprecision highp float;\nprecision highp int;\n\nin vec2 isf_position;\nout vec2 isf_FragNormCoord;\nout vec2 isf_FragCoord;\n\nuniform vec2 RENDERSIZE;\nuniform float TIME;\nuniform float TIMEDELTA;\nuniform vec4 DATE;\nuniform int FRAMEINDEX;\nuniform int PASSINDEX;\n\nvoid isf_vertShaderInit() {\n    gl_Position = vec4(isf_position, 0.0, 1.0);\n    isf_FragNormCoord = isf_position * 0.5 + 0.5;\n    isf_FragCoord = isf_FragNormCoord * RENDERSIZE;\n}\n\nuniform int shape;\nuniform int op;\nuniform int view;\nuniform vec2 orbit;\nuniform float size;\nuniform float blend;\nuniform float cutter;\nuniform float offset;\nuniform float repeat;\nuniform float stepScale;\nuniform float spin;\n\nvec4 isf_texel(sampler2D tex, vec2 normCoord, bool flip) {\n    vec2 c = flip ? vec2(normCoord.x, 1.0 - normCoord.y) : normCoord;\n    return texture(tex, c);\n}\n\n\n\nvoid main() {\n    isf_vertShaderInit();\n}\n"
+}
