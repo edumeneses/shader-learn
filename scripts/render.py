@@ -302,23 +302,39 @@ class Renderer:
     # -- uniforms ----------------------------------------------------------
 
     def _set(self, name: str, value: Any) -> None:
+        """Write a uniform, coercing to what the program actually declared.
+
+        The coercion is not a convenience. A command line says `--set space=0`
+        and cannot know whether `space` is a float or an int, and moderngl
+        raises rather than converting; without this, an ISF `long` input is
+        unsettable from the shell and the figure silently renders its default.
+        """
         member = self.program.get(name, None)
         if member is None:
             return  # the compiler dropped an unused uniform; not an error
+        fmt = getattr(member, "fmt", "")
         try:
-            if isinstance(value, (list, tuple)):
-                member.value = tuple(float(v) for v in value)
-            elif isinstance(value, bool):
-                member.value = value
-            elif isinstance(value, int) and member.__class__.__name__ == "Uniform" \
-                    and getattr(member, "fmt", "") == "1i":
-                member.value = value
+            if fmt.endswith("i") or fmt.endswith("I"):
+                if isinstance(value, (list, tuple)):
+                    member.value = tuple(int(round(float(v))) for v in value)
+                else:
+                    member.value = int(round(float(value)))
+            elif fmt.endswith("f"):
+                count = int(fmt[0]) if fmt and fmt[0].isdigit() else 1
+                if isinstance(value, (list, tuple)):
+                    member.value = tuple(float(v) for v in value[:count])
+                elif count == 1:
+                    member.value = float(value)
+                else:
+                    member.value = tuple([float(value)] * count)
+            elif isinstance(value, (list, tuple)):
+                member.value = tuple(value)
             else:
                 member.value = value
-        except Exception:
-            # A vec2 handed a scalar, most often. Report rather than render a
-            # figure that silently ignored a parameter.
-            raise SystemExit(f"cannot set uniform {name!r} to {value!r}")
+        except Exception as exc:
+            raise SystemExit(
+                f"cannot set uniform {name!r} (declared as {fmt!r}) to {value!r}: {exc}"
+            )
 
     def _bind_images(self) -> None:
         unit = 0

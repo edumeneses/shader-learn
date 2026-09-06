@@ -22,7 +22,7 @@
   read: 12
   practice: 0
   score: false
-  written: false
+  written: true
 - num: "01"
   module: A
   kind: lesson
@@ -31,7 +31,7 @@
   read: 12
   practice: 20
   score: true
-  written: false
+  written: true
 - num: "02"
   module: A
   kind: lesson
@@ -40,7 +40,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 
 # Module B: Coordinates and colour
 - num: "03"
@@ -51,7 +51,7 @@
   read: 12
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "04"
   module: B
   kind: lesson

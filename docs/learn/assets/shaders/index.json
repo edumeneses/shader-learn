@@ -4,12 +4,36 @@
    "Generator",
    "Course"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
-  "description": "A distance field to a circle, coloured by a palette, with every control exposed as a named parameter rather than a hard-coded number.",
+  "credit": "Eduardo Meneses, Learn shader art. Palette after Inigo Quilez.",
+  "description": "The course in one shader: a signed distance field, a cosine palette, an antialiased edge, and every number exposed as a named parameter.",
   "id": "00-hello-field",
-  "inputs": 6,
+  "inputs": 8,
   "mode": "fragment",
   "passes": 1,
   "source": "library/shaders/00/hello-field.fs"
+ },
+ {
+  "categories": [
+   "Course"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "The four smallest useful fragment shaders, one after another: a flat colour, the coordinate as colour, a single channel, and the coordinate moved by time.",
+  "id": "02-first-steps",
+  "inputs": 4,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/02/first-steps.fs"
+ },
+ {
+  "categories": [
+   "Course"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "The same circle drawn in three coordinate spaces, so the aspect-ratio mistake and its two fixes are visible side by side.",
+  "id": "03-aspect",
+  "inputs": 5,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/03/aspect.fs"
  }
 ]
