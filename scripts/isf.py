@@ -491,12 +491,22 @@ def _uniform_declarations(shader: ISFShader) -> str:
             lines.append(f"uniform {glsl_type} {inp.name};")
     # Pass targets are readable by later passes, and a PERSISTENT target is
     # readable by the pass that writes it, which is how feedback is written.
+    #
+    # De-duplicated, because several passes may name the same target: that is
+    # how a simulation takes several steps in one frame, and declaring its
+    # sampler once per pass is a redefinition the driver rejects with an error
+    # pointing at the generated source rather than at the shader.
+    declared: set[str] = set()
     for p in shader.passes:
-        if p.target:
+        if p.target and p.target not in declared:
+            declared.add(p.target)
             lines.append(f"uniform sampler2D _{p.target};")
             lines.append(f"uniform vec2 _{p.target}_imgSize;")
             lines.append(f"uniform bool _{p.target}_flip;")
     for name in shader.imported:
+        if name in declared:
+            continue
+        declared.add(name)
         lines.append(f"uniform sampler2D _{name};")
         lines.append(f"uniform vec2 _{name}_imgSize;")
         lines.append(f"uniform bool _{name}_flip;")

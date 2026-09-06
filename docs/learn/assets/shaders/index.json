@@ -221,6 +221,47 @@
  },
  {
   "categories": [
+   "Course"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "Easing curves plotted above the motion they produce, with phase offsets, so the shape of a curve and the feel of a movement can be compared directly.",
+  "id": "17-time",
+  "inputs": 8,
+  "mode": "fragment",
+  "passes": 1,
+  "source": "library/shaders/17/time.fs",
+  "unit": "17"
+ },
+ {
+  "categories": [
+   "Course",
+   "Feedback"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "A persistent buffer that reads its own previous frame through a transform, which is the whole of visual feedback: trails, tunnels, spirals, and decay.",
+  "id": "18-feedback",
+  "inputs": 10,
+  "mode": "fragment",
+  "passes": 2,
+  "source": "library/shaders/18/feedback.fs",
+  "unit": "18"
+ },
+ {
+  "categories": [
+   "Course",
+   "Simulation"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art. The Gray-Scott model is Pearson's parameterisation.",
+  "description": "A Gray-Scott reaction-diffusion simulation held entirely in a persistent float buffer: two chemicals, four numbers, and a whole zoo of patterns.",
+  "id": "19-reaction",
+  "inputs": 12,
+  "mode": "fragment",
+  "passes": 5,
+  "source": "library/shaders/19/reaction.fs",
+  "unit": "19"
+ },
+ {
+  "categories": [
    "Course",
    "Generator"
   ],

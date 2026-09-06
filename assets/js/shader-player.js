@@ -839,7 +839,9 @@
       this._targets = Object.create(null);
       const sizes = Object.create(null);
       for (const pass of this._manifest.passes) {
-        if (!pass.target) continue;
+        // Several passes may name the same target, which is how a simulation
+        // steps more than once per frame. One buffer.
+        if (!pass.target || this._targets[pass.target]) continue;
         const pw = evalSize(pass.width, w, h, sizes);
         const ph = evalSize(pass.height, w, h, sizes);
         sizes[pass.target] = { width: pw, height: ph };
@@ -950,14 +952,20 @@
         gl.clearColor(0, 0, 0, 1);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.drawArrays(gl.TRIANGLES, 0, 3);
-      }
 
-      for (const key of Object.keys(this._targets)) {
-        const t = this._targets[key];
-        if (t.persistent) {
-          const tmp = t.front;
-          t.front = t.back;
-          t.back = tmp;
+        // A persistent target swaps immediately after the pass that wrote it,
+        // not at the end of the frame. A later pass in the same frame then
+        // reads what was just written, and several passes naming the same
+        // target perform several real steps instead of overwriting each other.
+        // scripts/render.py does the same; the two must agree or a simulation
+        // runs at a different speed in the page than in the figure.
+        if (pass.target) {
+          const t = this._targets[pass.target];
+          if (t.persistent) {
+            const tmp = t.front;
+            t.front = t.back;
+            t.back = tmp;
+          }
         }
       }
 

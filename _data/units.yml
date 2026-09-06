@@ -202,7 +202,7 @@
   read: 13
   practice: 25
   score: false
-  written: false
+  written: true
 - num: "18"
   module: E
   kind: lesson
@@ -211,7 +211,7 @@
   read: 14
   practice: 30
   score: false
-  written: false
+  written: true
 - num: "19"
   module: E
   kind: lesson
@@ -220,7 +220,7 @@
   read: 14
   practice: 35
   score: false
-  written: false
+  written: true
 
 # Module F: Images and processing
 - num: "20"

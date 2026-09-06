@@ -283,7 +283,9 @@ class Renderer:
         self.targets: dict[str, Target] = {}
         sizes: dict[str, tuple[int, int]] = {}
         for p in self.shader.passes:
-            if not p.target:
+            if not p.target or p.target in self.targets:
+                # Several passes may name the same target, which is how a
+                # simulation steps more than once per frame. One buffer.
                 continue
             w = isf.eval_size(p.width, self.width, self.height, sizes)
             h = isf.eval_size(p.height, self.width, self.height, sizes)
@@ -294,6 +296,11 @@ class Renderer:
 
         self.screen = self.ctx.texture((self.width, self.height), 4, dtype="f1")
         self.screen_fbo = self.ctx.framebuffer(color_attachments=[self.screen])
+
+        # True when any pass writes a target it will read again next frame.
+        # The caller needs this: such a shader has to be stepped from frame
+        # zero rather than sampled at an instant.
+        self.has_state = any(p.persistent for p in self.shader.passes)
 
         self.image_units: dict[str, Any] = {}
         self._black = self.ctx.texture((1, 1), 4, data=b"\x00\x00\x00\xff")
@@ -383,8 +390,15 @@ class Renderer:
             self.ctx.clear(0.0, 0.0, 0.0, 0.0)
             self.vao.render(moderngl.TRIANGLES)
 
-        for target in self.targets.values():
-            target.swap()
+            # A persistent target swaps immediately after the pass that wrote
+            # it, not at the end of the frame. Two consequences, both wanted:
+            # a later pass in the same frame reads what was just written rather
+            # than last frame's copy, and several passes naming the same target
+            # perform several real steps instead of overwriting each other.
+            # A simulation that needs more than one step per displayed frame,
+            # which Gray-Scott does, is impossible without this.
+            if p.target:
+                self.targets[p.target].swap()
 
         # A shader whose last pass wrote to a target rather than to the screen
         # is still expected to show something: ISF's convention is that the
@@ -556,6 +570,9 @@ class Job:
     nvenc: bool = True
     # Posters for clips are downscaled; a still figure is written full size.
     poster_width: int | None = 960
+    # Frames to run before the first recorded one, for a shader whose picture
+    # takes a moment to build. Only meaningful with a persistent pass.
+    settle: int = 0
 
 
 def defaults_for(shader: isf.ISFShader) -> dict[str, Any]:
@@ -609,6 +626,12 @@ def run(job: Job) -> list[Path]:
 
     def frame_stream() -> Iterable[bytes]:
         nonlocal poster_frame
+        for i in range(-job.settle, 0):
+            t = i / job.fps
+            frame_values = dict(values)
+            for name, auto in job.automation.items():
+                frame_values[name] = auto.at(0.0)
+            renderer.render_frame(t, dt, i, frame_values)
         for i in range(frames):
             t = i / job.fps
             frame_values = dict(values)
@@ -638,15 +661,24 @@ def run(job: Job) -> list[Path]:
         if "mp4" not in job.formats:
             mp4.unlink(missing_ok=True)
     elif "png" in job.formats:
-        t = job.poster_time if job.poster_time is not None else 0.0
-        i = int(round(t * job.fps))
-        if audio is not None:
-            renderer.attach_audio(audio[0][min(i, frames - 1)],
-                                  audio[1][min(i, frames - 1)])
-        frame_values = dict(values)
-        for name, auto in job.automation.items():
-            frame_values[name] = auto.at(t)
-        poster_frame = renderer.render_frame(t, dt, i, frame_values)
+        target_time = job.poster_time if job.poster_time is not None else 0.0
+        target = int(round(target_time * job.fps))
+
+        # A shader with a persistent pass cannot be sampled at an instant. Its
+        # frame depends on every frame before it, so a still of a feedback
+        # shader has to be *stepped* to, not jumped to. Rendering one frame of
+        # such a shader gives an almost empty buffer, which looks like a broken
+        # shader rather than like a missing simulation.
+        start = 0 if renderer.has_state else target
+        for i in range(start, target + 1):
+            t = i / job.fps
+            if audio is not None:
+                renderer.attach_audio(audio[0][min(i, frames - 1)],
+                                      audio[1][min(i, frames - 1)])
+            frame_values = dict(values)
+            for name, auto in job.automation.items():
+                frame_values[name] = auto.at(t)
+            poster_frame = renderer.render_frame(t, dt, i, frame_values)
 
     if "png" in job.formats and poster_frame is not None:
         png = job.out.with_suffix(".png")
@@ -689,6 +721,7 @@ def job_from_spec(spec: dict[str, Any], base: Path) -> Job:
         quality=int(spec.get("quality", 20)),
         nvenc=not bool(spec.get("no_nvenc", False)),
         poster_width=spec.get("poster_width", 960),
+        settle=int(spec.get("settle", 0)),
     )
 
 
@@ -717,6 +750,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="NVENC constant quality; higher is smaller")
     ap.add_argument("--poster-width", type=int, default=960,
                     help="downscale a clip's poster to this width")
+    ap.add_argument("--settle", type=int, default=0,
+                    help="frames to run before recording, for a stateful shader")
     ap.add_argument("--no-nvenc", action="store_true",
                     help="encode on the CPU; use when NVENC sessions are exhausted")
     args = ap.parse_args(argv)
@@ -760,6 +795,7 @@ def main(argv: list[str] | None = None) -> int:
             quality=args.quality,
             nvenc=not args.no_nvenc,
             poster_width=args.poster_width,
+            settle=args.settle,
         ))
 
     for job in jobs:
