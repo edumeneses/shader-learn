@@ -446,6 +446,21 @@
  {
   "categories": [
    "Course",
+   "Generator",
+   "Audio"
+  ],
+  "credit": "Eduardo Meneses, Learn shader art",
+  "description": "Audio-reactive done properly: three bands, separate attack and release per band, an impulse on onset, and every mapping exposed so it can be tuned to the room rather than to the file.",
+  "id": "40-audio-reactive",
+  "inputs": 13,
+  "mode": "fragment",
+  "passes": 2,
+  "source": "library/shaders/40/audio-reactive.fs",
+  "unit": "40"
+ },
+ {
+  "categories": [
+   "Course",
    "Generator"
   ],
   "credit": "Eduardo Meneses, Learn shader art",

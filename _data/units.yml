@@ -385,7 +385,7 @@
   read: 13
   practice: 25
   score: true
-  written: false
+  written: true
 - num: "36"
   module: J
   kind: lesson
@@ -394,7 +394,7 @@
   read: 13
   practice: 30
   score: true
-  written: false
+  written: true
 - num: "37"
   module: J
   kind: lesson
@@ -403,7 +403,7 @@
   read: 14
   practice: 35
   score: true
-  written: false
+  written: true
 - num: "38"
   module: J
   kind: lesson
@@ -412,7 +412,7 @@
   read: 13
   practice: 30
   score: true
-  written: false
+  written: true
 - num: "39"
   module: J
   kind: lesson
@@ -421,7 +421,7 @@
   read: 13
   practice: 30
   score: true
-  written: false
+  written: true
 - num: "40"
   module: J
   kind: lesson
@@ -430,7 +430,7 @@
   read: 14
   practice: 35
   score: true
-  written: false
+  written: true
 - num: "41"
   module: J
   kind: lesson
@@ -439,7 +439,7 @@
   read: 14
   practice: 35
   score: true
-  written: false
+  written: true
 - num: "P4"
   module: J
   kind: milestone
@@ -448,7 +448,7 @@
   read: 14
   practice: 90
   score: true
-  written: false
+  written: true
 
 # Module K: Capstone
 - num: "42"
@@ -459,4 +459,4 @@
   read: 14
   practice: 180
   score: true
-  written: false
+  written: true

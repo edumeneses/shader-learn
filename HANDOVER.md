@@ -4,11 +4,13 @@ Status and queue for *Learn shader art*. Read `CLAUDE.md` first for the rules an
 the toolchain; this file is what is done, what is next, and what is waiting on a
 decision.
 
-Last updated 2026-09-06.
+Last updated 2026-09-06, end of the first session.
 
 ## Where things stand
 
-**22 of 47 units written.** Phases 1 and part of 2:
+**All 47 units are written.** 36 shaders, all compiling under glslang, all
+listed at `/library`, all but the compute one running live in the browser. The
+site builds under both configs, html-proofer passes, and CI is green.
 
 | Module | Units | State |
 |:-------|:------|:------|
@@ -17,45 +19,27 @@ Last updated 2026-09-06.
 | C Shapes as fields | 07 to 11, P1 | written |
 | D Noise and randomness | 12 to 16, P2 | written |
 | E Time, feedback, and state | 17 to 19 | written |
-| F Images and processing | 20 to 23 | **not started, blocked, see below** |
-| G Three dimensions | 24 to 27, P3 | not started |
-| H Formats and stages | 28 to 33 | not started |
-| I What a shader costs | 34 | not started |
-| J Shaders in ossia score | 35 to 41, P4 | not started |
-| K Capstone | 42 | not started |
+| F Images and processing | 20 to 23 | written |
+| G Three dimensions | 24 to 27, P3 | written |
+| H Formats and stages | 28 to 33 | written |
+| I What a shader costs | 34 | written |
+| J Shaders in ossia score | 35 to 41, P4 | **written, unverified in the app** |
+| K Capstone | 42 | written |
 
-**21 shaders**, all compiling under glslang, all running in the browser player,
-all listed at `/library`. The site builds under both configs and html-proofer
-passes. CI is green.
+## Start here: verify Phase 4 in a running score
 
-## Start here: Module F is blocked on one missing feature
+Phases 1 to 3 are grounded: every claim is either in a shader that runs or in a
+figure that was rendered. **Phase 4 is grounded in documentation only.** Units 35
+to 41 were written from ossia score's own reference pages and from the score
+course's recorded findings, and nobody has opened 3.8.2 and walked through them.
 
-**Nothing in the toolchain can supply an image to a shader.** ISF `image` inputs
-are parsed, declared as samplers, and reachable through the `IMG_` accessors,
-and neither `scripts/render.py` nor `assets/js/shader-player.js` ever binds
-anything to them. Module F is entirely about shaders that take an input, so it
-cannot start until this exists.
+Each unit's `checks/` note says so, and `checks/FIGURES-PENDING.md` lists the
+four specific claims most worth testing first, because a reader is told they can
+rely on them.
 
-The design that fits the project's one-source rule:
-
-1. **Write the test card as an ISF shader**, `library/shaders/20/testcard.fs`:
-   colour bars, a greyscale ramp, frequency wedges, and a region with fine
-   detail, all procedural.
-2. **Render it once to `docs/learn/assets/images/testcard.png`** and commit it,
-   with a spec under `figures/` so it is reproducible.
-3. **Both runtimes load that PNG**, so there is one source and no second
-   implementation to drift. Writing the test card twice, once in PIL and once in
-   canvas 2D, would reintroduce exactly the divergence the manifest design was
-   built to prevent.
-4. **`render.py` gains `--image name=path`**, defaulting to the test card.
-5. **The player gains an image source picker** per `image` input: the test card,
-   a file the reader drops in, and a webcam. The webcam is worth having: Module
-   F is about processing an input and a reader's own face is a better test
-   image than any card.
-
-Note that the player already caps live WebGL contexts at eight and releases the
-least recently seen, so a video or webcam texture must be released in
-`_release()` too or it will leak.
+X access from this session works: the user's Xwayland display is `:0` and the
+auth file is at `/run/user/<uid>/.mutter-Xwaylandauth.*`. That puts score windows
+on the user's live desktop, so ask first.
 
 ## Decisions waiting on Edu
 
@@ -78,49 +62,63 @@ technical one.
 
 ## Known gaps, in the order they will bite
 
-- **No *ossia score* figures at all.** `scripts/capture.py` and
-  `scripts/typeinto.py` are carried over from the score course and have not been
-  run in this repository. Every Phase 4 unit needs at least one figure and none
-  of them can be rendered offline, because the subject is the application.
-  `checks/FIGURES-PENDING.md` has the details.
-- **Only one rendered clip so far**, `docs/learn/assets/p2/p2-01.mp4`. The live
-  players carry the load elsewhere, which is the design, but Modules C to G
-  would each be better with one clip sweeping the parameter the unit is about.
-  These are `render.py --sweep` jobs and need no new machinery.
+- **Phase 4 is unverified**, above. Everything else on this list is smaller.
+- **No *ossia score* figures at all.** Every Phase 4 unit wants at least one and
+  none can be rendered offline, because the subject is the application.
+- **Two rendered clips so far**, `p2-01` and `32-01`. The live players carry the
+  load elsewhere, which is the design, but Modules C to G would each be better
+  with one clip sweeping the parameter the unit is about. `render.py --sweep`
+  jobs, no new machinery.
 - **`figures/03.json` does not exist and is wanted.** Unit 03 needs the same
-  circle at several aspect ratios, which needs either a montage step in
-  `render.py` or the ability to animate `RENDERSIZE`. The montage is cheaper.
+  circle at several aspect ratios, which needs a montage step in `render.py` or
+  the ability to animate `RENDERSIZE`. The montage is cheaper.
+- **Unit 39 describes a motion detector and ships no shader for it.**
+- **The player does not build mipmaps** for image inputs; the offline renderer
+  does. A heavily minified image therefore aliases in the browser and not in a
+  rendered figure. `checks/20-sampling.md`.
+- **VSA `sound` and `floatSound` are declared and never fed.** A VSA shader that
+  samples them gets an unbound sampler. `checks/31-vertex-shaders.md`.
+- **The compute path has been tested on one shader and one GPU.** `EXECUTION_MODEL`
+  with `"TYPE": "MANUAL"` is implemented and untested, buffers are not
+  implemented, and multi-pass and persistence are not supported, which makes Unit
+  32's exercise completable only in *score*. `checks/32-compute-shaders.md`.
 - **The browser and the offline renderer use different float precision** for
-  persistent buffers: RGBA16F in WebGL, full float offline. No visible
-  difference so far. Recorded in `checks/18-feedback.md`.
-- **Unit 19's shader has not been tested on a second GPU.** It claims two GPUs
-  diverge within a minute, which is the standard expectation for a chaotic
-  system in float arithmetic and is untested here.
+  persistent buffers: RGBA16F in WebGL, full float offline. No visible difference
+  so far. `checks/18-feedback.md`.
+- **Units 21, 26, and 27 work in code space rather than linear light**, which is
+  wrong by Unit 04's own rule. Each unit lists it under Common mistakes rather
+  than quietly doing the right thing, because every reference shader a reader
+  meets shares the shortcut. Revisit if a later unit depends on it.
+- **Unit 19's shader has not been tested on a second GPU.**
 
 ## Things that were learned the hard way
 
 All of these are in `CLAUDE.md` in full. In brief, because they cost real time:
 
-- **glslang is stricter than the NVIDIA driver, and this bit three times.**
-  `flat` and `sample` are reserved words, `round` is a built-in, and all three
-  compiled locally and would have failed in every browser. `isf.py` now refuses
-  them at parse time, and `scripts/setup.sh` fetches glslang into `.venv/bin` so
-  the check can run before a push rather than in CI.
+- **glslang is stricter than the NVIDIA driver, and this bit five times.**
+  `flat`, `sample`, `layout` are reserved words; `round` and `reflect` are
+  built-ins. All five compiled here and would have failed in every browser.
+  `isf.py` now refuses reserved words, built-in names, and the names ISF itself
+  supplies, at parse time and by name, and `scripts/setup.sh` fetches glslang
+  into `.venv/bin` so the check runs before a push rather than in CI. The last
+  two were caught locally, which is the guard working.
 - **A persistent target must swap after the pass that writes it**, not at the
-  end of the frame. Otherwise several passes on one target overwrite each other
-  instead of stepping. Both runtimes were changed together and must stay in
-  agreement.
-- **A simulation cannot iterate inside one pass.** Its neighbourhood comes from
-  a texture that does not update mid-pass.
+  end of the frame, or several passes on one target overwrite each other instead
+  of stepping. Both runtimes were changed together and must stay in agreement.
+- **A simulation cannot iterate inside one pass.** Its neighbourhood comes from a
+  texture that does not update mid-pass.
 - **A stateful shader cannot be sampled at an instant.** A still has to be
   stepped to from frame zero, which `render.py` now does automatically.
+- **A polar fold must rebuild a real position, not use arc length**, and must
+  check neighbouring sectors. In two dimensions Unit 10's trap chops shapes; in
+  three it makes the field over-estimate and the marcher steps through surfaces.
 - **A PNG poster of a noise field is larger than the H.264 clip it posters.**
   Clip posters are downscaled to 960 wide.
 
 ## The next three commits, if nothing changes
 
-1. Image input support in both runtimes, plus the test-card shader and its
-   committed PNG. Unblocks Module F.
-2. Units 20 to 23, with their shaders.
-3. Module G, which is the largest remaining block of new material and the one
-   whose shaders are most expensive to get right.
+1. Verify Phase 4 in a running *score* 3.8.2 and correct what is wrong. Capture
+   figure 37-01 while there, which is the most valuable picture in the course.
+2. Clips for Modules C to G, one per unit, sweeping the parameter each unit is
+   about.
+3. The smaller gaps above, in whatever order they start mattering.
