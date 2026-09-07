@@ -1,7 +1,15 @@
+{%- comment -%}
+  The masthead: the mark, then the course's name.
+
+  The vendored theme shipped this with the word "ossia" hardcoded, because it
+  came from score-docs by way of the score course. This course runs its shaders
+  in ossia score and is not an ossia course, so the name is read from
+  `wordmark` in _config.yml and falls back to the site title. A hardcoded name
+  is how the wrong one survived being copied twice.
+{%- endcomment -%}
 {% if site.logo %}
-  <div class="site-logo">
-  </div>
-  <h2 class="software">ossia</h2>
+  <div class="site-logo"></div>
+  <h2 class="software">{{ site.wordmark | default: site.title }}</h2>
 {% else %}
   {{ site.title }}
 {% endif %}

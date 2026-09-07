@@ -59,17 +59,19 @@ h1 {
   font-weight: 400;
 }
 
+// The masthead wordmark. Sized down from the vendored theme's 42px, which was
+// set for the single short word this course does not use.
 .software {
   padding-top: 0.1em;
   padding-bottom: 0.1em;
-  padding-left: 0.24em;
+  padding-left: 0.3em;
   margin: 0;
-  font-size: 42px !important;
+  font-size: 26px !important;
   font-weight: 700 !important;
-  line-height: 1;
-  color: $ossia-light-blue;
+  line-height: 1.1;
+  color: $sl-heading;
   text-transform: none;
-  letter-spacing: 1px;
+  letter-spacing: 0;
 }
 p {
   margin-top: 1em;
@@ -140,7 +142,7 @@ ol > li::before {
   /*   content:attr(data-badge); */
 
   /*   font-size:.7em; */
-  background: $ossia-light-blue;
+  background: $sl-cyan;
   border-radius: 50%;
 
   /*   margin-top: 7px; */

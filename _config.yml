@@ -4,7 +4,7 @@
 # preview after editing it.
 
 title: Learn shader art
-description: A zero-to-hero course in shader art, from a first fragment shader to a playable visual instrument in ossia score
+description: "A zero-to-hero course in shader art: GLSL, signed distance fields, noise, raymarching, and shaders you can perform"
 baseurl: "/shader-learn" # provisional; hosting is deferred (see README)
 url: "https://www.edumeneses.com" # review deployment; hosting is deferred (see README)
 
@@ -45,6 +45,10 @@ exclude:
   ]
 
 logo: "/assets/images/shader-learn-logo.svg"
+
+# The name beside the mark in the sidebar. Read by _includes/title.html, which
+# had "ossia" hardcoded when it arrived from the score course's vendored theme.
+wordmark: "shader art"
 
 search_enabled: true
 search:

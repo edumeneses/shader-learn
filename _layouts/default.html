@@ -141,7 +141,15 @@ layout: table_wrappers
         {% if site.footer_content != nil or site.last_edit_timestamp %}
           {% if page.url == "/" %}<hr>{% endif %}
           <footer>
-            <p style="text-align: left;" class="main-content">See an issue on this page ? Help us by fixing it <a href="https://github.com/ossia/score-docs/edit/master/{{ page.path }}">here</a> !</p>
+            {%- comment -%}
+              This link pointed at github.com/ossia/score-docs on every page,
+              inherited from the vendored theme. It is built from
+              gh_edit_repository now, so it follows this repository and cannot
+              send a reader to someone else's.
+            {%- endcomment -%}
+            {% if site.gh_edit_repository %}
+              <p style="text-align: left;" class="main-content">See a problem on this page? <a href="{{ site.gh_edit_repository }}/edit/{{ site.gh_edit_branch | default: 'main' }}/{{ page.path }}">Fix it here</a>.</p>
+            {% endif %}
             {% if site.back_to_top %}
               <p><a href="#top" id="back-to-top">{{ site.back_to_top_text }}</a></p>
             {% endif %}

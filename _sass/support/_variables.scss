@@ -32,6 +32,11 @@ $font-size-10-sm: 48px !default;
 // Colors
 //
 
+// ossia's palette, inherited with the vendored theme. Nothing references it any
+// more: this course runs its shaders in ossia score and is not an ossia course,
+// so the accents are the ones in the Learn shader art palette below. Kept only
+// because $active-link-color at the end of this block is a theme default that
+// the colour scheme overrides.
 // ossia colors
 $ossia-dark-grey: #1e2225 !default;
 $ossia-orange: #ff7a00 !default;
