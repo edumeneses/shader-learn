@@ -26,20 +26,34 @@ site builds under both configs, html-proofer passes, and CI is green.
 | J Shaders in ossia score | 35 to 41, P4 | **written, unverified in the app** |
 | K Capstone | 42 | written |
 
-## Start here: verify Phase 4 in a running score
+## Start here: finish verifying Phase 4
 
-Phases 1 to 3 are grounded: every claim is either in a shader that runs or in a
-figure that was rendered. **Phase 4 is grounded in documentation only.** Units 35
-to 41 were written from ossia score's own reference pages and from the score
-course's recorded findings, and nobody has opened 3.8.2 and walked through them.
+A first verification pass has happened and **`checks/VERIFICATION.md` is the
+record**. Read it before doing any more.
 
-Each unit's `checks/` note says so, and `checks/FIGURES-PENDING.md` lists the
-four specific claims most worth testing first, because a reader is told they can
-rely on them.
+What it establishes: the course's central claim, that an ISF input becomes an
+inlet with its default and its range, is **verified across 44 ISF processes in
+20 documents ossia ships**. So are the type mapping, the `Window:/` address, and
+the VSA header keys. One overclaim in Unit 31 was found and corrected, Unit 30
+gained a real shipped example of the mistake it warns about, and Units 29 and 37
+gained a genuine trap: a float input with no `MIN`/`MAX` gets an inlet domain of
+0 to 0, which is in a shipped example and makes any automation curve on it
+produce zero.
 
-X access from this session works: the user's Xwayland display is `:0` and the
-auth file is at `/run/user/<uid>/.mutter-Xwaylandauth.*`. That puts score windows
-on the user's live desktop, so ask first.
+The method that worked was reading `.score` documents, which are JSON, rather
+than driving the interface. It is faster, it covers every example at once, and
+it produces citations.
+
+**Driving the interface is blocked on this machine.** score launches, its window
+can be found and captured, and XTEST pointer motion works; but this is a Wayland
+session and no X window ever holds keyboard focus, so injected keystrokes never
+reach score. Do not retry it. Install `xserver-xephyr` and run score nested, do
+the keyboard steps by hand, or use an X11 session.
+
+What is still unverified, in priority order, is at the end of
+`checks/VERIFICATION.md`. The top item is Unit 36's claim that a compile error
+leaves the last working shader rendering, because the unit tells a reader they
+can rely on it in a performance.
 
 ## Decisions waiting on Edu
 

@@ -60,6 +60,8 @@ void main() {
 
 A shader with an input called `mouse` can be driven by a mouse. A shader with an input called `focus`, `origin`, or `target` can be driven by a mouse, an automation curve, an OSC message from a phone, a MIDI fader, a face tracker, or a hand. Nothing about the code changes; only the name does. **That rename is the difference between a shader you can look at and a shader you can perform**, and it takes ten seconds.
 
+This is not a hypothetical failing. `led-with-shaders.score`, which ships with *ossia score*'s own documentation, contains a ported Shadertoy whose inputs are named `iMouse`, `iZoom`, `iSteps`, and `iColor`. The port was faithful and it kept the prefix, the device name, and `iMouse`'s range of 0 to 640 by 480 **in pixels**, so an automation curve driving it has to be drawn in the coordinate space of a window nobody has any more. The shader works. It is harder to play than it needed to be, and the only difference is four names and one range.
+
 **glslsandbox** uses `time`, `resolution`, `mouse`, and `surfacePosition`, and its shaders are usually a single `main`. Fewer renames, same argument.
 
 **KodeLife** uses `time`, `resolution`, `mouse`, and `spectrum`, and its shaders often already have a parameter block, which makes them the easiest to port.
@@ -96,7 +98,8 @@ The reverse direction is worth knowing because it is how you share work. To put 
 - **`texture` against `IMG_NORM_PIXEL`.** Both work in many hosts and only one is correct.
 - **`gl_FragCoord`.** Shadertoy's `fragCoord` is in pixels with the origin at the bottom left, and reaching for `gl_FragCoord` directly instead of using the shim gives a shader that flips on some backends.
 - **Porting the constants faithfully.** The most common failure, and it produces a working shader that is useless in performance.
-- **Naming an input after a device.** `mouse`, `mic`, `webcam`, `midiCC7`. All of them lock a shader to one driver.
+- **Naming an input after a device.** `mouse`, `mic`, `webcam`, `midiCC7`. All of them lock a shader to one driver, and the habit is widespread enough to be in shipped examples.
+- **Keeping a pixel range on a ported pointer.** `iMouse` is in pixels on Shadertoy. An inlet ranged 0 to 640 is one nobody can drive sensibly. Normalise it to 0 to 1 and let the shader multiply.
 - **Not checking the licence**, and not crediting the author.
 
 ## Exercise

@@ -54,7 +54,9 @@ Now you have a strand number and a position along it, which is enough to build a
 
 **The primitive mode changes everything.** `POINTS` gives a cloud. `LINES` joins them in pairs. `LINE_STRIP` gives one continuous polyline through every vertex in order, which turns the same shader into a drawing. Changing one header key rewrites the piece.
 
-**In ossia score**, the header is `"MODE": "VERTEX_SHADER_ART"`, with `POINT_COUNT`, `PRIMITIVE_MODE`, and `BACKGROUND_COLOR`. Inputs work exactly as in ISF, so everything from [Unit 29]({{ site.baseurl }}/learn/29-isf.html) applies, and a VSA shader's parameters become inlets in the same way.
+**In ossia score**, the header is `"MODE": "VERTEX_SHADER_ART"`, with `POINT_COUNT`, `PRIMITIVE_MODE`, `LINE_SIZE`, and `BACKGROUND_COLOR`. Those keys are confirmed against `vertex-shader-art.score`, which ships with *score*'s documentation. Inputs work exactly as in ISF, so everything from [Unit 29]({{ site.baseurl }}/learn/29-isf.html) applies and a VSA shader's parameters become inlets in the same way.
+
+**The uniform names are vertexshaderart.com's**, not ISF's: `vertexId`, `vertexCount`, `time`, `resolution`, `mouse`, and the output `v_color`, with `gl_Position` and `gl_PointSize`. The shipped example uses exactly those and none of ISF's. This course's toolchain also declares the ISF spellings, `TIME` and `RENDERSIZE`, so a shader written either way runs in the player above; **do not rely on that in *score***, where the vertexshaderart names are the ones the format is defined in.
 
 **The cost model is completely different.** A fragment shader's cost is per pixel; a vertex shader's is per vertex, and the fragment stage is nearly free because the generated one does nothing. Sixty thousand points at sixty frames per second is 3.6 million vertex invocations per second, which is nothing at all for a modern GPU. This is by far the cheapest kind of shader in the course, and it is why the technique scales to numbers that would be absurd in Module G.
 

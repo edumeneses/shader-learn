@@ -20,6 +20,13 @@ the application. Recorded in `checks/FIGURES-PENDING.md`.
 - A texture reaches a window by addressing an outlet at the window device rather
   than by drawing a cable: carried over from the score course's own findings.
 
+## Verified against ossia score 3.8.2
+
+`Window:/` appears in `reference/processes/vertex-shader-art.score`, confirming
+that a texture reaches a window by address rather than by cable. The unit now
+names the address and tells the reader they can confirm it by grepping a
+document.
+
 ## Corrections and open questions
 
 - **Nothing in this unit has been verified in the running application by this

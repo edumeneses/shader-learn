@@ -29,6 +29,16 @@ Common mistakes section, because a reader writing a header will hit them.
   on OpenGL, Vulkan, Metal or Direct3D with differing Y direction: stated
   explicitly in the ossia reference page for the shader process.
 
+## Verified against ossia score 3.8.2
+
+The INPUTS-to-inlets rule was checked across **44 ISF processes in 20 shipped
+`.score` documents**, not by opening the application but by reading the
+documents, which are JSON. Every one matches. See `checks/VERIFICATION.md`.
+
+The unit gained three things from it: the exact rule including image inputs, the
+lower-cased OSC name, and the 0-to-0 domain a float with no range receives,
+which is in a shipped example.
+
 ## Corrections and open questions
 
 - The unit lists `IMPORTED` and says this course avoids it. `scripts/isf.py`

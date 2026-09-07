@@ -63,6 +63,10 @@ The comment does not have to be the first thing in the file, which matters becau
 
 Every one carries a `LABEL`, which is what a reader sees, separately from its `NAME`, which is what the code uses. Use both: a name that reads well in code rarely reads well in a panel.
 
+**What *score* does with them, verified.** Reading the documents *score* ships, the rule is exact: **every input becomes an inlet, in declaration order.** An `image` input becomes a **texture inlet**; every other type becomes a **value inlet** carrying the header's `DEFAULT` as its initial value and its `MIN` and `MAX` as its domain. The inlet is also exposed for OSC under a **lower-cased** version of the name, so an input called `blurAmount` is reachable at `bluramount`.
+
+**A float with no `MIN` and `MAX` gets a domain of 0 to 0.** This is not a hypothetical: `led-with-shaders.score`, which ships with *score*'s own documentation, declares `blurAmount` with no range, and the inlet *score* built for it has `Min: 0.0, Max: 0.0`. An automation curve mapped onto that inlet can only ever produce zero. **Always give a float a range.**
+
 **The automatic uniforms**, supplied by the host and available with no declaration: `RENDERSIZE`, `TIME`, `TIMEDELTA`, `DATE`, `FRAMEINDEX`, `PASSINDEX`, and the coordinate `isf_FragNormCoord`.
 
 **Never use `gl_FragCoord`.** *ossia score*'s documentation is explicit about why: the pipeline can run on OpenGL, Vulkan, Metal, or Direct3D, and they do not agree on which way the y axis runs. `isf_FragNormCoord` is the host's guarantee, and a shader that reaches past it is a shader that will be upside down on someone else's machine.
@@ -106,6 +110,7 @@ The [ISF reference]({{ site.isf_baseurl }}/) is short and is the authority. The 
 
 - **A trailing comma in the header.** The JSON fails to parse and the shader has no inputs at all, with no useful message. This is the most common ISF error by a wide margin: if your controls vanish, check the header before the code.
 - **A `NAME` that is a GLSL keyword or built-in.** `flat`, `sample`, `round`, `layout`, `reflect`. The uniform will not compile, and the driver's error points at the line after it. This course's toolchain refuses these at parse time by name, having been bitten five times.
+- **A float input with no `MIN` and `MAX`.** Its inlet's domain is 0 to 0 and an automation curve on it produces nothing. Verified in a shipped example, above.
 - **`MIN` and `MAX` as numbers on a `point2D`.** They must be two-element arrays.
 - **`VALUES` and `LABELS` of different lengths** on a `long`, giving a menu with missing or wrong entries.
 - **`PERSISTENT` without `FLOAT`.** Trails stick at low values and never fade. [Unit 18]({{ site.baseurl }}/learn/18-feedback.html).

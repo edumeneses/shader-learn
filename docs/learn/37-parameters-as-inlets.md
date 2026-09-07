@@ -34,9 +34,13 @@ That is the entire mechanism, and it is why a parameter named after a device is 
 
 **An input's type decides its inlet.** A `float` becomes a value inlet with the header's range. A `point2D` becomes a two-value inlet. A `color` becomes a colour inlet. A `bool` becomes a toggle, and an `image` becomes a texture inlet. The `LABEL` is what appears; the `NAME` stays in the code.
 
-**Ranges are contracts.** *score* uses the `MIN` and `MAX` to scale whatever arrives. An automation curve runs 0 to 1 in its own space and is mapped onto the inlet's range, so a well-chosen range means a curve drawn without thinking produces a sensible picture. A range that goes somewhere useless means every curve has to be drawn carefully. **Choosing ranges well is the single highest-leverage thing you can do for the person driving your shader**, including yourself in six months.
+**Ranges are contracts, and this is verifiable rather than a claim.** *score* stores each value inlet with a **domain** taken directly from the header's `MIN` and `MAX`, and an initial value taken from `DEFAULT`. Open any `.score` document that uses a shader, which is JSON, and the inlets are there with their domains beside the header that produced them.
+
+The consequence is the one to internalise: *score* uses the `MIN` and `MAX` to scale whatever arrives. An automation curve runs 0 to 1 in its own space and is mapped onto the inlet's range, so a well-chosen range means a curve drawn without thinking produces a sensible picture. A range that goes somewhere useless means every curve has to be drawn carefully. **Choosing ranges well is the single highest-leverage thing you can do for the person driving your shader**, including yourself in six months.
 
 **An automation curve is the default driver.** Place an automation in the interval, address it at the inlet, draw a shape. This is the timeline's native way of changing something over time, and it is deterministic, repeatable, and editable, which live coding is not.
+
+**An inlet's OSC name is the input's, lower-cased.** An input declared as `blurAmount` is exposed as `bluramount`. Worth knowing before you write an OSC layout against a shader, and worth avoiding names that differ only in case.
 
 **OSC makes it playable from anywhere.** Declare an OSC device, and any address on it can drive an inlet. A phone running a TouchOSC layout, a Max patch, a Python script, a sensor rig: all the same to the shader.
 
@@ -76,6 +80,7 @@ The test is simple: if you cannot name a parameter without referring to a device
 
 ## Common mistakes
 
+- **No range at all on a float.** Its domain becomes 0 to 0 and every curve on it produces zero. This is in a shipped example, so it is not a rare mistake.
 - **A range that produces a broken picture at one end.** Every curve then has to avoid it.
 - **A range so wide the useful region is a sliver.** The reverse problem, and just as common.
 - **Mapping inside the shader.** It hides the mapping and prevents reuse.

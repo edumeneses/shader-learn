@@ -28,6 +28,14 @@ question the course does not need to answer in a reference shader.
 - **The shader is edited.** The unit quotes the shim and the `main` wrapper
   verbatim and tells the reader to read the file from the top.
 
+## The unit's argument has a shipped example now
+
+`common-practices/led-design/led-with-shaders.score`, which ships with ossia's
+documentation, is a faithful Shadertoy port whose inputs are `iMouse`, `iZoom`,
+`iSteps`, and `iColor`, with `iMouse` ranged 0 to 640 by 480 **in pixels**. It
+is exactly the mistake the unit warns about, in ossia's own examples, and the
+unit now cites it.
+
 ## Corrections and open questions
 
 - The unit states Shadertoy's default licence as CC BY-NC-SA. That is the site's

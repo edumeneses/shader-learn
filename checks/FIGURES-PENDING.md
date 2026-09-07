@@ -25,14 +25,19 @@ them:
 - **Unit 40**: whether ossia's FFT texture is linear in frequency across the
   audible range, which the shader's band boundaries assume.
 
+**A first verification pass has happened.** `checks/VERIFICATION.md` records
+what was confirmed against ossia score 3.8.2, what was corrected as a result,
+and why driving the interface is blocked on this machine.
+
 ## Needs *ossia score* driven under synthetic input
 
 `scripts/capture.py` and `scripts/typeinto.py` are carried over from the score
 course and work there. They have **not** been run in this repository.
 
-X access from this session is possible: the user's Xwayland display is `:0`, and
-`XAUTHORITY=/run/user/<uid>/.mutter-Xwaylandauth.*` reaches it. That puts score
-windows on the user's live desktop, so it is worth asking before doing.
+**This is blocked, and `checks/VERIFICATION.md` says why.** score launches and
+its window can be captured; XTEST pointer motion works; but no X window ever
+holds keyboard focus in this Wayland session, so injected keystrokes never reach
+score. Install Xephyr and run score nested, or do the keyboard steps by hand.
 
 Wanted, in order of value:
 

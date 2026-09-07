@@ -32,6 +32,20 @@ copied from vertexshaderart.com runs here unmodified.
   `PRIMITIVE_MODE`, and `BACKGROUND_COLOR` are read from ossia's own reference
   page for the VSA process.
 
+## Verified against ossia score 3.8.2, and one overclaim corrected
+
+`reference/processes/vertex-shader-art.score` ships with ossia's documentation
+and confirms the header keys this implementation reads: `MODE`,
+`POINT_COUNT`, `PRIMITIVE_MODE`, `LINE_SIZE`, `BACKGROUND_COLOR`.
+
+Its shader body uses `vertexId`, `vertexCount`, `time`, `resolution`, `v_color`,
+`gl_PointSize`, and `gl_Position`, and **none of ISF's `TIME` or `RENDERSIZE`**.
+
+**The unit overclaimed and has been corrected.** It said ossia supplies both
+name sets. Only the vertexshaderart set is evidenced. The unit now says this
+course's toolchain supplies both and tells the reader not to rely on that in
+*score*.
+
 ## Corrections and open questions
 
 - **`sound` and `floatSound` are declared and never fed.** A VSA shader that

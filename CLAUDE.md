@@ -137,6 +137,16 @@ manifest instead.
   build against it. Use 3.11, which `scripts/setup.sh` does.
 - **The system bundler is `bundle3.3`, not `bundle`.** `preview.sh` prefers
   whichever exists.
+- **The interface cannot be driven here, and `checks/VERIFICATION.md` says why.**
+  This is a Wayland session. `scripts/capture.py` can find, size, and capture the
+  score window, and XTEST pointer motion works; **no X window ever holds keyboard
+  focus**, so injected keystrokes do not reach score and may reach whatever the
+  compositor focused instead. Do not retry it; either install Xephyr and run
+  score nested, or do the keyboard steps by hand.
+- **A `.score` document is JSON, and reading one is better evidence than a
+  screenshot.** The inlets *score* builds from a shader's JSON header can be read
+  directly, in bulk, across every example ossia ships. That is how the course's
+  central claim about inputs becoming inlets was verified across 44 processes.
 - **`$sl-*` palette variables live in `_sass/support/_variables.scss`**, not in
   the colour scheme, because `_sass/custom/custom.scss` is imported by the
   vendored light and dark schemes too and a variable defined in only one scheme
