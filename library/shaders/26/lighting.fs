@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Normals from the field's own gradient, then diffuse, specular, and shadows built one at a time so each term's contribution is separable.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The soft-shadow estimator is Inigo Quilez's.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The soft-shadow estimator and the distance functions are Inigo Quilez's; Blinn-Phong is Jim Blinn's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "3D"],
   "INPUTS": [

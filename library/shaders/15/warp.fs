@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Domain warping: feed noise its own output as a coordinate offset, once or twice, with each stage on a control so the contribution of each is separable.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The technique and the two-level form are Inigo Quilez's.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. Domain warping, the two-level form and its offset constants are Inigo Quilez's; the quintic curve is Ken Perlin's; the hash is Dave Hoskins's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Noise"],
   "INPUTS": [

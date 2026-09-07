@@ -83,17 +83,32 @@ repeats the hour:
 
 - **XTEST pointer motion works.** Asking for (900, 600) moves the pointer to
   (900, 600); `query_pointer` confirms it.
-- **No X window ever holds keyboard focus.** `get_input_focus()` returns a
-  window with no name, because this is a Wayland session and the compositor's
-  focus is on a Wayland surface. `capture.py`'s `activate()` uses
-  `_NET_ACTIVE_WINDOW`, which mutter does not honour for this purpose, and
-  clicking the window does not move focus either. **Keystrokes injected with
-  XTEST therefore do not reach score**, and may reach whatever the compositor
-  considers focused, which is why keyboard injection was stopped rather than
-  retried.
+- **Focus can be taken, and it does not help.** An earlier version of this note
+  said no X window ever holds keyboard focus. That was wrong and is corrected
+  here. `capture.py`'s `activate()` sends `_NET_ACTIVE_WINDOW` with source 2 and
+  a `CurrentTime` timestamp, which mutter refuses under focus-stealing
+  prevention. Sending it with **source 1 and a real server timestamp**, obtained
+  by appending zero bytes to a root property and reading the `PropertyNotify`,
+  is accepted: `_NET_ACTIVE_WINDOW` then reports score's own window. A direct
+  `XSetInputFocus` is accepted too.
+- **Keys still do not arrive.** With the compositor's focus demonstrably on
+  score's main window, `Ctrl+N` produces no document and typed characters do not
+  appear in a focused text field. Xwayland here runs with `-enable-ei-portal`,
+  which routes synthetic input through the RemoteDesktop portal; XTEST **pointer
+  motion works** and XTEST **keyboard does not reach the client**. That, rather
+  than focus, is the blocker. Keyboard injection was stopped rather than retried
+  because keys that go nowhere visible might not be going nowhere.
 
-The score course's toolchain worked because it ran against a dedicated X server
-on `:1`. There is no such server here and `Xvfb` and `Xephyr` are not installed.
+**`:1` is not a separate X server.** The score course used `DISPLAY=:1` and this
+note first assumed that meant a dedicated server. It does not: the single
+Xwayland process is started with two listen descriptors and serves `:0` and `:1`
+alike, and enumerating both gives an identical window list. The score course's
+own figure instructions say the work "needs an unlocked session", which is the
+real explanation: a human was at the machine with score genuinely focused and
+receiving input, and the tooling never had to inject keys into an unfocused
+application.
+
+`Xvfb` and `Xephyr` are not installed.
 
 **To unblock**, any one of:
 
@@ -101,6 +116,14 @@ on `:1`. There is no such server here and `Xvfb` and `Xephyr` are not installed.
    where XTEST owns the focus. This is the closest to the score course's setup.
 2. Run the keyboard steps by hand, with score focused, and capture around them.
 3. Log into an X11 session rather than Wayland for the figure session.
+
+## A bug found while verifying
+
+An ISF `float` input with no `MIN`/`MAX` sometimes gets an inlet domain of 0 to
+0, which makes the control inert and any automation curve on it a constant zero.
+The same header gives 0 to 1 in other shipped documents. Written up with
+reproduction steps and an honest caveat in `checks/SCORE-BUG-DRAFT.md`, for Edu
+to file or discard.
 
 ## Still unverified, in priority order
 

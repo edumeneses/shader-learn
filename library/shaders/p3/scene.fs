@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "The Module G milestone: a raymarched scene assembled from Units 24 to 27, with a step budget, a cost view, and every quality control exposed so it can be tuned down to the machine it has to run on.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. Distance functions and estimators after Inigo Quilez.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The distance functions, the smooth minimum, the soft-shadow and occlusion estimators and the cosine palette are Inigo Quilez's; the hash is Dave Hoskins's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "3D"],
   "INPUTS": [

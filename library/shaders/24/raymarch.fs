@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "The sphere-traced loop, with a two-dimensional cross-section that draws every step's safety circle so the algorithm can be watched rather than imagined.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. Sphere tracing is John Hart's; the raymarching idiom is Inigo Quilez's.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. Sphere tracing is John Hart's; the raymarching idiom and the distance functions are Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "3D"],
   "INPUTS": [

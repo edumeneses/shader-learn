@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "One shader exercising every ISF input type and both pass features, so the header can be read against the panel it produces.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Utility"],
   "INPUTS": [

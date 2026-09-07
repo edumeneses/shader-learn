@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Sixty thousand points, each deciding where it goes from nothing but its own index. A vertex shader can scatter, which is the thing Unit 19 said a fragment shader cannot do.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The format is the Vertex Shader Art spec, as ossia score implements it.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The format is the Vertex Shader Art spec as ossia score implements it; the cosine palette is Inigo Quilez's.",
   "ISFVSN": "2.0",
   "MODE": "VERTEX_SHADER_ART",
   "CATEGORIES": ["Course", "Geometry", "Particles"],

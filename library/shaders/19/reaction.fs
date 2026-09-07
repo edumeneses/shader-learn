@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "A Gray-Scott reaction-diffusion simulation held entirely in a persistent float buffer: two chemicals, four numbers, and a whole zoo of patterns.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The Gray-Scott model is Pearson's parameterisation.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The Gray-Scott model is Pearson's parameterisation; the weighted Laplacian follows Karl Sims; the cosine palette is Inigo Quilez's; the hash is Dave Hoskins's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Simulation"],
   "INPUTS": [

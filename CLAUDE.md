@@ -138,11 +138,17 @@ manifest instead.
 - **The system bundler is `bundle3.3`, not `bundle`.** `preview.sh` prefers
   whichever exists.
 - **The interface cannot be driven here, and `checks/VERIFICATION.md` says why.**
-  This is a Wayland session. `scripts/capture.py` can find, size, and capture the
-  score window, and XTEST pointer motion works; **no X window ever holds keyboard
-  focus**, so injected keystrokes do not reach score and may reach whatever the
-  compositor focused instead. Do not retry it; either install Xephyr and run
-  score nested, or do the keyboard steps by hand.
+  `scripts/capture.py` finds, sizes, and captures the score window, and XTEST
+  **pointer** motion works. Focus can also be taken: `_NET_ACTIVE_WINDOW` with
+  source 1 and a **real server timestamp** is accepted where `capture.py`'s
+  source-2 `CurrentTime` version is refused. **Keys still do not arrive**,
+  because Xwayland runs with `-enable-ei-portal` and XTEST keyboard is not
+  delivered to the client. Do not spend another hour on focus; it is not the
+  problem. Install Xephyr and run score nested, or do the keyboard steps by hand.
+- **`DISPLAY=:1` is not a second X server.** One Xwayland is started with two
+  listen descriptors and serves `:0` and `:1` identically. The score course used
+  `:1` and its figure notes say the work "needs an unlocked session", which is
+  the real reason its keystrokes landed.
 - **A `.score` document is JSON, and reading one is better evidence than a
   screenshot.** The inlets *score* builds from a shader's JSON header can be read
   directly, in bulk, across every example ossia ships. That is how the course's
@@ -175,6 +181,23 @@ manifest instead.
   `INPUTS`, and requires `"MODE": "COMPUTE_SHADER"` plus at least one `PASSES`
   entry with a `LOCAL_SIZE` and an `EXECUTION_MODEL`. The parser reads both
   spellings; the browser player cannot run compute at all and says so.
+
+## Attribution
+
+**Every shader here was written for this course; almost none of the ideas were.**
+`docs/attribution.md` is the page that says whose they are, and its per-shader
+table is generated from each file's `CREDIT` field, so the two cannot drift.
+
+When you write or edit a shader, **put what it borrows in `CREDIT`**, by name.
+The audit that produced the current credits found 24 gaps, all of them things
+used correctly and cited nowhere. Inigo Quilez alone accounts for the distance
+functions, the smooth minimum, the cosine palette, domain warping, the Voronoi
+edge pass, the soft-shadow and occlusion estimators, and the field visualisation
+used throughout Module C.
+
+Unit 30's shader is deliberately a generic plasma rather than a real Shadertoy
+port, so that a unit about other people's work does not republish a specific
+person's. Keep it that way.
 
 ## Writing style
 

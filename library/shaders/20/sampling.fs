@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Reading a texture: normalised against pixel coordinates, what happens between texels, and the coordinate mistakes that produce a flipped, stretched, or crawling image.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Filter"],
   "INPUTS": [

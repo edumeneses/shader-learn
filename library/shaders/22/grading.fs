@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "A colour grade in the order a colourist works: exposure, white balance, contrast, lift/gamma/gain, saturation, then a tone curve, each on its own control and each applied in the space it belongs in.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The filmic curve is Krzysztof Narkowicz's ACES approximation.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The filmic curve is Krzysztof Narkowicz's ACES approximation; Reinhard tone mapping is Erik Reinhard's; lift/gamma/gain follows the ASC CDL.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Color"],
   "INPUTS": [

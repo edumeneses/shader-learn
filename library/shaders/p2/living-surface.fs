@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "The Module D milestone: an animated surface that repeats exactly, built by moving through noise on a closed path rather than by sliding through it forever.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. Domain warping and the cosine palette are Inigo Quilez's; the quintic curve is Ken Perlin's; the hash is Dave Hoskins's; cellular noise is Steven Worley's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Generator"],
   "INPUTS": [

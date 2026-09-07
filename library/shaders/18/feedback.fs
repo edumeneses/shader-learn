@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "A persistent buffer that reads its own previous frame through a transform, which is the whole of visual feedback: trails, tunnels, spirals, and decay.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The cosine palette is Inigo Quilez's; Reinhard tone mapping is Erik Reinhard's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Feedback"],
   "INPUTS": [

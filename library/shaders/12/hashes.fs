@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Four ways to get a repeatable random number out of a coordinate, with the failure modes of the cheap ones made visible rather than described.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The sine hash is folklore; the integer hash is after Chris Wellons and Mark Jarzynski.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The sine hash is folklore; the fract-multiply hash is Dave Hoskins's; the integer mix is Chris Wellons's lowbias32, as recommended for GPU work by Jarzynski and Olano.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Noise"],
   "INPUTS": [

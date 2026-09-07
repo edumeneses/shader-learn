@@ -154,7 +154,16 @@ layout: table_wrappers
               <p><a href="#top" id="back-to-top">{{ site.back_to_top_text }}</a></p>
             {% endif %}
             {% if site.footer_content != nil %}
-              <p style="text-align: center;" class="text-small text-grey-dk-000 mb-0">{{ site.footer_content }}</p>
+              {%- comment -%}
+                The attribution link is built here rather than written into
+                footer_content, because a path in the config cannot know the
+                baseurl and this site is built with two different ones.
+              {%- endcomment -%}
+              <p style="text-align: center;" class="text-small text-grey-dk-000 mb-0">
+                {{ site.footer_content }}
+                This course borrows heavily from published work:
+                <a href="{{ site.baseurl }}/attribution">see who from</a>.
+              </p>
             {% endif %}
 
             {% if site.last_edit_timestamp %}

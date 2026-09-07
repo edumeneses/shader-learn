@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "The same circle drawn in three coordinate spaces, so the aspect-ratio mistake and its two fixes are visible side by side.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course"],
   "INPUTS": [

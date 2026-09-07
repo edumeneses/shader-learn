@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "The Module C milestone: one still image built only from distance fields, their operators, domain repetition, a cosine palette, and antialiasing measured with fwidth.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The smooth minimum and the cosine palette are Inigo Quilez's; the one-line grain hash is folklore.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Generator"],
   "INPUTS": [

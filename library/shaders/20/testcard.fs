@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "A procedural test card: colour bars, a greyscale ramp, frequency wedges, and fine detail. Rendered once and committed as a PNG, so every shader in Module F has something to read.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. Domain warping is Inigo Quilez's; the quintic curve is Ken Perlin's; the hash is Dave Hoskins's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Utility"],
   "INPUTS": [

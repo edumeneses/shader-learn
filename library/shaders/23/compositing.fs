@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Three layers composited with selectable blend modes, showing the difference between premultiplied and straight alpha and why the order of the operators is not a detail.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The separable blend modes follow the PDF and CSS compositing definitions.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The separable blend modes follow the PDF imaging model as restated by the CSS compositing specification; premultiplied alpha is Porter and Duff's; the cosine palette is Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Filter"],
   "INPUTS": [

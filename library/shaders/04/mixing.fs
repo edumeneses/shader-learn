@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "The same two colours blended in the space the numbers are stored in and in the space light actually adds in, above and below a split, so the muddy middle is visible rather than argued about.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The sRGB transfer functions are from the sRGB standard; the ordered dither is a Bayer matrix.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Color"],
   "INPUTS": [

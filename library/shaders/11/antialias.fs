@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "A deliberately hostile scene rendered four ways: no antialiasing, fwidth, and two supersampled ground truths, so that what fwidth buys and where it stops helping are both visible.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The zone plate is a standard sampling test pattern.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course"],
   "INPUTS": [

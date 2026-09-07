@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "The course in one shader: a signed distance field, a cosine palette, an antialiased edge, and every number exposed as a named parameter.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. Palette after Inigo Quilez.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The cosine palette is Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Generator", "Course"],
   "INPUTS": [

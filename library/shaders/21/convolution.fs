@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Convolution kernels, and a separable Gaussian done as two one-dimensional passes, with a control that switches to the naive two-dimensional version so the cost difference is visible rather than asserted.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The Sobel operator is Sobel and Feldman's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Filter"],
   "INPUTS": [

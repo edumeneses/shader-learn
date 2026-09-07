@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Ambient occlusion, fog, per-object materials, and one bounce of reflection, each on a switch, with a step-count view so the price of each is visible.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The occlusion estimator is Inigo Quilez's.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The occlusion estimator, the distance functions and the smooth minimum are Inigo Quilez's; the cosine palette is his too.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "3D"],
   "INPUTS": [

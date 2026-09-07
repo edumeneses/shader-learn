@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Fractal Brownian motion with octaves, lacunarity, and gain on controls, and a view that shows each octave separately so the sum stops being mysterious.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. Gradient noise after Ken Perlin and Inigo Quilez.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. Gradient noise and the quintic curve are Ken Perlin's; the hash is Dave Hoskins's; fbm and the ridged and turbulent variants follow Inigo Quilez.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Noise"],
   "INPUTS": [

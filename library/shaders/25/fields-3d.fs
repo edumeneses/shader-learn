@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Eight three-dimensional distance primitives and the operators that combine them, rendered with a step-count view so the cost of each is visible alongside its shape.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The distance functions are Inigo Quilez's.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The distance functions and the smooth minimum are Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "3D"],
   "INPUTS": [

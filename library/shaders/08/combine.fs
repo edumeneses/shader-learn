@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Two fields combined six ways, with the smoothing radius on a control, shown as a field so that what the operators do to the space between the shapes is visible.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The smooth minimum is Inigo Quilez's polynomial form.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The polynomial smooth minimum is Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Generator"],
   "INPUTS": [

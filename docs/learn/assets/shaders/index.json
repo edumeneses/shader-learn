@@ -4,7 +4,7 @@
    "Generator",
    "Course"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. Palette after Inigo Quilez.",
+  "credit": "Eduardo Meneses, Learn shader art. The cosine palette is Inigo Quilez's.",
   "description": "The course in one shader: a signed distance field, a cosine palette, an antialiased edge, and every number exposed as a named parameter.",
   "id": "00-hello-field",
   "inputs": 8,
@@ -17,7 +17,7 @@
   "categories": [
    "Course"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art.",
   "description": "The four smallest useful fragment shaders, one after another: a flat colour, the coordinate as colour, a single channel, and the coordinate moved by time.",
   "id": "02-first-steps",
   "inputs": 4,
@@ -30,7 +30,7 @@
   "categories": [
    "Course"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art.",
   "description": "The same circle drawn in three coordinate spaces, so the aspect-ratio mistake and its two fixes are visible side by side.",
   "id": "03-aspect",
   "inputs": 5,
@@ -44,7 +44,7 @@
    "Course",
    "Color"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The sRGB transfer functions are from the sRGB standard; the ordered dither is a Bayer matrix.",
   "description": "The same two colours blended in the space the numbers are stored in and in the space light actually adds in, above and below a split, so the muddy middle is visible rather than argued about.",
   "id": "04-mixing",
   "inputs": 6,
@@ -58,7 +58,7 @@
    "Course",
    "Color"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The palette form is Inigo Quilez's.",
+  "credit": "Eduardo Meneses, Learn shader art. The cosine palette form is Inigo Quilez's.",
   "description": "The cosine palette, with its four constants on controls, shown as a strip and applied to a field, so the relationship between the numbers and the gradient is visible.",
   "id": "05-palette",
   "inputs": 9,
@@ -71,7 +71,7 @@
   "categories": [
    "Course"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The rounded-box distance function is Inigo Quilez's.",
   "description": "One circle's edge drawn four ways, magnified, so the difference between a hard step, a fixed-width blend, and a pixel-width blend is visible rather than described.",
   "id": "06-edge",
   "inputs": 8,
@@ -99,7 +99,7 @@
    "Course",
    "Generator"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The smooth minimum is Inigo Quilez's polynomial form.",
+  "credit": "Eduardo Meneses, Learn shader art. The polynomial smooth minimum is Inigo Quilez's.",
   "description": "Two fields combined six ways, with the smoothing radius on a control, shown as a field so that what the operators do to the space between the shapes is visible.",
   "id": "08-combine",
   "inputs": 10,
@@ -113,7 +113,7 @@
    "Course",
    "Generator"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The cross distance function is Inigo Quilez's.",
   "description": "Translation, rotation, and scale applied to the space rather than to the shape, with a mode that shows what happens when you forget to compensate the scale.",
   "id": "09-transforms",
   "inputs": 10,
@@ -140,7 +140,7 @@
   "categories": [
    "Course"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The zone plate is a standard sampling test pattern.",
   "description": "A deliberately hostile scene rendered four ways: no antialiasing, fwidth, and two supersampled ground truths, so that what fwidth buys and where it stops helping are both visible.",
   "id": "11-antialias",
   "inputs": 8,
@@ -154,7 +154,7 @@
    "Course",
    "Noise"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The sine hash is folklore; the integer hash is after Chris Wellons and Mark Jarzynski.",
+  "credit": "Eduardo Meneses, Learn shader art. The sine hash is folklore; the fract-multiply hash is Dave Hoskins's; the integer mix is Chris Wellons's lowbias32, as recommended for GPU work by Jarzynski and Olano.",
   "description": "Four ways to get a repeatable random number out of a coordinate, with the failure modes of the cheap ones made visible rather than described.",
   "id": "12-hashes",
   "inputs": 6,
@@ -168,7 +168,7 @@
    "Course",
    "Noise"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. Gradient noise after Ken Perlin and Inigo Quilez.",
+  "credit": "Eduardo Meneses, Learn shader art. Gradient noise and the quintic curve are Ken Perlin's; the hash is Dave Hoskins's; the presentation follows Inigo Quilez.",
   "description": "Value noise and gradient noise side by side, with the interpolation curve on a control and a view that shows the grid both of them are built on.",
   "id": "13-noise",
   "inputs": 8,
@@ -182,7 +182,7 @@
    "Course",
    "Noise"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. Gradient noise after Ken Perlin and Inigo Quilez.",
+  "credit": "Eduardo Meneses, Learn shader art. Gradient noise and the quintic curve are Ken Perlin's; the hash is Dave Hoskins's; fbm and the ridged and turbulent variants follow Inigo Quilez.",
   "description": "Fractal Brownian motion with octaves, lacunarity, and gain on controls, and a view that shows each octave separately so the sum stops being mysterious.",
   "id": "14-fbm",
   "inputs": 10,
@@ -196,7 +196,7 @@
    "Course",
    "Noise"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The technique and the two-level form are Inigo Quilez's.",
+  "credit": "Eduardo Meneses, Learn shader art. Domain warping, the two-level form and its offset constants are Inigo Quilez's; the quintic curve is Ken Perlin's; the hash is Dave Hoskins's.",
   "description": "Domain warping: feed noise its own output as a coordinate offset, once or twice, with each stage on a control so the contribution of each is separable.",
   "id": "15-warp",
   "inputs": 10,
@@ -210,7 +210,7 @@
    "Course",
    "Noise"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The true-edge second pass is Inigo Quilez's.",
+  "credit": "Eduardo Meneses, Learn shader art. The true-edge second pass is Inigo Quilez's; the hash is Dave Hoskins's; cellular noise is Steven Worley's.",
   "description": "Voronoi from the 3x3 neighbourhood, with F1, the cell id, the F2 minus F1 edge distance, and the true edge distance as separate views.",
   "id": "16-voronoi",
   "inputs": 8,
@@ -223,7 +223,7 @@
   "categories": [
    "Course"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The cosine palette is Inigo Quilez's; the quintic curve is Ken Perlin's; the back and elastic curves are the standard easing catalogue.",
   "description": "Easing curves plotted above the motion they produce, with phase offsets, so the shape of a curve and the feel of a movement can be compared directly.",
   "id": "17-time",
   "inputs": 8,
@@ -237,7 +237,7 @@
    "Course",
    "Feedback"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The cosine palette is Inigo Quilez's; Reinhard tone mapping is Erik Reinhard's.",
   "description": "A persistent buffer that reads its own previous frame through a transform, which is the whole of visual feedback: trails, tunnels, spirals, and decay.",
   "id": "18-feedback",
   "inputs": 10,
@@ -251,7 +251,7 @@
    "Course",
    "Simulation"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The Gray-Scott model is Pearson's parameterisation.",
+  "credit": "Eduardo Meneses, Learn shader art. The Gray-Scott model is Pearson's parameterisation; the weighted Laplacian follows Karl Sims; the cosine palette is Inigo Quilez's; the hash is Dave Hoskins's.",
   "description": "A Gray-Scott reaction-diffusion simulation held entirely in a persistent float buffer: two chemicals, four numbers, and a whole zoo of patterns.",
   "id": "19-reaction",
   "inputs": 12,
@@ -265,7 +265,7 @@
    "Course",
    "Filter"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art.",
   "description": "Reading a texture: normalised against pixel coordinates, what happens between texels, and the coordinate mistakes that produce a flipped, stretched, or crawling image.",
   "id": "20-sampling",
   "inputs": 6,
@@ -279,7 +279,7 @@
    "Course",
    "Utility"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. Domain warping is Inigo Quilez's; the quintic curve is Ken Perlin's; the hash is Dave Hoskins's.",
   "description": "A procedural test card: colour bars, a greyscale ramp, frequency wedges, and fine detail. Rendered once and committed as a PNG, so every shader in Module F has something to read.",
   "id": "20-testcard",
   "inputs": 2,
@@ -293,7 +293,7 @@
    "Course",
    "Filter"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The Sobel operator is Sobel and Feldman's.",
   "description": "Convolution kernels, and a separable Gaussian done as two one-dimensional passes, with a control that switches to the naive two-dimensional version so the cost difference is visible rather than asserted.",
   "id": "21-convolution",
   "inputs": 6,
@@ -307,7 +307,7 @@
    "Course",
    "Color"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The filmic curve is Krzysztof Narkowicz's ACES approximation.",
+  "credit": "Eduardo Meneses, Learn shader art. The filmic curve is Krzysztof Narkowicz's ACES approximation; Reinhard tone mapping is Erik Reinhard's; lift/gamma/gain follows the ASC CDL.",
   "description": "A colour grade in the order a colourist works: exposure, white balance, contrast, lift/gamma/gain, saturation, then a tone curve, each on its own control and each applied in the space it belongs in.",
   "id": "22-grading",
   "inputs": 13,
@@ -321,7 +321,7 @@
    "Course",
    "Filter"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The separable blend modes follow the PDF and CSS compositing definitions.",
+  "credit": "Eduardo Meneses, Learn shader art. The separable blend modes follow the PDF imaging model as restated by the CSS compositing specification; premultiplied alpha is Porter and Duff's; the cosine palette is Inigo Quilez's.",
   "description": "Three layers composited with selectable blend modes, showing the difference between premultiplied and straight alpha and why the order of the operators is not a detail.",
   "id": "23-compositing",
   "inputs": 10,
@@ -335,7 +335,7 @@
    "Course",
    "3D"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. Sphere tracing is John Hart's; the raymarching idiom is Inigo Quilez's.",
+  "credit": "Eduardo Meneses, Learn shader art. Sphere tracing is John Hart's; the raymarching idiom and the distance functions are Inigo Quilez's.",
   "description": "The sphere-traced loop, with a two-dimensional cross-section that draws every step's safety circle so the algorithm can be watched rather than imagined.",
   "id": "24-raymarch",
   "inputs": 8,
@@ -349,7 +349,7 @@
    "Course",
    "3D"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The distance functions are Inigo Quilez's.",
+  "credit": "Eduardo Meneses, Learn shader art. The distance functions and the smooth minimum are Inigo Quilez's.",
   "description": "Eight three-dimensional distance primitives and the operators that combine them, rendered with a step-count view so the cost of each is visible alongside its shape.",
   "id": "25-fields-3d",
   "inputs": 11,
@@ -363,7 +363,7 @@
    "Course",
    "3D"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The soft-shadow estimator is Inigo Quilez's.",
+  "credit": "Eduardo Meneses, Learn shader art. The soft-shadow estimator and the distance functions are Inigo Quilez's; Blinn-Phong is Jim Blinn's.",
   "description": "Normals from the field's own gradient, then diffuse, specular, and shadows built one at a time so each term's contribution is separable.",
   "id": "26-lighting",
   "inputs": 10,
@@ -377,7 +377,7 @@
    "Course",
    "3D"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The occlusion estimator is Inigo Quilez's.",
+  "credit": "Eduardo Meneses, Learn shader art. The occlusion estimator, the distance functions and the smooth minimum are Inigo Quilez's; the cosine palette is his too.",
   "description": "Ambient occlusion, fog, per-object materials, and one bounce of reflection, each on a switch, with a step-count view so the price of each is visible.",
   "id": "27-materials",
   "inputs": 10,
@@ -391,7 +391,7 @@
    "Course",
    "Utility"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art.",
   "description": "One shader exercising every ISF input type and both pass features, so the header can be read against the panel it produces.",
   "id": "29-every-input",
   "inputs": 8,
@@ -405,7 +405,7 @@
    "Course",
    "Generator"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The plasma is the common Shadertoy idiom, not any one author's.",
+  "credit": "Eduardo Meneses, Learn shader art. Written for this course as a generic Shadertoy-shaped plasma so that no individual author's work is republished; the cosine palette is Inigo Quilez's.",
   "description": "A Shadertoy-shaped shader translated into ISF, with the original's uniform names kept as defines so the two versions can be compared line by line.",
   "id": "30-ported",
   "inputs": 6,
@@ -420,7 +420,7 @@
    "Geometry",
    "Particles"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. The format is the Vertex Shader Art spec, as ossia score implements it.",
+  "credit": "Eduardo Meneses, Learn shader art. The format is the Vertex Shader Art spec as ossia score implements it; the cosine palette is Inigo Quilez's.",
   "description": "Sixty thousand points, each deciding where it goes from nothing but its own index. A vertex shader can scatter, which is the thing Unit 19 said a fragment shader cannot do.",
   "id": "31-lissajous",
   "inputs": 11,
@@ -434,7 +434,7 @@
    "Course",
    "Utility"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The compute variant of ISF is ossia score's.",
   "description": "A luminance histogram computed with atomics, which is the operation a fragment shader cannot perform: every invocation writes to a location it chooses rather than to the one it was given.",
   "id": "32-histogram",
   "inputs": 4,
@@ -449,7 +449,7 @@
    "Generator",
    "Audio"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The cosine palette is Inigo Quilez's.",
   "description": "Audio-reactive done properly: three bands, separate attack and release per band, an impulse on onset, and every mapping exposed so it can be tuned to the room rather than to the file.",
   "id": "40-audio-reactive",
   "inputs": 13,
@@ -463,7 +463,7 @@
    "Course",
    "Generator"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. The smooth minimum and the cosine palette are Inigo Quilez's; the one-line grain hash is folklore.",
   "description": "The Module C milestone: one still image built only from distance fields, their operators, domain repetition, a cosine palette, and antialiasing measured with fwidth.",
   "id": "p1-poster",
   "inputs": 11,
@@ -477,7 +477,7 @@
    "Course",
    "Generator"
   ],
-  "credit": "Eduardo Meneses, Learn shader art",
+  "credit": "Eduardo Meneses, Learn shader art. Domain warping and the cosine palette are Inigo Quilez's; the quintic curve is Ken Perlin's; the hash is Dave Hoskins's; cellular noise is Steven Worley's.",
   "description": "The Module D milestone: an animated surface that repeats exactly, built by moving through noise on a closed path rather than by sliding through it forever.",
   "id": "p2-living-surface",
   "inputs": 12,
@@ -491,7 +491,7 @@
    "Course",
    "3D"
   ],
-  "credit": "Eduardo Meneses, Learn shader art. Distance functions and estimators after Inigo Quilez.",
+  "credit": "Eduardo Meneses, Learn shader art. The distance functions, the smooth minimum, the soft-shadow and occlusion estimators and the cosine palette are Inigo Quilez's; the hash is Dave Hoskins's.",
   "description": "The Module G milestone: a raymarched scene assembled from Units 24 to 27, with a step budget, a cost view, and every quality control exposed so it can be tuned down to the machine it has to run on.",
   "id": "p3-scene",
   "inputs": 12,

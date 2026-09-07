@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "One circle's edge drawn four ways, magnified, so the difference between a hard step, a fixed-width blend, and a pixel-width blend is visible rather than described.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The rounded-box distance function is Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course"],
   "INPUTS": [

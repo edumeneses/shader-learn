@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Value noise and gradient noise side by side, with the interpolation curve on a control and a view that shows the grid both of them are built on.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. Gradient noise after Ken Perlin and Inigo Quilez.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. Gradient noise and the quintic curve are Ken Perlin's; the hash is Dave Hoskins's; the presentation follows Inigo Quilez.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Noise"],
   "INPUTS": [

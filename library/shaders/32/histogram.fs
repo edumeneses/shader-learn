@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "A luminance histogram computed with atomics, which is the operation a fragment shader cannot perform: every invocation writes to a location it chooses rather than to the one it was given.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The compute variant of ISF is ossia score's.",
   "ISFVSN": "2.0",
   "MODE": "COMPUTE_SHADER",
   "CATEGORIES": ["Course", "Utility"],

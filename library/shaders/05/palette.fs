@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "The cosine palette, with its four constants on controls, shown as a strip and applied to a field, so the relationship between the numbers and the gradient is visible.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The palette form is Inigo Quilez's.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The cosine palette form is Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Color"],
   "INPUTS": [

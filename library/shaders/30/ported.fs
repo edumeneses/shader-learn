@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "A Shadertoy-shaped shader translated into ISF, with the original's uniform names kept as defines so the two versions can be compared line by line.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The plasma is the common Shadertoy idiom, not any one author's.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. Written for this course as a generic Shadertoy-shaped plasma so that no individual author's work is republished; the cosine palette is Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Generator"],
   "INPUTS": [

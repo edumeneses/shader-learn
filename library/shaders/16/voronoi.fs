@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Voronoi from the 3x3 neighbourhood, with F1, the cell id, the F2 minus F1 edge distance, and the true edge distance as separate views.",
-  "CREDIT": "Eduardo Meneses, Learn shader art. The true-edge second pass is Inigo Quilez's.",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The true-edge second pass is Inigo Quilez's; the hash is Dave Hoskins's; cellular noise is Steven Worley's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Noise"],
   "INPUTS": [

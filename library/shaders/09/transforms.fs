@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Translation, rotation, and scale applied to the space rather than to the shape, with a mode that shows what happens when you forget to compensate the scale.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The cross distance function is Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Generator"],
   "INPUTS": [

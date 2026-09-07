@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Easing curves plotted above the motion they produce, with phase offsets, so the shape of a curve and the feel of a movement can be compared directly.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The cosine palette is Inigo Quilez's; the quintic curve is Ken Perlin's; the back and elastic curves are the standard easing catalogue.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course"],
   "INPUTS": [

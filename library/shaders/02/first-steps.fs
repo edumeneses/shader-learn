@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "The four smallest useful fragment shaders, one after another: a flat colour, the coordinate as colour, a single channel, and the coordinate moved by time.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course"],
   "INPUTS": [

@@ -1,6 +1,6 @@
 /*{
   "DESCRIPTION": "Audio-reactive done properly: three bands, separate attack and release per band, an impulse on onset, and every mapping exposed so it can be tuned to the room rather than to the file.",
-  "CREDIT": "Eduardo Meneses, Learn shader art",
+  "CREDIT": "Eduardo Meneses, Learn shader art. The cosine palette is Inigo Quilez's.",
   "ISFVSN": "2.0",
   "CATEGORIES": ["Course", "Generator", "Audio"],
   "INPUTS": [
