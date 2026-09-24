@@ -861,12 +861,17 @@ def run(job: Job) -> list[Path]:
 
     def frame_stream() -> Iterable[bytes]:
         nonlocal poster_frame
+        # TIME runs negative through the settle so the recording still starts
+        # at zero, but FRAMEINDEX counts up from zero across both. Stateful
+        # shaders initialise on FRAMEINDEX < 2; a negative index would reset
+        # them for the whole settle, and restarting at zero would reset them
+        # again on the first recorded frame, so settling did nothing.
         for i in range(-job.settle, 0):
             t = i / job.fps
             frame_values = dict(values)
             for name, auto in job.automation.items():
                 frame_values[name] = auto.at(0.0)
-            renderer.render_frame(t, dt, i, frame_values)
+            renderer.render_frame(t, dt, i + job.settle, frame_values)
         for i in range(frames):
             t = i / job.fps
             frame_values = dict(values)
@@ -874,7 +879,7 @@ def run(job: Job) -> list[Path]:
                 frame_values[name] = auto.at(t)
             if audio is not None:
                 renderer.attach_audio(audio[0][i], audio[1][i])
-            data = renderer.render_frame(t, dt, i, frame_values)
+            data = renderer.render_frame(t, dt, i + job.settle, frame_values)
             if i == poster_index:
                 poster_frame = data
             yield data
