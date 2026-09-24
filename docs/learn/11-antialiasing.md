@@ -69,10 +69,12 @@ The player renders a zone plate and a fan of converging rays, both chosen becaus
 1. **Start with no antialiasing and Drift on.** The rosette at the centre of the fan and the rings at the edge of the zone plate both boil. Nothing about this picture is correct.
 2. **Switch to `fwidth`.** The rays' edges are now clean where they are wide, near the outside. The centre, where they converge, is no better and is arguably worse: the moiré is now smoothly shaded instead of hard, which does not make it right.
 3. **Switch to supersample 4, then 16.** The rosette softens into grey, which is the correct answer: the true average of a pattern finer than a pixel is its mean, and grey is the mean of black and white stripes.
-4. **Go back to `fwidth` and turn on Fade thin rays.** The centre goes grey, at one sixteenth of the cost of supersampling. This is the analytic fade, and it is the technique worth taking away from this unit.
+4. **Go back to `fwidth` and turn on Fade thin rays.** The centre becomes a flat disc of the same grey that supersampling found, at one sixteenth of the cost. This is the analytic fade, and it is the technique worth taking away from this unit.
 5. **Look at the zone plate's outer ring in all four modes.** No method fixes it except supersampling, and even 16 samples only pushes the problem outward. There is a limit, and knowing where it is stops you from optimising the wrong thing.
 6. **Raise Detail and repeat.** The point at which each method fails moves inward. Nothing changes qualitatively.
 7. **Read the supersampling loop.** Note that it iterates over a fixed 4 by 4 and skips the samples it does not want, rather than looping to a variable bound. That is not style: some WebGL drivers require a compile-time loop bound, and a raymarcher written the natural way will fail in a browser. Module G writes every loop this way.
+
+{% include figure.html unit="11" name="11-01" video=true alt="A fan of converging black and white rays, rotating slowly, shown five ways in turn; the centre shimmers with a moiré rosette in the first two and settles into flat grey in the other three" caption="Steps 1 to 4, rendered on the fan alone at 96 arms: no antialiasing, fwidth, supersample 4, supersample 16, and fwidth with Fade thin rays, two seconds each. The rosette boils with no antialiasing and is merely softened by fwidth. Supersampling turns it into grey, which is the correct average of stripes finer than a pixel, and the fade reaches the same grey with one sample." %}
 
 ## Look at these
 
@@ -94,7 +96,7 @@ Quilez's [filtering articles](https://iquilezles.org/articles/) are the referenc
 
 Take the polar repetition from [Unit 10]({{ site.baseurl }}/learn/10-repetition.html), which converges to a point at the centre and therefore aliases badly there, and fix it.
 
-Requirements: use `fwidth` for the edges; compute each arm's width in pixels and fade the arm towards the background when that width drops below one; and do it without a single extra sample.
+Requirements: use `fwidth` for the edges; compute each arm's width in pixels, a ray and its gap together, and fade the pattern towards its average as that width falls towards two pixels; and do it without a single extra sample.
 
 **Success criterion:** with the pattern rotating, the centre resolves to a smooth disc of the average colour rather than a boiling rosette, and the outer arms are as sharp as they were. If the centre goes black instead of grey, you faded the coverage towards the background rather than towards the pattern's average, which is a real distinction and worth a comment in your code.
 

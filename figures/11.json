@@ -1,0 +1,89 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/11/antialias.fs",
+      "out": "docs/learn/assets/11/11-01",
+      "size": [
+        1280,
+        720
+      ],
+      "duration": 10,
+      "fps": 30,
+      "formats": [
+        "mp4",
+        "png"
+      ],
+      "set": {
+        "scene": 1,
+        "arms": 96,
+        "drift": 0.3
+      },
+      "automation": {
+        "method": [
+          [
+            0,
+            0
+          ],
+          [
+            1.99,
+            0
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3.99,
+            1
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5.99,
+            2
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            7.99,
+            3
+          ],
+          [
+            8,
+            1
+          ],
+          [
+            10,
+            1
+          ]
+        ],
+        "prefilter": [
+          [
+            0,
+            false
+          ],
+          [
+            7.99,
+            false
+          ],
+          [
+            8,
+            true
+          ],
+          [
+            10,
+            true
+          ]
+        ]
+      },
+      "poster_time": 1.0,
+      "quality": 28,
+      "poster_width": 960,
+      "_note": "Steps 1 to 4 of the unit, two seconds each: no antialiasing, fwidth, supersample 4, supersample 16, and fwidth again with Fade thin rays. The fan alone at 96 arms, because its rosette is the part that is finer than a pixel. The last two states should read as the same light grey at the centre, which is the point of step 4. The paired keyframes hold each state, since long inputs are rounded and bools switch at the midpoint. Quality 28 rather than 30, because the encoder smooths exactly the per-pixel shimmer the clip exists to show. No render supersampling, which would antialias every method alike."
+    }
+  ]
+}

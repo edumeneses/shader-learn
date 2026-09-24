@@ -20,7 +20,7 @@
       "LABELS": ["zone plate", "converging rays", "both"],
       "DEFAULT": 2
     },
-    { "NAME": "detail",  "TYPE": "float", "LABEL": "Detail",     "DEFAULT": 60.0, "MIN": 5.0, "MAX": 260.0 },
+    { "NAME": "detail",  "TYPE": "float", "LABEL": "Detail",     "DEFAULT": 6.0, "MIN": 0.5, "MAX": 16.0 },
     { "NAME": "arms",    "TYPE": "float", "LABEL": "Rays",       "DEFAULT": 24.0, "MIN": 3.0, "MAX": 96.0 },
     { "NAME": "thin",    "TYPE": "float", "LABEL": "Ray width",  "DEFAULT": 0.35, "MIN": 0.02, "MAX": 1.00 },
     { "NAME": "drift",   "TYPE": "float", "LABEL": "Drift",      "DEFAULT": 0.10, "MIN": 0.0, "MAX": 1.0 },
@@ -31,11 +31,17 @@
 
 const float TAU = 6.28318530718;
 
-// A zone plate: rings whose frequency rises with the square of the radius. Near
-// the edge the pattern is finer than a pixel, so it is the standard torture
-// test for a sampler. Whatever a renderer does wrong, it does wrong here first.
+// A zone plate: rings whose frequency rises linearly with the radius. Near the
+// edge the pattern is finer than a pixel, so it is the standard torture test
+// for a sampler. Whatever a renderer does wrong, it does wrong here first.
+//
+// The phase is measured in pixels, not in frame heights, so the rings reach
+// the sampling limit at the same place at every resolution: at a radius of
+// PI / (2 * detail) frame heights, which is about a quarter of the way out at
+// the default. Measured in frame heights, the rings would never get finer than
+// a pixel at a small size, and a test pattern that cannot fail tests nothing.
 float zone(vec2 p) {
-    float r = dot(p, p);
+    float r = dot(p, p) * RENDERSIZE.y;
     return sin(r * detail + TIME * drift * 3.0);
 }
 
@@ -76,18 +82,29 @@ void main() {
         // exactly the band the edge occupies. It costs almost nothing and it
         // fixes an edge. It cannot fix detail finer than a pixel, because there
         // is no information in one sample about what happened between samples.
-        float d = field(p);
-        float w = fwidth(d);
-        cov = smoothstep(-w, w, d);
+        // The two patterns are measured separately, so that the fade below
+        // touches only the fan.
+        float z = zone(p);
+        float cz = smoothstep(-fwidth(z), fwidth(z), z);
+        float f = -fan(p);
+        float cf = smoothstep(-fwidth(f), fwidth(f), f);
 
         if (prefilter) {
             // What to do about rays too thin to sample: do not try to draw
-            // them, fade them. Coverage below a pixel is genuinely partial, so
-            // scaling the ink by the sub-pixel width is the correct answer and
-            // it is what a good line renderer has always done.
-            float rayPx = length(p) * TAU / max(arms, 1.0) * thin / px;
-            cov *= clamp(rayPx, 0.0, 1.0);
+            // them, fade them. One period of the fan, a ray and its gap, has
+            // to span at least two pixels to be drawn at all; below that the
+            // pixel cannot show the pattern, only its average, so fade towards
+            // the average. That is the fraction of the fan that is ink,
+            // 1 - thin, and it is what supersampling converges on. Fading
+            // towards zero instead would turn the centre into background,
+            // which is wrong and looks it. The fade starts at four pixels,
+            // because fwidth's edges are already a pixel wide each and the
+            // stripes start to beat before the hard limit.
+            float periodPx = length(p) * TAU / max(arms, 1.0) / px;
+            cf = mix(1.0 - thin, cf, smoothstep(2.0, 4.0, periodPx));
         }
+
+        cov = (scene == 0) ? cz : (scene == 1) ? cf : max(cz, cf);
 
     } else {
         // Supersampling: take the samples that were missing. Cost is linear in
