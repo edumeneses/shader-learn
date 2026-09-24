@@ -36,3 +36,16 @@ building their own will produce it.
   the shader's targets are half-float in the browser and full float in the
   offline renderer. **The two runtimes therefore do not use the same precision**,
   which has not caused a visible difference and is worth knowing.
+- **Corrected 2026-09-24: step 3 said Zoom at 1.03 makes "a tunnel" and that
+  "the source stays put while everything else moves".** Rendering figure 18-01
+  showed neither. With Twist at 0 the trail streams outward from the zoom
+  centre and floods the frame; nothing reads as a tunnel. The source keeps
+  orbiting, so it does not stay put; what distinguishes feedback from a moving
+  camera is that the source keeps its size while the material it left grows.
+  Step 3 now says both.
+- **`render.py --settle` did nothing for this shader until 2026-09-24.** Settle
+  frames were numbered with a negative `FRAMEINDEX` and recording restarted at
+  zero, so the shader's `FRAMEINDEX < 2` initialisation reset the buffer for
+  the whole settle and again on the first recorded frame. `FRAMEINDEX` now
+  counts up from zero across settle and recording; `TIME` still starts at zero
+  when recording starts.

@@ -1,0 +1,26 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/19/reaction.fs",
+      "out": "docs/learn/assets/19/19-01",
+      "size": [
+        1280,
+        720
+      ],
+      "duration": 20,
+      "fps": 30,
+      "formats": [
+        "mp4",
+        "png"
+      ],
+      "set": {
+        "recipe": 1
+      },
+      "poster_time": 10.0,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Step 1 of the unit: the coral recipe grown from its initial disc with nothing automated. Coral is slow at this size: four steps a frame at 30 fps is 120 steps a second, and the pattern takes about 18,000 steps to reach the top and bottom of a 1280 by 720 frame. The 2,400 settle frames (9,600 steps) skip to where it is branching, and the 20 second clip is the next 2,400 steps of the edge advancing.",
+      "settle": 2400
+    }
+  ]
+}

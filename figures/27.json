@@ -1,0 +1,43 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/27/materials.fs",
+      "out": "docs/learn/assets/27/27-01",
+      "size": [
+        1280,
+        720
+      ],
+      "duration": 6,
+      "fps": 30,
+      "formats": [
+        "mp4",
+        "png"
+      ],
+      "set": {
+        "view": 0,
+        "fog": 0.12,
+        "spin": 0.0
+      },
+      "automation": {
+        "fogHeight": [
+          [
+            0,
+            0.0
+          ],
+          [
+            3,
+            1.0
+          ],
+          [
+            6,
+            0.0
+          ]
+        ]
+      },
+      "poster_time": 2.4,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Step 4 of the unit: Fog settles swept from zero to one and back, on the full render. Fog is raised to 0.12 from its default so that the height falloff reads at clip size: at zero the whole scene is veiled, at one the fog lies on the floor and the tops of the objects come clear. Spin is zero."
+    }
+  ]
+}

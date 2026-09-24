@@ -1,0 +1,43 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/26/lighting.fs",
+      "out": "docs/learn/assets/26/26-01",
+      "size": [
+        1280,
+        720
+      ],
+      "duration": 6,
+      "fps": 30,
+      "formats": [
+        "mp4",
+        "png"
+      ],
+      "set": {
+        "view": 4,
+        "shadowMode": 2,
+        "spin": 0.0
+      },
+      "automation": {
+        "softness": [
+          [
+            0,
+            1.0
+          ],
+          [
+            3,
+            64.0
+          ],
+          [
+            6,
+            1.0
+          ]
+        ]
+      },
+      "poster_time": 0.5,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Step 7 of the unit: Shadow softness swept across its range on the shadow-only view with soft shadows, and back so the clip loops. Spin is zero so that only the penumbra changes. The poster is at 0.5 s, softness about 11.5, close to the default, so the still shows a penumbra rather than a hard edge."
+    }
+  ]
+}

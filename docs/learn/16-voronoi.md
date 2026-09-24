@@ -57,6 +57,8 @@ The correct distance to the nearest **edge** needs a second pass. For each neigh
 6. **Take Jitter to one and turn Drift up.** The cells move and reorganise. Watch a boundary as two sites pass each other: cells appear and disappear, and no cell ever crosses another. This is what makes Voronoi feel alive rather than merely textured.
 7. **Switch to id with F1 shading**, which is the combination worth taking away: per-cell colour, shaded by distance from the site, with a true edge. Cracked earth in three lines of colour code.
 
+{% include figure.html unit="16" name="16-01" video=true alt="A grid of square coloured cells, each with a dot at its centre, whose dots wander off-centre and turn the grid into an irregular Voronoi pattern, then return" caption="Step 5, rendered in the id with F1 shading view, with drift off. Jitter goes from 0 to 1 and back. At zero every site sits at the centre of its cell and the diagram is a square grid, which is the sanity check; as the sites move, the cells become irregular without any of them crossing another." %}
+
 ## Look at these
 
 {% include toy.html id="ldl3W8" title="Voronoi distances" by="Inigo Quilez" note="The true-edge second pass, with the derivation. This unit's implementation is this." %}

@@ -1,0 +1,54 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/20/sampling.fs",
+      "out": "docs/learn/assets/20/20-01",
+      "size": [
+        1280,
+        720
+      ],
+      "duration": 8,
+      "fps": 30,
+      "formats": [
+        "mp4",
+        "png"
+      ],
+      "set": {
+        "mode": 0,
+        "centre": [
+          0.96,
+          0.5
+        ],
+        "quantise": 0.0
+      },
+      "automation": {
+        "zoom": [
+          [
+            0,
+            1.0
+          ],
+          [
+            2,
+            3.0
+          ],
+          [
+            4,
+            16.0
+          ],
+          [
+            6,
+            3.0
+          ],
+          [
+            8,
+            1.0
+          ]
+        ]
+      },
+      "poster_time": 4.0,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Step 6 of the unit: Zoom swept from 1 to 16 and back on the fit mapping, so the clip loops. Zoom is about the Centre point, so at 1 the card is untouched; Centre sits on the fine end of the frequency wedge, where single texels alternate and bilinear magnification is visible. The keys are roughly geometric so the clip does not spend most of its time at the top of the range."
+    }
+  ]
+}

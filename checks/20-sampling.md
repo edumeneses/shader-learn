@@ -25,7 +25,7 @@ Its four regions each answer a question a filter can get wrong: colour bars for
 colour-space mistakes, a greyscale ramp for banding and gamma, frequency wedges
 for what a blur or a resample loses, and a continuous-tone region because a
 filter tested only on flat colour and hard edges will look fine and fall apart on
-gradients. The **red bracket is deliberately asymmetric**: a Y flip on a
+gradients. The **red mark in the top left is deliberately asymmetric**: a Y flip on a
 symmetric test image is invisible, and a Y flip is the most common bug in this
 module.
 
@@ -52,3 +52,10 @@ module.
   offline renderer builds mipmaps on load; **the player does not**, so a heavily
   minified image aliases in the browser and not in a rendered figure. Fix in the
   player before any unit depends on minification.
+- **Corrected 2026-09-24: the unit called the top-left marker "the red
+  bracket".** It is a plus sign: `testcard.fs` builds it from two boxes centred
+  on the same point, so it is symmetric about its own centre, and its comment
+  calling it a bracket is wrong too. Only its position is asymmetric, which is
+  still enough to show a Y flip. The unit now says "the red mark". An L-shaped
+  bracket would also show a mirror in X and would be the better marker; that is
+  a change to the test card, and so to every Module F figure, and was not made.

@@ -1,0 +1,45 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/13/noise.fs",
+      "out": "docs/learn/assets/13/13-01",
+      "size": [
+        1280,
+        720
+      ],
+      "duration": 8,
+      "fps": 30,
+      "formats": [
+        "mp4",
+        "png"
+      ],
+      "set": {
+        "kind": 2,
+        "curve": 2,
+        "contrast": 0.0,
+        "drift": 0.0,
+        "showGrid": true
+      },
+      "automation": {
+        "density": [
+          [
+            0,
+            3.0
+          ],
+          [
+            4,
+            12.0
+          ],
+          [
+            8,
+            3.0
+          ]
+        ]
+      },
+      "poster_time": 2.0,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Step 5: both kinds split, lattice on, Density swept up and back so the clip loops."
+    }
+  ]
+}

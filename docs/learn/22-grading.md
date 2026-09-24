@@ -63,6 +63,8 @@ For live visual work there is a second reason. A grade is where a piece is match
 7. **Take Saturation to 2.5.** The bars clip and the continuous-tone region posterises. Oversaturation destroys detail, which is easy to forget when the picture is getting more colourful.
 8. **Read the histogram's caveat in the source.** It samples along a scanline rather than the whole frame, because a fragment shader cannot accumulate across pixels. A true histogram needs a compute pass, which is [Unit 32]({{ site.baseurl }}/learn/32-compute-shaders.html).
 
+{% include figure.html unit="22" name="22-01" video=true alt="The test card split down the middle, its left half graded with a filmic curve as exposure rises two stops and falls again, the right half untouched, with a luminance histogram along the bottom that swells towards the right" caption="Steps 1 and 2 together, rendered. Exposure rises two stops and returns with the filmic curve on. The graded left half brightens and its highlights roll off towards white instead of flattening into it, while the untouched right half stays as the reference and the histogram moves right." %}
+
 ## Look at these
 
 {% include toy.html id="lslGzl" title="Filmic tone mapping comparison" by="Shadertoy community" note="Reinhard, Uncharted 2, and ACES side by side on the same source." %}

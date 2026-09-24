@@ -1,0 +1,18 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/08/combine.fs",
+      "out": "docs/learn/assets/08/08-01",
+      "size": [1280, 720],
+      "duration": 6,
+      "fps": 30,
+      "formats": ["mp4", "png"],
+      "set": { "op": 3, "view": 0, "left": [0.36, 0.5], "right": [0.64, 0.5] },
+      "automation": { "k": [[0, 0.001], [3, 0.4], [6, 0.001]] },
+      "poster_time": 2.0,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Step 2 and 3 of the unit: smooth union with the circles apart, Smoothing swept from its minimum (plain min, a sharp crease) to its maximum and back, so the clip loops. The point is that the field changes at a distance, before the shapes touch."
+    }
+  ]
+}

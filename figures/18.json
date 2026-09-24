@@ -1,0 +1,19 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/18/feedback.fs",
+      "out": "docs/learn/assets/18/18-01",
+      "size": [1280, 720],
+      "duration": 12,
+      "fps": 30,
+      "formats": ["mp4", "png"],
+      "set": { "twist": 0.0, "decay": 0.982 },
+      "automation": { "zoom": [[0, 1.0], [2, 1.0], [10, 1.03], [12, 1.03]] },
+      "settle": 90,
+      "poster_time": 9.0,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Steps 2 and 3 of the unit: Zoom held at exactly 1.0 with Twist at 0 for two seconds, then raised to 1.03. The buffer is stateful, so it cannot loop; 90 settle frames let the plain trail exist before the clip starts."
+    }
+  ]
+}

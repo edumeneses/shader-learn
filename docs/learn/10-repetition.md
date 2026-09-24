@@ -79,6 +79,8 @@ Everything that radiates is this: petals, spokes, gears, mandalas. The same trap
 6. **In polar, take Cell size down towards zero.** The shapes converge on the centre and get cut, because the sector is narrower than the shape there. This is the same trap with a radial cause.
 7. **Turn Drift up in any mode.** The shape rotates inside its cell rather than the lattice rotating, because the rotation is applied after the fold. Move it before the fold in your own copy and see the difference; both are useful and they are not the same.
 
+{% include figure.html unit="10" name="10-01" video=true alt="A grid of rounded boxes drawn as a distance field, growing until they overflow their cells, at which point their ends are cut off flat and the contours between them break into bands, then shrinking back" caption="Step 3, rendered: the infinite grid in the field view, with Shape size swept past the edge of its cell and back. While each box fits its cell the contours are continuous. Once it overflows, every cell measures only its own copy, the ends are chopped flat, and the field jumps at every cell boundary." %}
+
 ## Look at these
 
 {% include toy.html id="MsSGRh" title="Domain repetition" by="Inigo Quilez" note="The reference implementation, including the corrected version that checks neighbouring cells." %}

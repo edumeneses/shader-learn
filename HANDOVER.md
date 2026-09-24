@@ -4,7 +4,7 @@ Status and queue for *Learn shader art*. Read `CLAUDE.md` first for the rules an
 the toolchain; this file is what is done, what is next, and what is waiting on a
 decision.
 
-Last updated 2026-09-06, end of the first session.
+Last updated 2026-09-24, second session.
 
 ## Where things stand
 
@@ -79,10 +79,25 @@ technical one.
 - **Phase 4 is unverified**, above. Everything else on this list is smaller.
 - **No *ossia score* figures at all.** Every Phase 4 unit wants at least one and
   none can be rendered offline, because the subject is the application.
-- **Two rendered clips so far**, `p2-01` and `32-01`. The live players carry the
-  load elsewhere, which is the design, but Modules C to G would each be better
-  with one clip sweeping the parameter the unit is about. `render.py --sweep`
-  jobs, no new machinery.
+- **Modules C to G now have a clip each**, 07 to 27 plus P1 and P3, each
+  sweeping or stepping the parameter its unit is about, from `figures/NN.json`.
+  Rendering them was a verification pass as much as a figure pass: it found
+  that Unit 07's step 4, Unit 11's fade and zone plate, Unit 18's step 3, and
+  Unit 20's "bracket" were all wrong, and each is corrected in its `checks/`
+  note. Modules A, B, H, and I still have none beyond `32-01`.
+- **The test card's "bracket" is a plus sign.** `library/shaders/20/testcard.fs`
+  draws two boxes on one point, so the mark is asymmetric only by position: it
+  reveals a vertical flip and would miss a horizontal mirror. An L-shape would
+  catch both, at the cost of re-rendering `testcard.png` and every figure that
+  reads it (20 to 23, 32). Unit 20's prose now says "mark", which is accurate
+  either way.
+- **Unit 27's default fog is too faint to read.** At 0.016 the fog is barely
+  visible; figure 27-01 raises it to 0.12. Consider a higher default.
+- **Unit 19's coral fills a 720-line frame slowly**, about 18,000 steps to reach
+  the edges; the player's "give it thirty seconds" is right only because its
+  canvas is smaller. `checks/19-state-in-a-texture.md`.
+- **Unit 12's clip is 640 by 360 at 12 fps**, because per-pixel white noise
+  does not compress: at 720p it was 12 MB.
 - **`figures/03.json` does not exist and is wanted.** Unit 03 needs the same
   circle at several aspect ratios, which needs a montage step in `render.py` or
   the ability to animate `RENDERSIZE`. The montage is cheaper.
@@ -128,11 +143,19 @@ All of these are in `CLAUDE.md` in full. In brief, because they cost real time:
   three it makes the field over-estimate and the marcher steps through surfaces.
 - **A PNG poster of a noise field is larger than the H.264 clip it posters.**
   Clip posters are downscaled to 960 wide.
+- **`render.py --settle` did nothing until 2026-09-24.** It fed stateful
+  shaders a negative `FRAMEINDEX`, which they read as "initialise", and then
+  restarted at zero. `FRAMEINDEX` now counts up across the settle; `TIME`
+  still starts at zero with the recording.
+- **Render the figure before trusting the step.** Four units' walkthroughs
+  described what the author expected rather than what the player does, and
+  every one was caught by looking at frames of its clip.
 
 ## The next three commits, if nothing changes
 
 1. Verify Phase 4 in a running *score* 3.8.2 and correct what is wrong. Capture
    figure 37-01 while there, which is the most valuable picture in the course.
-2. Clips for Modules C to G, one per unit, sweeping the parameter each unit is
-   about.
-3. The smaller gaps above, in whatever order they start mattering.
+   Still blocked on this machine as of 2026-09-24: no Xephyr, Wayland session.
+2. The test card's mark, and Unit 27's fog default, above; both are small and
+   both want Edu's eye first.
+3. `figures/03.json`, Unit 39's motion detector, and the remaining smaller gaps.

@@ -36,3 +36,11 @@ purpose, which previews Unit 11 from inside a unit about something else.
 - The unit asserts that `min` of two exact fields stays a valid bound but stops
   being exact between the shapes. True, and it is stated again in Unit 08 where
   it is the subject. If either statement is ever corrected, correct both.
+- **Corrected 2026-09-24: step 4 said the isolines do not change as Round
+  rises.** Rendering figure 07-01 showed that they do. The shader's rounded box
+  is `sdBox(p, b - r) - r`, which holds the shape's size by shrinking the box
+  before offsetting it, so the field is a smaller box's field relabelled and
+  every corner contour gets rounder. The claim is true only of plain
+  subtraction, `sdBox(p, b) - r`, which keeps every contour and grows the
+  shape. The Idea section describes plain subtraction correctly; step 4 now
+  describes what the player actually does.

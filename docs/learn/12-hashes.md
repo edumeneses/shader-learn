@@ -71,6 +71,8 @@ Use it when the hash is doing real work: per-cell variation, jittered sampling, 
 6. **Turn Reseed over time on.** The whole field changes twice a second, because the seed is part of the input. Nothing about the hash changed; you asked it a different question.
 7. **Read `hashUint`.** Three xor-shifts and two multiplies. Each step spreads the influence of one bit across more of the word, and after five of them every input bit affects every output bit. That is the entire design principle.
 
+{% include figure.html unit="12" name="12-01" video=true alt="A field of grey per-pixel white noise that, as the view zooms in, develops diagonal streaks and then regular stripes, before zooming back out to plain noise" caption="Step 2, rendered with the two-dimensional sine hash. Zoom climbs from 1 to 400 and back. At low zoom it is white noise; as the input grows, sin loses precision and the output develops streaks, then stripes. Rendered at the player's size, because per-pixel noise barely compresses." %}
+
 ## Look at these
 
 {% include toy.html id="4djSRW" title="Hash without sine" by="Dave Hoskins" note="The reference collection: every input and output dimension, with costs. Bookmark it." %}

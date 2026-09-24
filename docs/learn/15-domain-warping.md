@@ -68,6 +68,8 @@ Read it as three questions. `q` is a vector field: two fbm calls at offset origi
 7. **Turn Shading down to zero and back.** Without it the picture is a coloured field. With it, it is a surface. Two derivative instructions.
 8. **Turn Drift up.** The field flows. Note that this is not a loop; [Milestone P2]({{ site.baseurl }}/learn/p2-living-surface.html) is about making it one.
 
+{% include figure.html unit="15" name="15-01" video=true alt="A blue and rust domain-warped field whose currents fold into finer and finer filaments as the first warp strength rises, then relax again" caption="Step 4, rendered with two levels of warp. Warp 1 goes from 0 to 12 and back while Warp 2 stays at 4, so even the first frame is warped once. The currents fold further as it rises, and towards the top the filaments break up into small, disconnected swirls." %}
+
 ## Look at these
 
 {% include toy.html id="4s23zz" title="Warping" by="Inigo Quilez" note="The article's companion. The definitive demonstration, and the source of the constants everyone uses." %}

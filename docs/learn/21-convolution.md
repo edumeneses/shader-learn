@@ -60,6 +60,8 @@ This needs two passes, which is what [Unit 18]({{ site.baseurl }}/learn/18-feedb
 7. **Switch to Sobel magnitude.** Two kernels, one for each axis, combined by length. This is the operator behind most edge detection everywhere, and it is nine samples.
 8. **Take Amount above 1** on sharpen. The filter overshoots, which is a real look and is also how a mild sharpen becomes an obvious one.
 
+{% include figure.html unit="21" name="21-01" video=true alt="The test card with a gaussian blur applied to one side of a vertical wipe that travels across the frame and back, softening the frequency wedge and the terrain as it passes" caption="Step 1, rendered. The Compare wipe crosses a separable gaussian blur of radius 8 and returns. Watch the frequency wedge: its fine end turns flat grey under the blur, and the point where it turns is where the filter stops resolving the pattern." %}
+
 ## Look at these
 
 {% include toy.html id="XdfGDH" title="Separable Gaussian blur" by="Shadertoy community" note="Two passes, with the weights computed rather than baked." %}

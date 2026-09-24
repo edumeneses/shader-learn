@@ -74,6 +74,8 @@ Each pass through, the coordinate is multiplied so the noise gets finer, and the
 6. **Turn Ridged on.** The creases become peaks and the field starts to look like terrain seen from above. Turn Turbulent on instead and it looks like smoke. One `abs` separates the two.
 7. **Set Lacunarity to exactly 2.0 and look for a faint grid** at high octave counts and low base scale. Then set it to 2.02. This is a small thing that has cost people whole afternoons.
 
+{% include figure.html unit="14" name="14-01" video=true alt="An fbm field that starts as a few smooth blobs and gains finer and finer texture one octave at a time, then loses it again, while its large shapes stay where they are" caption="Step 5, rendered. Octaves steps from 1 to 8 and back, one octave at a time, because the shader rounds it. The large shapes are fixed by the first octave, and past five or six the added octaves are hard to see at this size. Lacunarity is 2.02, for the reason in step 7." %}
+
 ## Look at these
 
 {% include toy.html id="4ttSWf" title="Rainforest" by="Inigo Quilez" note="fbm doing everything: terrain, trees, mist, and the variation between them. The reference for the technique's ceiling." %}

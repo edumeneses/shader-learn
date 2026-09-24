@@ -68,6 +68,8 @@ The player combines two circles with all six operators, in the field view, so yo
 6. **Switch to smooth subtraction and raise Smoothing.** The bite gets a fillet on the inside of the cut. This is the operator that makes a carved shape look moulded rather than machined.
 7. **Turn Isolines off and set the view to the shape.** This is what the reader of your finished piece sees. Everything you have been looking at is still there, doing the work.
 
+{% include figure.html unit="08" name="08-01" video=true alt="Two circles drawn as a distance field under smooth union, whose separate sets of contours bend towards each other and merge into one blob as the smoothing rises, then separate again" caption="Steps 2 and 3, rendered. Smoothing goes from its minimum to its maximum and back, with the circles apart. At the minimum the gap shows the sharp V of plain min; as Smoothing rises the contours between the shapes bend towards each other well before the outlines meet." %}
+
 ## Look at these
 
 {% include toy.html id="lt3BW2" title="3D distance operators" by="Inigo Quilez" note="The same operators in three dimensions, which is where they matter most; identical code." %}

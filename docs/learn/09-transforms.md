@@ -74,6 +74,8 @@ The player draws a cross, so that rotation is unmistakable, in the field view, w
 6. **Switch to mode 2 and sweep Stretch.** The shape stretches, as asked. The isolines are now wrong by a factor that depends on direction: dense along one axis, sparse along the other, with no single number that could fix it.
 7. **In mode 2, look at the corners.** The `min(sx, sy)` correction makes the field safe rather than correct, and the corners are where the difference is largest.
 
+{% include figure.html unit="09" name="09-01" video=true alt="A rotated cross drawn as a distance field, growing and shrinking in a loop while the contour lines around it spread out as it grows and crowd together as it shrinks" caption="Step 4, rendered: mode 1, the mistake, with Scale swept up and back. The outline is right at every size. The isolines are not: they spread out as the cross grows and crowd in as it shrinks, because the field still measures distance at the original scale." %}
+
 ## Look at these
 
 {% include toy.html id="Xtd3z7" title="Distance function transformations" by="Inigo Quilez" note="Rotation, elongation, rounding, and onioning, each in one line." %}

@@ -67,6 +67,8 @@ vec2 u = fade(f);    // the interpolation curve
 7. **Turn Drift on and watch what moves.** The field slides past the window. Nothing is being generated per frame; you are panning across a function that was always there.
 8. **Turn the lattice off and look at both sides again.** Value noise still reads as a grid of blobs. That tell survives the overlay being removed, and it is the reason gradient noise is worth its extra cost.
 
+{% include figure.html unit="13" name="13-01" video=true alt="Value noise on the left and gradient noise on the right over a visible lattice, the lattice cells shrinking and the features shrinking with them, then growing back" caption="Step 5, rendered. Density rises from 3 to 12 and back, with the lattice shown. Every feature shrinks with its cell: the same function at a different scale, with one feature size. Value noise stays a grid of blobs throughout; gradient noise never does." %}
+
 ## Look at these
 
 {% include toy.html id="XslGRr" title="Noise, 3D" by="Inigo Quilez" note="Gradient noise in three dimensions with the derivative computed analytically, which Unit 15 will want." %}

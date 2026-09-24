@@ -59,14 +59,16 @@ The practical consequence: if your image is upside down, do not add a flip and m
 
 {% include shader.html id="20-sampling" height="440" pointer="centre" caption="Step through the five mappings. Drag the canvas to move the zoom centre. Then change the source to your camera, which is a better test image than any card because you know what it should look like." %}
 
-1. **Start on fit.** The whole card is visible with a gap where the shapes do not match. The red bracket is at the top left, which is how you know nothing has flipped.
+1. **Start on fit.** The whole card is visible with a gap where the shapes do not match. The red mark is at the top left, which is how you know nothing has flipped.
 2. **Switch to stretch.** The card fills the frame and the aspect is wrong: the colour bars are no longer the same width and the registration cross is no longer square. This is what using `uv` directly does.
 3. **Switch to fill and crop.** No gap, and the top and bottom of the card are gone. Neither this nor fit is more correct; they answer different questions.
-4. **Switch to flipped Y.** The bracket moves to the bottom left. That asymmetric marker is on the test card for exactly this reason: a flip on a symmetric image is invisible.
+4. **Switch to flipped Y.** The red mark moves to the bottom left. It is on the test card, alone and off centre, for exactly this reason: a flip on a symmetric image is invisible.
 5. **Switch to pixel coordinates, unnormalised.** The whole frame is one colour, because a lookup coordinate of 900 is far outside the 0 to 1 range a sampler expects, and the clamp returns the corner texel. Worth causing once, because the symptom looks nothing like the cause.
 6. **Go back to fit and raise Zoom.** Around 8 the texels become visible as soft squares: that is bilinear filtering, magnifying and interpolating.
 7. **Raise Sample grid with the zoom still high.** The lookup snaps to a coarse grid, so each cell reads one point and holds it. That is nearest-neighbour sampling, drawn large enough to see.
 8. **Set the source to your camera.** Everything above still applies, and the aspect ratio is now genuinely different from the output, which is the case that matters.
+
+{% include figure.html unit="20" name="20-01" video=true alt="The test card zooming into the fine end of its frequency wedge until single texels show as soft stepped stripes, then zooming back out to the whole card" caption="Step 6, rendered. Zoom goes from 1 to 16 and back on the fit mapping, centred on the fine end of the frequency wedge, where neighbouring texels alternate. Past about 8 the stripes turn into soft steps: each texel is now many pixels wide, and bilinear filtering is blending between them." %}
 
 ## Look at these
 
@@ -94,7 +96,7 @@ Write a reusable `fit` function that takes the output coordinate, the input size
 
 Then build a shader that uses it and adds a `float` named `rotate` which rotates the image about its centre without changing which mapping mode is in effect.
 
-**Success criterion:** at every mode and every rotation, the registration cross stays square and the red bracket stays at the corner it started at. If rotating changes the shape of the cross, the rotation is being applied in a space that is not square, which is [Unit 03]({{ site.baseurl }}/learn/03-coordinates.html) returning.
+**Success criterion:** at every mode and every rotation, the registration cross stays square and the red mark stays at the corner it started at. If rotating changes the shape of the cross, the rotation is being applied in a space that is not square, which is [Unit 03]({{ site.baseurl }}/learn/03-coordinates.html) returning.
 
 ## Going further
 

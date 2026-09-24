@@ -74,6 +74,8 @@ One subtraction. A row of objects with a cascade reads as a wave passing through
 7. **Turn Ping-pong off.** The dots jump back to the start each cycle. Now turn Period down to about 0.6 and watch how much worse the jump looks when it happens often.
 8. **Read `phaseAt`.** Four lines, and the `fract` of a division is the whole habit.
 
+{% include figure.html unit="17" name="17-01" video=true alt="Twelve coloured dots easing back and forth under a plotted smoothstep curve; they begin moving as one column, spread into a travelling wave, and gather into a column again" caption="Step 6, rendered. Phase spread goes from 0 to 1 and back across four periods of smoothstep with Ping-pong on. At zero the followers move as one block; as the spread rises each one reads the same curve a little later, and the block becomes a wave." %}
+
 ## Look at these
 
 {% include toy.html id="4dS3Rd" title="Useful easing functions" by="Inigo Quilez" note="Impulse, parabola, power curve, and gain; a set that overlaps very little with the web animation canon and is more useful in shaders." %}

@@ -1,0 +1,44 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/25/fields-3d.fs",
+      "out": "docs/learn/assets/25/25-01",
+      "size": [
+        1280,
+        720
+      ],
+      "duration": 6,
+      "fps": 30,
+      "formats": [
+        "mp4",
+        "png"
+      ],
+      "set": {
+        "shape": 3,
+        "op": 2,
+        "view": 1,
+        "spin": 0.0
+      },
+      "automation": {
+        "blend": [
+          [
+            0,
+            0.01
+          ],
+          [
+            3,
+            0.6
+          ],
+          [
+            6,
+            0.01
+          ]
+        ]
+      },
+      "poster_time": 1.5,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Step 6 of the unit: Smoothing swept on the torus-and-sphere smooth union in the step view, and back so the clip loops. Spin is zero so that the only thing changing is the fillet and its cost."
+    }
+  ]
+}

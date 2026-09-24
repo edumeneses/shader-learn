@@ -56,6 +56,8 @@ What changes is the consequence of getting it wrong. In two dimensions an inexac
 7. **Raise Repeat.** A lattice of objects, at no cost in the field. Compare the step view before and after: it barely changes, which is the argument for this whole technique in one picture.
 8. **Set the operator to subtraction and orbit into the cut.** Note that the interior surface is correctly lit, which a rasteriser would have needed geometry for.
 
+{% include figure.html unit="25" name="25-01" video=true alt="A torus joined to a sphere, drawn as a heat map of march steps, whose junction swells from a sharp crease into a broad fillet and back, with the fillet glowing brighter than either shape as it grows" caption="Step 6, rendered. Smoothing on the smooth union goes from its minimum to its maximum and back, in the step view. The silhouettes are bright at every setting; the fillet brightens only as it widens, because that is where smin stops being a distance and the marcher has to creep." %}
+
 ## Look at these
 
 {% include toy.html id="Xds3zN" title="Raymarching primitives" by="Inigo Quilez" note="Twenty exact primitives with their derivations, and the material-id pattern this unit describes." %}

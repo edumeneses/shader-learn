@@ -83,6 +83,8 @@ A particle system needs each particle to write itself into the frame at wherever
 7. **Change Diffuse B.** Turing's original insight was that a pattern arises when two things diffuse at *different* rates. Set both diffusion rates equal and watch the pattern refuse to form.
 8. **Look at the PASSES block in the source.** Four passes name `state`, then one draws. Those four are four real simulation steps, because a persistent target swaps after the pass that wrote it rather than at the end of the frame.
 
+{% include figure.html unit="19" name="19-01" video=true alt="A roughly circular patch of blue branching coral on a brown field, its edge slowly advancing outward as new branches split off" caption="Step 1, twenty seconds of it. The coral recipe, nothing automated, recorded after 9,600 simulation steps so that the pattern has had time to branch. Every change in the clip happens at the edge, where there is still unconsumed A to grow into; the interior has already settled." %}
+
 ## Look at these
 
 {% include toy.html id="XlsczN" title="Reaction diffusion" by="Shadertoy community" note="The same model with a parameter map, so you can see where in feed-kill space each pattern lives." %}

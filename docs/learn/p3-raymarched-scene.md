@@ -74,6 +74,8 @@ Read its source for three things it does deliberately.
 7. **Test on something slower.** Halve the resolution and double the expected cost, or better, open it on a laptop. Write down what breaks first.
 8. **Write the numbers down in the shader's header.** The `DESCRIPTION` field is a good place. A scene whose budget is documented can be tuned by someone else at a venue; one whose budget lives in your head cannot.
 
+{% include figure.html unit="p3" name="p3-01" video=true alt="A field of boxes on a ground plane, drawn as cost against the budget, green where the march finished comfortably; as the budget falls a red band appears along the horizon, then floods the ground, leaving only the near faces of the boxes green" caption="Step 4, rendered. The step budget falls from 160 to 16 and rises again, on the cost view. The first red appears along the horizon, where rays graze the ground plane, and the silhouettes follow; the faces of the boxes stay green almost to the end. That order is the three answers in the next section, in the order they bite." %}
+
 ## Where the steps actually go
 
 Three answers cover almost every scene, and knowing them shortens the search.

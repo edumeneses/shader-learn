@@ -81,10 +81,12 @@ The player draws six shapes and can show either the shape or the whole field. Th
 1. **Stay on the field view for the whole unit.** The shape view is there to remind you what you would normally see.
 2. **Look at the isolines around the circle.** They are concentric and evenly spaced, because the field is exact: one isoline per unit of distance, everywhere.
 3. **Switch to the box.** Outside a face the isolines are parallel to it; outside a corner they are circular arcs centred on the corner. That is the two-term structure of `sdBox` made visible, and it is the fastest way to understand the function.
-4. **Switch to the rounded box and take Round to zero and back.** Watch the isolines: they do not change shape at all, only which one is drawn as the boundary. Rounding really is just picking a different contour.
+4. **Switch to the rounded box and take Round to zero and back.** Watch the isolines. Along the straight edges they stay put; around the corners every one of them gets rounder. The shader shrinks the box by Round and then subtracts Round again, so the shape keeps its size and what you are looking at is a smaller box's field, relabelled. Subtracting alone would keep every contour and grow the shape; shrinking first is what holds it still.
 5. **Switch to the segment and drag both points.** The Handle control moves the far end. Note the caps, and note that the isolines around them are circular while those along the middle are parallel.
 6. **Turn Isolines to zero, then to 300.** At zero you see only the smooth falloff, which is what a glow is. At 300 the lines get finer than a pixel near the shape and start to alias, which is [Unit 11]({{ site.baseurl }}/learn/11-antialiasing.html) arriving early.
 7. **Look at the triangle and the hexagon.** Both use a fold, and both are worth reading once without expecting to be able to write them. The hexagon's `k` constant is the direction of one of its edges; the triangle's is the square root of three.
+
+{% include figure.html unit="07" name="07-01" video=true alt="A rounded box drawn as a distance field, warm contours outside and cool inside, whose corners round and sharpen in a loop while the straight edges of every contour stay in place" caption="Step 4, rendered. Round goes from zero to its maximum and back. The boundary keeps its size because the shader shrinks the box before it rounds it, so every corner contour is re-centred on a smaller corner and gets rounder with it." %}
 
 ## Look at these
 

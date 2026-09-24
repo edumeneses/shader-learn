@@ -1,0 +1,18 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/10/repetition.fs",
+      "out": "docs/learn/assets/10/10-01",
+      "size": [1280, 720],
+      "duration": 6,
+      "fps": 30,
+      "formats": ["mp4", "png"],
+      "set": { "kind": 1, "view": 0, "cell": 0.34 },
+      "automation": { "size": [[0, 0.08], [3, 0.2], [6, 0.08]] },
+      "poster_time": 3.0,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Step 3 of the unit, the trap: infinite grid in the field view, Shape size swept from well inside its cell to past its edge and back (the box is 1.18 times size across its half-width, so it outgrows a 0.34 cell at 0.144), so the clip loops. Once the shape outgrows its cell it is chopped square and the isolines break at every cell boundary."
+    }
+  ]
+}

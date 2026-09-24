@@ -71,6 +71,8 @@ for (int i = 0; i < MAX_STEPS; i++) {
 7. **Switch to steps taken.** The heat map of the three-dimensional scene. The bright regions are the silhouettes and the ground plane at grazing angle, exactly as the cross-section predicted.
 8. **Switch to the render** and compare it against the step view. Everything that looks cheap is dark, and everything that looks like nothing, the empty ground stretching away, is bright.
 
+{% include figure.html unit="24" name="24-01" video=true alt="A two-dimensional cross-section of a raymarcher: an orange ray with a dot at each step and a dashed circle around each dot, sweeping up and down so that it grazes a rounded box, hits it, and grazes it again" caption="Steps 1 and 2, rendered. The ray's aim sweeps up and back. In open space the circles are large and the ray covers ground in a few steps; where it passes close to the box the circles shrink and bunch, and the ray creeps along the surface for a dozen steps. No circle ever crosses a surface." %}
+
 ## Look at these
 
 {% include toy.html id="Xds3zN" title="Raymarching primitives" by="Inigo Quilez" note="The reference implementation, with about twenty primitives. Read `castRay` first and ignore the rest." %}

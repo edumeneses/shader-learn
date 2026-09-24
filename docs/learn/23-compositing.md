@@ -75,6 +75,8 @@ Premultiplied is the better convention and it is what a compositor uses internal
 8. **Raise Edge softness, then toggle Premultiplied alpha.** With a hard edge nothing changes. With a soft edge the fringe appears and disappears. This is the bug this unit exists for, and it is invisible until you make the edge soft.
 9. **Turn Show the layer's alpha on.** The mask on its own, which is what a compositor spends most of its time looking at.
 
+{% include figure.html unit="23" name="23-01" video=true alt="A soft coloured disc composited with overlay, sliding along the grey ramp of the test card from the black end to the white end and back, darkening over the shadows and lightening over the highlights" caption="Step 5, rendered. The overlay layer travels from the black end of the ramp to the white end and back. Over the dark half it darkens like multiply; past the middle it lightens like screen. That switch under the layer, driven by the backdrop and not by the layer, is what overlay means." %}
+
 ## Look at these
 
 {% include toy.html id="XdS3Rw" title="Blend modes" by="Shadertoy community" note="All of the separable modes on one page, each labelled." %}

@@ -1,0 +1,18 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/22/grading.fs",
+      "out": "docs/learn/assets/22/22-01",
+      "size": [1280, 720],
+      "duration": 8,
+      "fps": 30,
+      "formats": ["mp4", "png"],
+      "set": { "curve": 2, "split": 0.5, "scope": true },
+      "automation": { "exposure": [[0, 0.0], [4, 2.0], [8, 0.0]] },
+      "poster_time": 4.0,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "Steps 1 and 2 together: Exposure swept up two stops and back with the filmic curve on, so the graded left half rolls its highlights off instead of clipping while the untouched right half is the reference. The input image defaults to docs/learn/assets/images/testcard.png."
+    }
+  ]
+}

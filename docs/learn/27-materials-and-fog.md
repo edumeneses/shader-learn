@@ -68,6 +68,8 @@ Fog is also the cheapest depth cue in existence and it does something else usefu
 7. **Raise Roughness with reflection on.** The reflection weakens and the specular broadens together, because both are describing the same physical property.
 8. **Switch to steps taken.** Compare it with the same view in [Unit 25]({{ site.baseurl }}/learn/25-fields-3d.html): the reflective floor is now among the most expensive regions in the frame, because every pixel of it pays for a second march.
 
+{% include figure.html unit="27" name="27-01" video=true alt="A red box and ball, a blue sphere, and a green post on a dark floor, first veiled evenly in blue fog, then clearing from the top down as the fog sinks to lie on the floor, then veiled again" caption="Step 4, rendered, with Fog raised to 0.12 so the effect reads at this size. Fog settles goes from zero to one and back. The density never changes; at zero it fills the air evenly, and at one it lies on the floor, so the tops of the objects come clear while their bases stay in it." %}
+
 ## Look at these
 
 {% include toy.html id="Xds3zN" title="Raymarching primitives" by="Inigo Quilez" note="Occlusion, fog, materials, and a full lighting model in one readable file. The reference for this unit." %}

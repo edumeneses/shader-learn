@@ -78,6 +78,8 @@ Your answer should not look like this one. If it does, change the palette first;
 
 9. **Fix what the large render showed**, which is usually one of three things: an edge that is soft because a `smin` had too large a `k`, a gradient that bands because the grain is too subtle at that resolution, or a repetition whose cell is slightly too small and is chopping.
 
+{% include figure.html unit="p1" name="p1-01" video=true alt="A poster of a striped sun behind a low range of rounded hills, the sun sinking behind the ridge and rising again while every other part of the picture holds still" caption="The reference poster with one input moved: Sun, down behind the ridge and back up. Every other input is at its default. This is the third success criterion in practice; at every point on the path the picture is still one worth looking at." %}
+
 ## Success criteria
 
 You are finished when all five are true.

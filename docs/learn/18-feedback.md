@@ -66,12 +66,14 @@ Implementations do this with two buffers and a swap, which is why reading and wr
 
 1. **Let it run for ten seconds.** A source travels on a closed path and leaves a trail; the trail is being zoomed and twisted a little every frame, which turns it into a structure rather than a line.
 2. **Take Zoom to exactly 1.0 and Twist to 0.** The structure collapses to a plain trail. Everything else was the transform.
-3. **Raise Zoom to about 1.03.** A tunnel. Take it below 1 and the material flows inward instead. Note that the source stays put while everything else moves, which is the tell for feedback as opposed to a moving camera.
+3. **Raise Zoom to about 1.03.** The trail streams outward from the centre and within a few seconds covers most of the frame. Take Zoom below 1 and the material flows inward instead. Note that the source keeps its size while everything it left behind grows, which is the tell for feedback as opposed to a moving camera.
 4. **Set Zoom back to 1 and raise Twist.** A spiral. Then use both, which is the classic.
 5. **Take Decay to 1.0.** Nothing fades, and within a few seconds most of the frame is white. Take it to 0.85 and the trail is barely a smear. The useful range is narrow and very sensitive; 0.97 to 0.99 is where most of this lives.
 6. **Turn Hue drift up.** The colour of a region now depends on how long ago it was written, which is something no memoryless shader can do. This is the effect worth taking away from the unit.
 7. **Press Clear, then release it.** The buffer resets and the picture rebuilds. Note how long it takes to settle; that duration is exactly what makes a feedback shader awkward to render deterministically, and `scripts/render.py` has a `--settle` option for it.
 8. **Read the source and find the two passes.** `PASSINDEX == 0` accumulates and `PASSINDEX == 1` tone-maps. Note that the tone mapping is in the display pass, not in the accumulation: keeping the buffer linear is why the bright regions build smoothly rather than clipping.
+
+{% include figure.html unit="18" name="18-01" video=true alt="A glowing trail left by a small orbiting source on black; for two seconds it is a plain curved trail, then it swells outward and floods the frame in pale green bands while the source stays small" caption="Steps 2 and 3, rendered. Twist is 0 throughout. For two seconds Zoom is exactly 1.0 and the picture is a plain trail; then Zoom rises to 1.03 and every earlier frame is enlarged a little more than the one after it, while the source itself stays the same size." %}
 
 ## Look at these
 

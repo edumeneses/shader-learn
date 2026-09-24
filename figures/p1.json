@@ -1,0 +1,17 @@
+{
+  "figures": [
+    {
+      "shader": "../library/shaders/p1/poster.fs",
+      "out": "docs/learn/assets/p1/p1-01",
+      "size": [1280, 720],
+      "duration": 8,
+      "fps": 30,
+      "formats": ["mp4", "png"],
+      "automation": { "sun": [[0, [0.5, 0.72]], [4, [0.5, 0.40]], [8, [0.5, 0.72]]] },
+      "poster_time": 0.0,
+      "quality": 30,
+      "poster_width": 960,
+      "_note": "The success criterion that moving any single input still gives a picture worth looking at: the reference poster with only Sun moved, down towards the horizon and back, so the clip loops. Every other input is at its default."
+    }
+  ]
+}

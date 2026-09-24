@@ -74,6 +74,8 @@ No extra samples, no light sampling, no noise. It is an approximation with no ph
 7. **Raise Shadow softness.** The penumbra narrows, because the constant is a scale on how quickly closeness turns into darkness. It is a look, not a physical quantity.
 8. **Switch to everything.** Ambient, diffuse, shadow, specular, fog. Take Ambient to zero and note that unlit regions become pure black, which is what a scene with one light and no bounce actually looks like and is almost never what you want.
 
+{% include figure.html unit="26" name="26-01" video=true alt="The shadow term alone, white where lit and black where shadowed, whose shadows begin as a broad blur over the whole floor, sharpen into hard edges, and blur again" caption="Step 7, rendered. Shadow softness goes from one to sixty-four and back, on the shadow-only view with soft shadows. A low value spreads the penumbra across the whole floor and even darkens the objects themselves; a high one is indistinguishable from a hard shadow. Neither end is correct, because the constant is a look." %}
+
 ## Look at these
 
 {% include toy.html id="lsKcDD" title="Soft shadows in raymarched scenes" by="Inigo Quilez" note="The estimator this unit uses, with the improved version that fixes its banding." %}

@@ -54,3 +54,10 @@ will be rediscovered otherwise.
   That is the standard expectation and it has **not** been tested here; there is
   only one GPU on this machine. Before anyone relies on this shader for a
   multi-screen installation, test it.
+- **Figure 19-01 is recorded after a 2,400 frame settle**, which only works
+  since the `render.py` fix of 2026-09-24 described in `checks/18-feedback.md`;
+  before it, a settle reset this shader to its initial disc. At 1280 by 720 the
+  coral takes about 18,000 steps to reach the top and bottom of the frame, far
+  longer than the player's thirty-second caption suggests at that size. The
+  player's canvas is smaller, so the pattern is larger relative to it and fills
+  sooner; the figure shows the branching edge rather than the fill.
